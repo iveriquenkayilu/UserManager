@@ -1,16 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Threading.Tasks;
-using RainyCorp.UserManagerService.Common.Models.User;
-using RainyCorp.UserManagerService.Constants;
 using RainyCorp.UserManagerService.Entities;
-using RainyCorp.UserManagerService.Entities.DataType;
 using RainyCorp.UserManagerService.Interfaces.Repositories;
 using RainyCorp.UserManagerService.Services.Interfaces;
-using RainyCorp.UserManagerService.Shared.Interfaces.Services;
 using RainyCorp.UserManagerService.Shared.Constants;
+using RainyCorp.UserManagerService.Shared.Interfaces.Services;
+using RainyCorp.UserManagerService.Shared.Models.User;
+using System.Threading.Tasks;
 
 namespace RainyCorp.UserManagerService.Services
 {
@@ -21,7 +18,6 @@ namespace RainyCorp.UserManagerService.Services
 
         public UserService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<UserService> logger, IUserContext userContext) : base(unitOfWork, logger, mapper, userContext)
         {
-         
         }
 
         //public async Task<List<UserModel>> GetAsync()
@@ -41,8 +37,8 @@ namespace RainyCorp.UserManagerService.Services
         public async Task DeleteVisitorAsync(long id)
         {
             var visitor = await UnitOfWork.GetAsync<Visitor>(id);
-            if (visitor==null) return;
-            UnitOfWork.SoftDelete<Visitor>(visitor);  // test if needs to save
+            if (visitor == null) return;
+            UnitOfWork.Delete<Visitor>(visitor);  // test if needs to save
         }
 
         /// <summary>
@@ -51,8 +47,6 @@ namespace RainyCorp.UserManagerService.Services
         /// <param name="id"></param>
         /// <returns></returns>
         public async Task<bool> VistiorExists(long id) => await UnitOfWork.AnyAsync<Visitor>(v => v.Id == id);
-
-     
 
         //public async Task AddRoles(long currentUserId, long userId, List<string> roles)
         //{
@@ -97,6 +91,5 @@ namespace RainyCorp.UserManagerService.Services
             await UnitOfWork.SaveAsync();
             return visitor.Id;
         }
-
     }
 }

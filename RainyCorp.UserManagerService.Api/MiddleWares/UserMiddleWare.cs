@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using RainyCorp.UserManagerService.Services.Interfaces;
+using RainyCorp.UserManagerService.Shared.Models.User;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UAParser;
 
 namespace RainyCorp.UserManagerService.Api.MiddleWares
 {
@@ -23,13 +24,13 @@ namespace RainyCorp.UserManagerService.Api.MiddleWares
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context, IUserService userService) //IRealTimeHub realTimeHub
         {
-            string visitorId = context.Request.Cookies["VisitorId"];
+            //string visitorId = context.Request.Cookies["VisitorId"];
 
-            if (context.Session.GetString(".TigerStamina.Session") == null)
-                context.Session.SetString(".TigerStamina.Session", Guid.NewGuid().ToString());// TODO make constant
+            //if (context.Session.GetString(".TigerStamina.Session") == null)
+            //    context.Session.SetString(".TigerStamina.Session", Guid.NewGuid().ToString());// TODO make constant
 
-            if ((visitorId == null && !context.User.Identity.IsAuthenticated) || !await userService.VistiorExists((long.Parse(visitorId))))
-            {
+            //if ((visitorId == null && !context.User.Identity.IsAuthenticated) || !await userService.VistiorExists((long.Parse(visitorId))))
+            //{
                 // a new visitor notification.
 
                 var userAgent = context.Request.Headers["User-Agent"];
@@ -48,23 +49,23 @@ namespace RainyCorp.UserManagerService.Api.MiddleWares
                     OperatingSystem = operatingSystem,
                 };
 
-                var id = await userService.AddVisitorAsync(visitor);
+                //var id = await userService.AddVisitorAsync(visitor);
 
-                context.Response.Cookies.Append("VisitorId", id.ToString(), new CookieOptions()
-                {
-                    Path = "/",
-                    HttpOnly = true,
-                    Secure = false,
-                });
+                //context.Response.Cookies.Append("VisitorId", id.ToString(), new CookieOptions()
+                //{
+                //    Path = "/",
+                //    HttpOnly = true,
+                //    Secure = false,
+                //});
                 //Test maybe not await
-                await realTimeHub.SendNotificationAsync(new AddNotificationModel
-                {
-                    LinkId = id,
-                    To = NotificationOption.AdminAndCoaches,
-                    Type = NotificationType.NewVisitor,
-                    LinkParameter = id.ToString()
-                });
-            }
+                //await realTimeHub.SendNotificationAsync(new AddNotificationModel
+                //{
+                //    LinkId = id,
+                //    To = NotificationOption.AdminAndCoaches,
+                //    Type = NotificationType.NewVisitor,
+                //    LinkParameter = id.ToString()
+                //});
+            //}
             await _requestDelegate(context);
 
         }

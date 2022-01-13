@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RainyCorp.UserManagerService.Repository\RainyCorp.UserManagerService.Repository.csproj" />
     <ProjectReference Include="..\RainyCorp.UserManagerService.Shared\RainyCorp.UserManagerService.Shared.csproj" />
   </ItemGroup>
 

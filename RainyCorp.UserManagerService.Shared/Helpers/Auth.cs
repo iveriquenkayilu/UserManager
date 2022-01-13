@@ -34,7 +34,8 @@ namespace OBS.UserManagementService.Domain.Helpers
             _httpContext = httpContext;
             _logger = logger;
         }
-        public AuthenticationTokens CreateSecurityToken(long userId, string username, List<Role> roles)
+
+        public AuthTokenModel CreateSecurityToken(long userId, string username, List<string> roles)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -53,7 +54,8 @@ namespace OBS.UserManagementService.Domain.Helpers
             claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
             roles.ForEach(r =>
             {
-                claims.Add(new Claim(ClaimTypes.Role, r.NormalizedName));
+                //claims.Add(new Claim(ClaimTypes.Role, r.NormalizedName));
+                claims.Add(new Claim(ClaimTypes.Role, r));
             });
 
             var tokenDescriptor = new SecurityTokenDescriptor()
@@ -70,7 +72,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             var refreshToken = GenerateAndCacheRefreshToken(userId);
 
             // 5. Return Token from method
-            return new AuthenticationTokens { AccessToken = tokenHandler.WriteToken(token), RefreshToken = refreshToken };
+            return new AuthTokenModel { AccessToken = tokenHandler.WriteToken(token), RefreshToken = refreshToken, Duration = _webProtocolSettings.AccessTokenExpiresInMinutes };
         }
 
         public RefreshTokenModel GetCachedRefreshTokenWithRequestIpValidation(string refreshToken)

@@ -6,7 +6,7 @@ namespace RainyCorp.UserManagerService.Shared.Interfaces.Shared
 {
     public interface IAuth
     {
-        AuthenticationTokens CreateSecurityToken(long userId, string username, List<Role> roles);
+        AuthTokenModel CreateSecurityToken(long userId, string username, List<string> roles);
         bool RevokeCachedRefreshToken(string refreshToken);
         RefreshTokenModel GetCachedRefreshTokenWithRequestIpValidation(string refreshToken);
     }

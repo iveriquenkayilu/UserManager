@@ -12,8 +12,10 @@ using Microsoft.OpenApi.Models;
 using OBS.UserManagementService.Domain.Helpers;
 using RainyCorp.UserManagerService.Api.MiddleWares;
 using RainyCorp.UserManagerService.Entities;
+using RainyCorp.UserManagerService.Interfaces.Repositories;
 using RainyCorp.UserManagerService.Repository;
 using RainyCorp.UserManagerService.Services;
+using RainyCorp.UserManagerService.Services.Interfaces;
 using RainyCorp.UserManagerService.Shared.Helpers;
 using RainyCorp.UserManagerService.Shared.Interfaces.Services;
 using RainyCorp.UserManagerService.Shared.Interfaces.Shared;
@@ -55,7 +57,7 @@ namespace RainyCorp.UserManagerService
                            options => options.EnableRetryOnFailure()));
             }
 
-            //services.AddDatabaseDeveloperPageExceptionFilter();
+            services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddIdentity<User, Role>(options => options.SignIn.RequireConfirmedAccount = true)
              .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
@@ -68,13 +70,15 @@ namespace RainyCorp.UserManagerService
             // registers Repository services
 
             //services.AddScoped<IHttpOrchestrator, HttpOrchestrator>();
-
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork<ApplicationDbContext>>();
 
             // registers AutoMapper
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
             services.AddScoped<RoleManager<Role>>();
             services.AddScoped<UserManager<User>>();
+            services.AddScoped<SignInManager<User>>();
 
             services.Configure<WebProtocolSettings>(Configuration.GetSection("WebProtocolSettings"));
             var protocols = Configuration.GetSection("WebProtocolSettings").Get<WebProtocolSettings>();
@@ -121,7 +125,7 @@ namespace RainyCorp.UserManagerService
                 var user = (userManager.FindByIdAsync(id.ToString())).Result;
                 var roles = (userManager.GetRolesAsync(user).Result).ToList();
 
-                return new UserContext(id, roles);
+                return new UserContext(id, user.UserName, roles);
             });
 
             if (Environment.IsDevelopment())
@@ -138,7 +142,7 @@ namespace RainyCorp.UserManagerService
                 });
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "OBS.UserManagementService.Api", Version = "v1" });
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "RainyCorp.UserManagerService.Api", Version = "v1" });
 
                     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                     {
@@ -177,13 +181,14 @@ namespace RainyCorp.UserManagerService
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //app.UseMigrationsEndPoint();
+                app.UseMigrationsEndPoint();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "OBS.UserManagementService.Api v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RainyCorp.UserManagerService.Api v1"));
                 app.UseCors("Policy");
             }
 
             app.UseMiddleware<ExceptionMiddleWare>();
+            app.UseMiddleware<UserMiddleWare>();
 
             app.UseHttpsRedirection();
 

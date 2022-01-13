@@ -13,6 +13,10 @@
         /// </value>
         public string Username { get; set; }
 
+        public string Name { get; set; }
+
+        public string Surname { get; set; }
+
         /// <summary>
         /// Gets or sets the email.
         /// </summary>

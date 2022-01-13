@@ -10,6 +10,10 @@
         public const string UserCreated = "UserCreated";
         public const string FailedToCreatUser = "FailedToCreatUser";
         public const string WrongCredentials = "FailedToCreatUser";
+        public const string InvalidRefreshToken = "InvalidRefreshToken";
+        public const string RefreshTokenFailed = "RefreshTokenFailed";
+        public const string UserNotFound = "UserNotFound";
+        public const string TokensRefreshed = "TokensRefreshed";
 
         #endregion
 

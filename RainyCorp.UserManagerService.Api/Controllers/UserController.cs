@@ -68,6 +68,34 @@ namespace RainyCorp.UserManagerService.Api.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
+        [HttpPost("/api/refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenInput input)
+        {
+            _logger.LogInformation($"User is trying to refresh access token with refresh token : {input.RefreshToken}");
+
+            var cachedToken = _auth.GetCachedRefreshTokenWithRequestIpValidation(input.RefreshToken);
+            if (cachedToken is null)
+                return Ok(ResponseModel.Fail(ResponseMessages.InvalidRefreshToken));
+
+            if (!_auth.RevokeCachedRefreshToken(input.RefreshToken))
+                return Ok( ResponseModel.Fail(ResponseMessages.RefreshTokenFailed));
+
+            //var user = await _userRepository.GetUserByIdAsync();
+    
+            var user = await _signInManager.UserManager.FindByIdAsync(cachedToken.UserId.ToString());
+            if (user is null)
+                return Ok(ResponseModel.Fail(ResponseMessages.UserNotFound));
+
+            var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
+            var tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles);
+
+            var result= tokens != null
+                ? ResponseModel.Success(ResponseMessages.TokensRefreshed, tokens)
+                : ResponseModel.Fail(ResponseMessages.RefreshTokenFailed);
+            return Ok(result);
+        }
+
         [Authorize(Roles = Roles.Admin)]
         [HttpPost("/api/register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel input)

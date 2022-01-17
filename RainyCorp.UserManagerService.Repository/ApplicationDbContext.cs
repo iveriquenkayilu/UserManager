@@ -13,11 +13,14 @@ namespace RainyCorp.UserManagerService.Repository
         }
 
         public DbSet<Visitor> Visitors { get; set; }
+        public DbSet<ServiceApiKey> ServiceApiKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<Role>().Ignore(r => r.CreatedAt);
+
+            builder.Entity<ServiceApiKey>().HasIndex(s => s.KeyName).IsUnique();
+            //builder.Entity<Role>().Ignore(r => r.CreatedAt);
 
             builder.Entity<UserRole>(ur =>
             {

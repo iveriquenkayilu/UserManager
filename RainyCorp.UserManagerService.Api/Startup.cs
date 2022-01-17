@@ -72,6 +72,7 @@ namespace RainyCorp.UserManagerService
             //services.AddScoped<IHttpOrchestrator, HttpOrchestrator>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUnitOfWork, UnitOfWork<ApplicationDbContext>>();
+            services.AddScoped<IApiService, ApiService>();
 
             // registers AutoMapper
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);

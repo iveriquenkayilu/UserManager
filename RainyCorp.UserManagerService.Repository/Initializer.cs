@@ -36,6 +36,7 @@ namespace RainyCorp.UserManagerService.Repository
                 _logger.LogInformation("Initializing the database and applying migrations");
 
                 await _dbContext.Database.MigrateAsync();
+                //await _dbContext.Database.EnsureCreatedAsync();
 
                 if (_environment.IsDevelopment())
                     await AddDefaultValuesAsync();

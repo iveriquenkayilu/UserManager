@@ -23,7 +23,7 @@ namespace RainyCorp.UserManagerService.Services
 
         protected virtual IUserContext UserContext { get; }
 
-        public BaseService(IUnitOfWork unitOfWork, ILogger<BaseService> logger, IMapper mapper, IUserContext userContext)
+        public BaseService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<BaseService> logger)
         {
             UnitOfWork = unitOfWork;
             Logger = logger;

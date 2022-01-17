@@ -16,7 +16,7 @@ namespace RainyCorp.UserManagerService.Services
         //private readonly IMapper _mapper;
         //private readonly IUnitOfWork _unitOfWork;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<UserService> logger, IUserContext userContext) : base(unitOfWork, logger, mapper, userContext)
+        public UserService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApiService> logger) : base(userContext, unitOfWork, mapper, logger)
         {
         }
 

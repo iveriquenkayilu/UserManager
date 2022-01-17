@@ -1,0 +1,82 @@
+name: .NET
+
+on:
+  push:
+    branches: [ master, development ]
+  pull_request:
+    branches: [ master, development ]
+env:
+ app_name: usermanager
+ service_name: UserManager
+ path: /var/www/usermanager
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    - name: Publish
+      run: dotnet publish -c Release -o ./publish
+      
+    - name: Zip Published Files
+      uses: montudor/action-zip@v1
+      with:
+        args: zip -qq -r ./publish.zip ./publish
+        
+    - name: Copy Zip Folder Over SSH
+      uses: appleboy/scp-action@master 
+      with:     
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "./publish.zip"
+          target: "${{env.path}}"
+          rm: true
+          
+    - name: Unzipping the Folder and Starting the Service
+      uses: fifsky/ssh-action@master
+      with:
+         command: |
+           sudo -S <<< ${{secrets.PASSWORD}} chmod -R 777 ${{env.path}}/publish.zip
+           sudo -S <<< ${{secrets.PASSWORD}} systemctl stop ${{env.service_name}}
+           unzip -o ${{env.path}}/publish.zip -d ${{env.path}}
+           
+           #Create output file, override if already present  
+           output=${{env.path}}/publish/appsettings.Production.json 
+  
+           #Write data to a file  
+           echo "{" > $output  
+           echo '"ConnectionStrings":{ "MySqlConnection":"${{ secrets.CONNECTION_STRING }}" }' >> $output  
+           echo "}" >> $output  
+  
+           #Printing the content of the file  
+           #cat $output
+
+           sudo -S <<< ${{secrets.PASSWORD}} systemctl restart ${{env.service_name}}
+           sudo -S <<< ${{secrets.PASSWORD}} systemctl status ${{env.service_name}}
+                   
+         host: ${{ secrets.HOST }}
+         user: ${{ secrets.USERNAME }}
+         pass: ${{ secrets.PASSWORD}}
+    
+     # uses: appleboy/ssh-action@master # An action made to control Linux servers
+     # with: # We set all our secrets here for the action, these won't be shown in the action logs
+      #    host: ${{ secrets.HOST }}
+     #     username: ${{ secrets.USERNAME }}
+      #    password: ${{ secrets.PASSWORD }}
+      #    port: ${{ secrets.PORT }}
+       #   script: |
+      #      cd /var/www/rainycorp/publish

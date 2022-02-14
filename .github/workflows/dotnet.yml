@@ -44,7 +44,7 @@ jobs:
           port: ${{ secrets.PORT }}
           source: "./publish.zip"
           target: "${{env.path}}"
-          rm: true
+          #rm: true
           
     - name: Unzipping the Folder and Starting the Service
       uses: fifsky/ssh-action@master

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RainyCorp.UserManagerService.Entities;
+using RainyCorp.UserManagerService.Interfaces.Repositories;
 using RainyCorp.UserManagerService.Shared.Constants;
 using RainyCorp.UserManagerService.Shared.Interfaces.Services;
 using RainyCorp.UserManagerService.Shared.Interfaces.Shared;
@@ -19,12 +21,14 @@ namespace RainyCorp.UserManagerService.Api.Controllers
     [Route("api/users")]
     public class UserController : ControllerBase
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly SignInManager<User> _signInManager;
         private readonly IUserContext _userContext;
         private readonly IAuth _auth;
         private readonly ILogger<UserController> _logger;
-        public UserController(SignInManager<User> signInManager, IUserContext userContext, IAuth auth, ILogger<UserController> logger)
+        public UserController(IUnitOfWork unitOfWork, SignInManager<User> signInManager, IUserContext userContext, IAuth auth, ILogger<UserController> logger)
         {
+            _unitOfWork = unitOfWork;
             _signInManager = signInManager;
             _userContext = userContext;
             _auth = auth;
@@ -35,11 +39,20 @@ namespace RainyCorp.UserManagerService.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            return Ok();
-        }
+            var users = await _unitOfWork.Query<User>()
+                .Select(u => new UserModel
+                {
+                    Id = u.Id,
+                    CreatedAt = u.CreatedAt,
+                    IsConnected = u.IsConnected,
+                    Name = u.Name,
+                    Surname = u.Surname,
+                    UpdatedAt = u.UpdatedAt,
+                    Username = u.UserName
+                }).ToListAsync();
 
-        [HttpGet("/test")]
-        public IActionResult Test() => Ok();
+            return Ok(users);
+        }
 
         [AllowAnonymous]
         [HttpPost("/api/login")]
@@ -79,10 +92,10 @@ namespace RainyCorp.UserManagerService.Api.Controllers
                 return Ok(ResponseModel.Fail(ResponseMessages.InvalidRefreshToken));
 
             if (!_auth.RevokeCachedRefreshToken(input.RefreshToken))
-                return Ok( ResponseModel.Fail(ResponseMessages.RefreshTokenFailed));
+                return Ok(ResponseModel.Fail(ResponseMessages.RefreshTokenFailed));
 
             //var user = await _userRepository.GetUserByIdAsync();
-    
+
             var user = await _signInManager.UserManager.FindByIdAsync(cachedToken.UserId.ToString());
             if (user is null)
                 return Ok(ResponseModel.Fail(ResponseMessages.UserNotFound));
@@ -90,7 +103,7 @@ namespace RainyCorp.UserManagerService.Api.Controllers
             var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
             var tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles);
 
-            var result= tokens != null
+            var result = tokens != null
                 ? ResponseModel.Success(ResponseMessages.TokensRefreshed, tokens)
                 : ResponseModel.Fail(ResponseMessages.RefreshTokenFailed);
             return Ok(result);

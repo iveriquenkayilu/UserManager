@@ -52,8 +52,8 @@ namespace RainyCorp.UserManagerService.Repository
         {
             if (!await _dbContext.Roles.AnyAsync())
             {
-                await _roleManager.CreateAsync(new Role { Name = Roles.Admin, CreatedAt = DateTime.Now });
-                await _roleManager.CreateAsync(new Role { Name = "User", CreatedAt = DateTime.Now });
+                await _roleManager.CreateAsync(new Role { Name = Roles.Admin, /*CreatedAt = DateTime.Now*/ });
+                await _roleManager.CreateAsync(new Role { Name = "User", /*CreatedAt = DateTime.Now */});
             }
 
             if (!await _dbContext.Users.AnyAsync())

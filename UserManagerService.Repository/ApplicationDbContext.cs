@@ -13,7 +13,7 @@ namespace UserManagerService.Repository
         }
 
         public DbSet<Visitor> Visitors { get; set; }
-        public DbSet<ServiceApiKey> ServiceApiKeys { get; set; }
+        //public DbSet<ServiceApiKey> ServiceApiKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

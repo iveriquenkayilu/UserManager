@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
 using UserManagerService.Shared.Constants;
@@ -10,23 +13,19 @@ using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Interfaces.Shared;
 using UserManagerService.Shared.Models;
 using UserManagerService.Shared.Models.User;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace UserManagerService.Api.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/users")]
-    public class UserController : ControllerBase
+    public class UserController : BaseController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly SignInManager<User> _signInManager;
         private readonly IUserContext _userContext;
         private readonly IAuth _auth;
         private readonly ILogger<UserController> _logger;
-        public UserController(IUnitOfWork unitOfWork, SignInManager<User> signInManager, IUserContext userContext, IAuth auth, ILogger<UserController> logger)
+        public UserController(IUnitOfWork unitOfWork, SignInManager<User> signInManager, IUserContext userContext, IAuth auth, ILogger<UserController> logger) : base(userContext, logger)
         {
             _unitOfWork = unitOfWork;
             _signInManager = signInManager;

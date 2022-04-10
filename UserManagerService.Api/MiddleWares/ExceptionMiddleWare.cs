@@ -27,7 +27,7 @@ namespace UserManagerService.Api.MiddleWares
             {
                 _logger.LogError($"Something went wrong, encountered exception {ex}", ex);
 
-                await context.Response.WriteAsync(new
+                await context.Response.WriteAsJsonAsync(new
                 {
                     ResponseCode = (int)HttpStatusCode.InternalServerError,
                     Message = "Error occurred"

@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using UserManagerService.Entities;
-using UserManagerService.Shared.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UserManagerService.Entities;
+using UserManagerService.Shared.Constants;
 
 namespace UserManagerService.Repository
 {
@@ -52,8 +52,8 @@ namespace UserManagerService.Repository
         {
             if (!await _dbContext.Roles.AnyAsync())
             {
-                await _roleManager.CreateAsync(new Role { Name = Roles.Admin, /*CreatedAt = DateTime.Now*/ });
-                await _roleManager.CreateAsync(new Role { Name = "User", /*CreatedAt = DateTime.Now */});
+                await _roleManager.CreateAsync(new Role { Name = Roles.Admin, CreatedAt = DateTime.Now });
+                await _roleManager.CreateAsync(new Role { Name = "User", CreatedAt = DateTime.Now });
             }
 
             if (!await _dbContext.Users.AnyAsync())

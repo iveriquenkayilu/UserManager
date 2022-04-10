@@ -129,18 +129,20 @@ namespace UserManagerService
                 return new UserContext(id, user.UserName, roles);
             });
 
-            if (Environment.IsDevelopment())
+            // check if this is necessary
+            services.AddCors(options =>
             {
-                services.AddCors(options =>
+                options.AddPolicy("Policy",
+                builder =>
                 {
-                    options.AddPolicy("Policy",
-                    builder =>
-                    {
-                        builder.WithOrigins("*")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                    });
+                    builder.WithOrigins("*")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
                 });
+            });
+
+            if (Environment.IsDevelopment())
+            {         
                 services.AddSwaggerGen(c =>
                 {
                     c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserManagerService.Api", Version = "v1" });
@@ -184,10 +186,10 @@ namespace UserManagerService
                 app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));
-                app.UseCors("Policy");
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));           
             }
 
+            app.UseCors("Policy"); // check if this is necessary
             app.UseMiddleware<ExceptionMiddleWare>();
             app.UseMiddleware<UserMiddleWare>();
 

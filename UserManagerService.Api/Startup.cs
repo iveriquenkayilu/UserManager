@@ -89,7 +89,7 @@ namespace UserManagerService
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;               
             }).AddJwtBearer(x =>
             {
                 x.RequireHttpsMetadata = false;
@@ -101,11 +101,13 @@ namespace UserManagerService
                     ValidateAudience = false, // Same here
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(protocols.EncryptionKey))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(protocols.EncryptionKey)),
+                    AuthenticationType= "JWT" // Might not be important
                 };
             });
 
-            services.AddScoped<IUserContext, UserContext>(c =>
+            // check between scoped and transcient
+            services.AddTransient<IUserContext, UserContext>(c =>
             {
                 //TODO Handle incorrect cases.
                 IHttpContextAccessor httpContextAccessor = c.GetService<IHttpContextAccessor>();

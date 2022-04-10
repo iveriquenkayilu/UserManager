@@ -6,13 +6,13 @@ using UserManagerService.Shared.Interfaces.Services;
 
 namespace UserManagerService.Api.Controllers
 {
-    //[Authorize]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     [ApiController]
     public abstract class BaseController : ControllerBase
     {
-        private readonly IUserContext _userContext;
-        private readonly ILogger<BaseController> _logger;
+        protected readonly IUserContext _userContext;
+        protected readonly ILogger<BaseController> _logger;
         public BaseController(IUserContext userContext, ILogger<BaseController> logger)
         {
             _userContext = userContext;

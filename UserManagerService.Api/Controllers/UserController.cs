@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
+using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Constants;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Interfaces.Shared;
@@ -22,19 +23,17 @@ namespace UserManagerService.Api.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly SignInManager<User> _signInManager;
-        private readonly IUserContext _userContext;
+        private readonly IUserService _userService;
         private readonly IAuth _auth;
-        private readonly ILogger<UserController> _logger;
-        public UserController(IUnitOfWork unitOfWork, SignInManager<User> signInManager, IUserContext userContext, IAuth auth, ILogger<UserController> logger) : base(userContext, logger)
+        public UserController(IUnitOfWork unitOfWork, SignInManager<User> signInManager, IUserContext userContext, IAuth auth, ILogger<UserController> logger, IUserService userService) : base(userContext, logger)
         {
             _unitOfWork = unitOfWork;
             _signInManager = signInManager;
-            _userContext = userContext;
             _auth = auth;
-            _logger = logger;
+            _userService = userService;
         }
 
-        [Authorize(Roles = Roles.Admin)]
+        [Authorize(Roles = Roles.ADMIN)]
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
@@ -108,7 +107,7 @@ namespace UserManagerService.Api.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = Roles.Admin)]
+        [Authorize(Roles = Roles.ADMIN)]
         [HttpPost("/api/register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel input)
         {
@@ -152,5 +151,8 @@ namespace UserManagerService.Api.Controllers
                 return Ok(ResponseModel.Fail(ResponseMessages.FailedToCreatUser));
             }
         }
+
+        [HttpGet("/api/me")]
+        public async Task<IActionResult> Me() => Ok(await _userService.GetUserProfileAsync(_userContext.UserId));
     }
 }

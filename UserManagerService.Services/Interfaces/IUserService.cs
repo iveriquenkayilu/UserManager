@@ -35,5 +35,6 @@ namespace UserManagerService.Services.Interfaces
         /// <param name="id"></param>
         /// <returns></returns>
         Task<bool> VistiorExists(long id);
+        Task<UserProfile> GetUserProfileAsync(long id);
     }
 }

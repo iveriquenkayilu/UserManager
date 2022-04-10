@@ -1,13 +1,14 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading.Tasks;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
 using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Constants;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Models.User;
-using System.Threading.Tasks;
 
 namespace UserManagerService.Services
 {
@@ -33,6 +34,18 @@ namespace UserManagerService.Services
         //    return _mapper.Map<UserModel>(user);
         //}
         public async Task<User> GetEntityAsync(long id) => await UnitOfWork.GetAsync<User>(id);
+
+        public async Task<UserProfile> GetUserProfileAsync(long id)
+        {
+            var profile = await UnitOfWork.Query<User>(u => u.Id == id).Select(u => new UserProfile
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Surname = u.Surname,
+                Username = u.UserName
+            }).FirstOrDefaultAsync();
+            return profile;
+        }
 
         public async Task DeleteVisitorAsync(long id)
         {

@@ -35,12 +35,12 @@ namespace UserManagerService.Repository
                 _logger.LogInformation($"Hosting environment: {_environment.EnvironmentName}");
                 _logger.LogInformation("Initializing the database and applying migrations");
 
-                await _dbContext.Database.MigrateAsync();
-                //await _dbContext.Database.EnsureCreatedAsync();
+                await AddDefaultValuesAsync();
 
-                if (_environment.IsDevelopment())
-                    await AddDefaultValuesAsync();
-
+                if (_environment.IsDevelopment()) // Inverse
+                    await _dbContext.Database.MigrateAsync();
+                else
+                    await _dbContext.Database.EnsureCreatedAsync();
             }
             catch (Exception e)
             {

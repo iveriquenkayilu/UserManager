@@ -10,6 +10,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OBS.UserManagementService.Domain.Helpers;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using UserManagerService.Api.MiddleWares;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
@@ -17,13 +21,10 @@ using UserManagerService.Repository;
 using UserManagerService.Services;
 using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Helpers;
+using UserManagerService.Shared.Hubs;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Interfaces.Shared;
 using UserManagerService.Shared.Settings;
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
 
 namespace UserManagerService
 {
@@ -67,6 +68,11 @@ namespace UserManagerService
             //register the initializer
             services.AddAsyncInitializer<Initializer>();
 
+            services.AddSignalR(options =>
+            {
+                //options.KeepAliveInterval = TimeSpan.FromDays(30);
+                options.ClientTimeoutInterval = TimeSpan.FromMinutes(1);
+            });
             // registers Repository services
 
             //services.AddScoped<IHttpOrchestrator, HttpOrchestrator>();
@@ -89,7 +95,7 @@ namespace UserManagerService
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;               
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(x =>
             {
                 x.RequireHttpsMetadata = false;
@@ -102,7 +108,7 @@ namespace UserManagerService
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(protocols.EncryptionKey)),
-                    AuthenticationType= "JWT" // Might not be important
+                    AuthenticationType = "JWT" // Might not be important
                 };
             });
 
@@ -144,7 +150,7 @@ namespace UserManagerService
             });
 
             if (Environment.IsDevelopment())
-            {         
+            {
                 services.AddSwaggerGen(c =>
                 {
                     c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserManagerService.Api", Version = "v1" });
@@ -188,7 +194,7 @@ namespace UserManagerService
                 app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));           
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));
             }
 
             app.UseCors("Policy"); // check if this is necessary
@@ -206,6 +212,7 @@ namespace UserManagerService
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<SignalRHub>("/api/signalr");
                 endpoints.MapControllers();
             });
         }

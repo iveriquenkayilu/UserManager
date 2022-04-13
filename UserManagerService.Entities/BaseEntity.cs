@@ -1,6 +1,6 @@
-﻿using UserManagerService.Entities.Interfaces;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+using UserManagerService.Entities.Interfaces;
 
 namespace UserManagerService.Entities
 {
@@ -17,5 +17,6 @@ namespace UserManagerService.Entities
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public DateTime? DeletedAt { get; set; }
+        public long CreatorId { get; set; }
     }
 }

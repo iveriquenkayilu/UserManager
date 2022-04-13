@@ -13,6 +13,15 @@ namespace UserManagerService.Repository
         }
 
         public DbSet<Visitor> Visitors { get; set; }
+        public DbSet<Organization> Organizations { get; set; }
+        public DbSet<OrganizationType> OrganizationTypes { get; set; }
+        public DbSet<OrganizationUser> OrganizationUsers { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
+        public DbSet<ContactType> ContactTypes { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<TeamUser> TeamUsers { get; set; }
+
         //public DbSet<ServiceApiKey> ServiceApiKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -44,6 +53,41 @@ namespace UserManagerService.Repository
                 uk.HasKey(u => new { u.UserId, u.Value });
 
                 uk.HasOne(u => (User)u.User).WithMany().HasForeignKey(u => u.UserId);
+            });
+
+            builder.Entity<Organization>(o =>
+            {
+                o.HasOne(u => (OrganizationType)u.OrganizationType).WithMany().HasForeignKey(u => u.OrganizationTypeId)
+                                .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            builder.Entity<OrganizationUser>(o =>
+            {
+                o.HasIndex(u => new { u.OrganizationId, u.UserId }).IsUnique();
+
+                o.HasOne(u => (User)u.User).WithMany().HasForeignKey(u => u.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                o.HasOne(u => (Organization)u.Organization).WithMany().HasForeignKey(u => u.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            builder.Entity<Contact>(c =>
+            {
+
+                c.HasOne(u => (ContactType)u.ContactType).WithMany().HasForeignKey(u => u.ContactTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            builder.Entity<TeamUser>(c =>
+            {
+                c.HasOne(u => (Team)u.Team).WithMany().HasForeignKey(u => u.
+                TeamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                c.HasOne(u => (User)u.User).WithMany().HasForeignKey(u => u.
+                UserId)
+                .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

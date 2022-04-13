@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using UserManagerService.Entities.Interfaces;
 using System;
+using UserManagerService.Entities.Interfaces;
 
 namespace UserManagerService.Entities
 {
@@ -12,5 +12,6 @@ namespace UserManagerService.Entities
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public DateTime? DeletedAt { get; set; }
         public DateTime ExpiredAt { get; set; }
+        public long CreatorId { get; set; }
     }
 }

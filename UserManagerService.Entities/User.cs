@@ -38,5 +38,7 @@ namespace UserManagerService.Entities
         ///   <c>true</c> if this instance is connected; otherwise, <c>false</c>.
         /// </value>
         public bool IsConnected { get; set; } = false;
+
+        public long CreatorId { get; set; }
     }
 }

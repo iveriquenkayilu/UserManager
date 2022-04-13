@@ -11,5 +11,6 @@ namespace UserManagerService.Entities.Interfaces
         DateTime UpdatedAt { get; set; }
 
         DateTime? DeletedAt { get; set; }
+        long CreatorId { get; set; }
     }
 }

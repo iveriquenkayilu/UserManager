@@ -36,9 +36,9 @@ namespace UserManagerService.Repository
                 _logger.LogInformation("Initializing the database and applying migrations");
 
                 if (_environment.IsDevelopment()) // Inverse
-                    await _dbContext.Database.MigrateAsync();
-                else
                     await _dbContext.Database.EnsureCreatedAsync();
+                else
+                    await _dbContext.Database.MigrateAsync();
 
                 await AddDefaultValuesAsync();
             }
@@ -96,6 +96,34 @@ namespace UserManagerService.Repository
             }
             else
                 _logger.LogError("Failed to create user");
+        }
+
+
+        private async Task CreateAdminCompanyAsync(long userId)
+        {
+
+            if (!await _dbContext.OrganizationTypes.AnyAsync())
+            {
+                var type = new OrganizationType { Name = Admin.OrganizationType };
+                await _dbContext.AddAsync(type);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            if (!await _dbContext.Organizations.AnyAsync())
+            {
+                var typeId = (await _dbContext.OrganizationTypes.Where(o => o.Name == Admin.OrganizationName).SingleOrDefaultAsync()).Id;
+                var organization = new Organization { Name = Admin.OrganizationName, OrganizationTypeId = typeId };
+                await _dbContext.AddAsync(organization);
+                await _dbContext.SaveChangesAsync();
+
+                if (!await _dbContext.OrganizationUsers.AnyAsync())
+                {
+
+                    var organizationUser = new OrganizationUser { OrganizationId = organization.Id, UserId = userId };
+                    await _dbContext.AddAsync(organizationUser);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
         }
     }
 }

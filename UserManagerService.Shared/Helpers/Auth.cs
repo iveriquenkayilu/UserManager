@@ -3,9 +3,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using UserManagerService.Shared.Interfaces.Shared;
-using UserManagerService.Shared.Models.User;
-using UserManagerService.Shared.Settings;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,6 +10,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using UserManagerService.Shared.Interfaces.Shared;
+using UserManagerService.Shared.Models.User;
+using UserManagerService.Shared.Settings;
 
 namespace OBS.UserManagementService.Domain.Helpers
 {
@@ -35,7 +35,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             _logger = logger;
         }
 
-        public AuthTokenModel CreateSecurityToken(long userId, string username, List<string> roles)
+        public AuthTokenModel CreateSecurityToken(long userId, string username, List<string> roles, long orgId, string orgName)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -52,6 +52,8 @@ namespace OBS.UserManagementService.Domain.Helpers
             var claims = new List<Claim>();
             claims.Add(new Claim(ClaimTypes.Name, username));
             claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
+            claims.Add(new Claim("OrganizationId", orgId.ToString()));
+            claims.Add(new Claim("OrganizationName", orgName));
             roles.ForEach(r =>
             {
                 //claims.Add(new Claim(ClaimTypes.Role, r.NormalizedName));

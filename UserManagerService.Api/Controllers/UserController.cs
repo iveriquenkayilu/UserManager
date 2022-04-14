@@ -71,7 +71,10 @@ namespace UserManagerService.Api.Controllers
                 await _signInManager.SignOutAsync(); // remove the cookie
                 var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
 
-                tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList());
+                var company = await _unitOfWork.Query<OrganizationUser>(o => o.UserId == user.Id)
+                    .Include(o => o.Organization).Select(o => (Organization)o.Organization).FirstOrDefaultAsync();
+
+                tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company.Id, company.Name);
             }
             var result = (string.IsNullOrEmpty(tokens.AccessToken) || string.IsNullOrEmpty(tokens.RefreshToken))
                     ? ResponseModel.Fail(ResponseMessages.AuthenticationFailed)
@@ -99,7 +102,10 @@ namespace UserManagerService.Api.Controllers
                 return Ok(ResponseModel.Fail(ResponseMessages.UserNotFound));
 
             var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
-            var tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles);
+            var company = await _unitOfWork.Query<OrganizationUser>(o => o.UserId == user.Id)
+                    .Include(o => o.Organization).Select(o => (Organization)o.Organization).FirstOrDefaultAsync();
+
+            var tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles, company.Id, company.Name);
 
             var result = tokens != null
                 ? ResponseModel.Success(ResponseMessages.TokensRefreshed, tokens)

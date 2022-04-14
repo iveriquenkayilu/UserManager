@@ -84,15 +84,17 @@ namespace UserManagerService.Repository
             };
 
             var ir = await _userManager.CreateAsync(user, password);
-            var userdId = await _dbContext.Users.Where(u => u.UserName.ToUpper() == userName.ToUpper()).Select(u => u.Id).FirstOrDefaultAsync();
+            var userId = await _dbContext.Users.Where(u => u.UserName.ToUpper() == userName.ToUpper()).Select(u => u.Id).FirstOrDefaultAsync();
 
             if (ir.Succeeded)
             {
                 var userRoles = new List<UserRole>();
-                roles.ForEach(r => { userRoles.Add(new UserRole { RoleId = r, UserId = userdId }); });
+                roles.ForEach(r => { userRoles.Add(new UserRole { RoleId = r, UserId = userId }); });
                 await _dbContext.UserRoles.AddRangeAsync(userRoles);
                 await _dbContext.SaveChangesAsync();
                 _logger.LogInformation($"Created user `{userName}` successfully");
+
+                await CreateAdminCompanyAsync(userId);
             }
             else
                 _logger.LogError("Failed to create user");

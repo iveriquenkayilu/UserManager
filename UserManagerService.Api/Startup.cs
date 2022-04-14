@@ -44,13 +44,13 @@ namespace UserManagerService
             services.AddHttpContextAccessor();
             services.AddMemoryCache();
 
-            if (Environment.IsDevelopment())
-                services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
-                {
-                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-                }));
-            else
+            //if (Environment.IsDevelopment())
+            //    services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
+            //    {
+            //        builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            //    }));
+            //else
             {
                 var connectionString = Configuration.GetConnectionString("MySqlConnection");
                 services.AddDbContext<ApplicationDbContext>(options =>
@@ -137,18 +137,6 @@ namespace UserManagerService
                 return new UserContext(id, user.UserName, roles);
             });
 
-            // check if this is necessary
-            services.AddCors(options =>
-            {
-                options.AddPolicy("Policy",
-                builder =>
-                {
-                    builder.WithOrigins("*")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-                });
-            });
-
             if (Environment.IsDevelopment())
             {
                 services.AddSwaggerGen(c =>
@@ -184,6 +172,20 @@ namespace UserManagerService
                     );
                 });
             }
+            else
+            {    //TODO remove this on Prod
+                services.AddCors(options =>
+                {
+                    options.AddPolicy("Policy",
+                    builder =>
+                    {
+                        builder.WithOrigins("*")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                    });
+                });
+
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -196,8 +198,9 @@ namespace UserManagerService
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));
             }
+            else
+                app.UseCors("Policy"); // TODO remove this. It is for dev
 
-            app.UseCors("Policy"); // check if this is necessary
             app.UseMiddleware<ExceptionMiddleWare>();
             app.UseMiddleware<UserMiddleWare>();
 

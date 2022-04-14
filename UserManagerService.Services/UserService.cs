@@ -44,6 +44,15 @@ namespace UserManagerService.Services
                 Surname = u.Surname,
                 Username = u.UserName
             }).FirstOrDefaultAsync();
+
+            var company = await UnitOfWork.Query<OrganizationUser>(o => o.UserId == id)
+                   .Include(o => o.Organization).Select(o => (Organization)o.Organization).FirstOrDefaultAsync();
+
+            if (company is not null)
+            {
+                profile.OrganizationId = company.Id;
+                profile.OrganizationName = company.Name;
+            }
             return profile;
         }
 

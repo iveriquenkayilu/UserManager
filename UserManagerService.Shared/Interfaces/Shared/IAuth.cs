@@ -1,12 +1,11 @@
-﻿using UserManagerService.Entities;
+﻿using System.Collections.Generic;
 using UserManagerService.Shared.Models.User;
-using System.Collections.Generic;
 
 namespace UserManagerService.Shared.Interfaces.Shared
 {
     public interface IAuth
     {
-        AuthTokenModel CreateSecurityToken(long userId, string username, List<string> roles);
+        AuthTokenModel CreateSecurityToken(long userId, string username, List<string> roles, long orgId, string orgName);
         bool RevokeCachedRefreshToken(string refreshToken);
         RefreshTokenModel GetCachedRefreshTokenWithRequestIpValidation(string refreshToken);
     }

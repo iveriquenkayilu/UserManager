@@ -33,8 +33,26 @@ namespace UserManagerService.Api.Controllers
             _userService = userService;
         }
 
-        [Authorize(Roles = Roles.ADMIN)]
         [HttpGet]
+        public async Task<IActionResult> GetOrganizationUsers()
+        {
+            var users = await _unitOfWork.Query<OrganizationUser>(u => u.OrganizationId == _userContext.OrganizationId).Include(o => o.User)
+                .Select(u => new UserModel
+                {
+                    Id = u.User.Id,
+                    CreatedAt = u.User.CreatedAt,
+                    IsConnected = u.User.IsConnected,
+                    Name = u.User.Name,
+                    Surname = u.User.Surname,
+                    UpdatedAt = u.User.UpdatedAt,
+                    Username = u.User.UserName
+                }).ToListAsync();
+
+            return Ok(users);
+        }
+
+        [Authorize(Roles = Roles.ADMIN)]
+        [HttpGet("admin")]
         public async Task<IActionResult> GetUsers()
         {
             var users = await _unitOfWork.Query<User>()
@@ -124,6 +142,8 @@ namespace UserManagerService.Api.Controllers
                 return Ok(ResponseModel.Fail(ResponseMessages.WrongCredentials));
             }
 
+            // TODO check if org exists
+
             var user = await _signInManager.UserManager.FindByNameAsync(input.Username);
             if (user != null)
                 return Ok(ResponseModel.Fail(ResponseMessages.EmailExists));
@@ -147,6 +167,15 @@ namespace UserManagerService.Api.Controllers
                 //var createdUser = await _userRepository.GetUserByUsernameAsync(input.Username);
                 _logger.LogInformation($"Created user `{input.Username}` successfully");
 
+                var orgUser = new OrganizationUser()
+                {
+                    OrganizationId = input.OrganizationId,
+                    UserId = user.Id,
+                    CreatorId = _userContext.UserId,
+                };
+                await _unitOfWork.AddAsync(orgUser);
+                await _unitOfWork.SaveAsync();
+                // TODO return data
                 return Ok(ResponseModel.Success(ResponseMessages.UserCreated));
             }
             else

@@ -108,7 +108,7 @@ namespace UserManagerService
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(protocols.EncryptionKey)),
-                    AuthenticationType = "JWT" // Might not be important
+                    //AuthenticationType = "JWT" // Might not be important
                 };
             });
 
@@ -133,8 +133,16 @@ namespace UserManagerService
 
                 var user = (userManager.FindByIdAsync(id.ToString())).Result;
                 var roles = (userManager.GetRolesAsync(user).Result).ToList();
+                
+                var organizationId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                .Where(c => c.Type == "OrganizationId")
+                .Select(c => Int64.Parse(c.Value)).FirstOrDefault();
 
-                return new UserContext(id, user.UserName, roles);
+                var organizationName = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                .Where(c => c.Type == "OrganizationName")
+                .Select(c => c.Value).FirstOrDefault();
+
+                return new UserContext(id, user.UserName, roles, organizationId, organizationName);
             });
 
             if (Environment.IsDevelopment())

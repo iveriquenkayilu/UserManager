@@ -32,5 +32,7 @@
         /// The password.
         /// </value>
         public string Password { get; set; }
+
+        public long OrganizationId { get; set; }
     }
 }

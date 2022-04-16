@@ -1,6 +1,6 @@
-﻿using UserManagerService.Shared.Interfaces.Services;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UserManagerService.Shared.Interfaces.Services;
 
 namespace UserManagerService.Services
 {
@@ -9,6 +9,9 @@ namespace UserManagerService.Services
         public long UserId { get; set; }
         public string Username { get; set; }
         public List<string> Roles { get; set; } = new List<string>();
+
+        public long OrganizationId { get; set; }
+        public string OrganizationName { get; set; }
 
         public UserContext()
         {
@@ -27,6 +30,15 @@ namespace UserManagerService.Services
             UserId = userId;
             Username = username;
             Roles = roles?.Select(r => r.ToUpper()).ToList();
+        }
+
+        public UserContext(long userId, string username, List<string> roles, long organizationId, string organizationName)
+        {
+            UserId = userId;
+            Username = username;
+            Roles = roles?.Select(r => r.ToUpper()).ToList();
+            OrganizationId = organizationId;
+            OrganizationName = organizationName;
         }
     }
 }

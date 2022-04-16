@@ -18,16 +18,13 @@ namespace UserManagerService.Entities.Interfaces
         public string Surname { get; set; }
 
         /// <summary>
-        /// Gets or sets the Last update date.
-        /// </summary>
-        public DateTime UpdatedAt { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether this instance is connected.
         /// </summary>
         /// <value>
         ///   <c>true</c> if this instance is connected; otherwise, <c>false</c>.
         /// </value>
         bool IsConnected { get; set; }
+
+        public string UserName { get; set; }
     }
 }

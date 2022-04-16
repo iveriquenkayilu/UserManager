@@ -8,5 +8,7 @@ namespace UserManagerService.Shared.Interfaces.Services
         string Username { get; set; }
 
         List<string> Roles { get; set; }
+        long OrganizationId { get; set; }
+        string OrganizationName { get; set; }
     }
 }

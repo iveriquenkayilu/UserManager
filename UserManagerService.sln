@@ -7,8 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{CAEF93D1-1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F6ECF833-96C0-461B-9100-BD6278590476}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RainyCorp.UserManagerService.UnitTests", "RainyCorp.UserManagerService.UnitTests\RainyCorp.UserManagerService.UnitTests.csproj", "{0F89DF94-5165-4157-90FA-DF59D114386E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserManagerService.Api", "UserManagerService.Api\UserManagerService.Api.csproj", "{7CCD6E23-1349-4542-A048-47E75F24990F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserManagerService.Entities", "UserManagerService.Entities\UserManagerService.Entities.csproj", "{DF87509F-5B74-4A88-98B2-3E2C29C9D35F}"

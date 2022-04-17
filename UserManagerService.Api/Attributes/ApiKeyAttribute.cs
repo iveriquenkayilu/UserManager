@@ -2,12 +2,10 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using UserManagerService.Shared.Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+using UserManagerService.Shared.Settings;
 
 namespace UserManagerService.Api.Attributes
 {
@@ -18,8 +16,12 @@ namespace UserManagerService.Api.Attributes
         {
             ApiKeySettings apiKeySettings = new();
             var appSettings = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
-            var logger= context.HttpContext.RequestServices.GetRequiredService<ILogger<ApiKeyAttribute>>();
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<ApiKeyAttribute>>();
             appSettings.GetSection("ApiKeySettings").Bind(apiKeySettings);
+
+            var header = context.HttpContext.Request.Headers[apiKeySettings.Name];
+            if (string.IsNullOrEmpty(header))
+                logger.LogInformation($"Couldn't get header value with key {apiKeySettings.Name}");
 
             if (!context.HttpContext.Request.Headers.TryGetValue(apiKeySettings.Name, out var extractedApiKey))
             {

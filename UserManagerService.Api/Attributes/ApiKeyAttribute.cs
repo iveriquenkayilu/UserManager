@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace UserManagerService.Api.Attributes
 {
@@ -17,6 +18,7 @@ namespace UserManagerService.Api.Attributes
         {
             ApiKeySettings apiKeySettings = new();
             var appSettings = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+            var logger= context.HttpContext.RequestServices.GetRequiredService<ILogger<ApiKeyAttribute>>();
             appSettings.GetSection("ApiKeySettings").Bind(apiKeySettings);
 
             if (!context.HttpContext.Request.Headers.TryGetValue(apiKeySettings.Name, out var extractedApiKey))
@@ -26,6 +28,7 @@ namespace UserManagerService.Api.Attributes
                     StatusCode = 401,
                     Content = "Api Key was not provided"
                 };
+                logger.LogInformation("Api Key was not provided");
                 return;
             }
 
@@ -36,6 +39,7 @@ namespace UserManagerService.Api.Attributes
                     StatusCode = 401,
                     Content = "Api Key is not valid"
                 };
+                logger.LogInformation("Api Key is not valid");
                 return;
             }
 

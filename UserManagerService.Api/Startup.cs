@@ -188,11 +188,10 @@ namespace UserManagerService
                     builder =>
                     {
                         builder
-                        .WithOrigins("*")
+                        .WithOrigins("https://test.iverique.com","http://localhost")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        //.AllowCredentials()
-                        ;
+                        .AllowCredentials();
                     });
                 });
 

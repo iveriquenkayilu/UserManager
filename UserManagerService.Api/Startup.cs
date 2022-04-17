@@ -187,10 +187,12 @@ namespace UserManagerService
                     options.AddPolicy("Policy",
                     builder =>
                     {
-                        builder.WithOrigins("*")
+                        builder
+                        .WithOrigins("*")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .AllowCredentials();
+                        //.AllowCredentials()
+                        ;
                     });
                 });
 

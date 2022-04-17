@@ -212,6 +212,11 @@ namespace UserManagerService
 
             app.UseMiddleware<ExceptionMiddleWare>();
             app.UseMiddleware<UserMiddleWare>();
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("Service", "UMS");
+                await next.Invoke();
+            });
 
             app.UseHttpsRedirection();
 

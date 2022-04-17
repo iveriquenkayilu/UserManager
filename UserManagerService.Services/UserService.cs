@@ -21,6 +21,13 @@ namespace UserManagerService.Services
 
         public async Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<long> ids)
         {
+            Logger.LogInformation("Getting user profiles");
+
+            if (ids is null || ids.Count == 0)
+                return new List<UserProfile>(); // TODO use a custom exception
+
+            ids = ids.Distinct().ToList();
+
             var profiles = await UnitOfWork.Query<OrganizationUser>(u => ids.Contains(u.UserId))
                 .Include(o => o.Organization).Include(o => o.User)
                 .Select(u => new UserProfile

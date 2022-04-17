@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UserManagerService.Api.Attributes;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
 using UserManagerService.Services.Interfaces;
@@ -189,5 +190,21 @@ namespace UserManagerService.Api.Controllers
 
         [HttpGet("/api/me")]
         public async Task<IActionResult> Me() => Ok(await _userService.GetUserProfileAsync(_userContext.UserId));
+
+        [HttpPost("profiles/get")]
+        public async Task<IActionResult> Profiles([FromBody] GetUserProfilesModel input)
+        {
+            var profiles = await _userService.GetUserProfilesByIdsAsync(input.UserIds);
+            return Ok(ResponseModel.Success(ResponseMessages.UserProfilesFetched, profiles));
+        }
+
+        [AllowAnonymous]
+        [ApiKey]
+        [HttpPost("profiles")]
+        public async Task<IActionResult> GetProfiles([FromBody] GetUserProfilesModel input)
+        {
+            var profiles = await _userService.GetUserProfilesByIdsAsync(input.UserIds);
+            return Ok(ResponseModel.Success(ResponseMessages.UserProfilesFetched, profiles));
+        }
     }
 }

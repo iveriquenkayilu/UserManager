@@ -1,6 +1,7 @@
 ﻿using UserManagerService.Entities;
 using UserManagerService.Shared.Models.User;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace UserManagerService.Services.Interfaces
 {
@@ -36,5 +37,6 @@ namespace UserManagerService.Services.Interfaces
         /// <returns></returns>
         Task<bool> VistiorExists(long id);
         Task<UserProfile> GetUserProfileAsync(long id);
+        Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<long> ids);
     }
 }

@@ -64,7 +64,6 @@ namespace UserManagerService.Repository
             }
         }
 
-
         private async Task CreateUser(List<long> roles, string firstName, string lastName, string email, string userName,
         string password)
         {

@@ -133,7 +133,7 @@ namespace UserManagerService
 
                 var user = (userManager.FindByIdAsync(id.ToString())).Result;
                 var roles = (userManager.GetRolesAsync(user).Result).ToList();
-                
+
                 var organizationId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
                 .Where(c => c.Type == "OrganizationId")
                 .Select(c => Int64.Parse(c.Value)).FirstOrDefault();
@@ -189,7 +189,8 @@ namespace UserManagerService
                     {
                         builder.WithOrigins("*")
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                     });
                 });
 

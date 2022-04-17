@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UserManagerService.Entities;
@@ -14,11 +15,25 @@ namespace UserManagerService.Services
 {
     public class UserService : BaseService, IUserService
     {
-        //private readonly IMapper _mapper;
-        //private readonly IUnitOfWork _unitOfWork;
-
         public UserService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApiService> logger) : base(userContext, unitOfWork, mapper, logger)
         {
+        }
+
+        public async Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<long> ids)
+        {
+            var profiles = await UnitOfWork.Query<OrganizationUser>(u => ids.Contains(u.UserId))
+                .Include(o => o.Organization).Include(o => o.User)
+                .Select(u => new UserProfile
+                {
+                    Id = u.User.Id,
+                    Name = u.User.Name,
+                    Surname = u.User.Surname,
+                    Username = u.User.UserName,
+                    OrganizationId = u.OrganizationId,
+                    OrganizationName = u.Organization.Name
+                }).ToListAsync();
+
+            return profiles;
         }
 
         //public async Task<List<UserModel>> GetAsync()

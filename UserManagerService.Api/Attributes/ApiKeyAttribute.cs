@@ -19,10 +19,11 @@ namespace UserManagerService.Api.Attributes
             var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<ApiKeyAttribute>>();
             appSettings.GetSection("ApiKeySettings").Bind(apiKeySettings);
 
-            var header = context.HttpContext.Request.Headers[apiKeySettings.Name];
+            var header = context.HttpContext.Request.Headers[apiKeySettings.Name].ToString();
             if (string.IsNullOrEmpty(header))
                 logger.LogInformation($"Couldn't get header value with key {apiKeySettings.Name}");
-
+            else
+                logger.LogInformation($"Header is {header.Substring(0, 5)}");
             if (!context.HttpContext.Request.Headers.TryGetValue(apiKeySettings.Name, out var extractedApiKey))
             {
                 context.Result = new ContentResult()

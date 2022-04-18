@@ -31,7 +31,9 @@ namespace UserManagerService.Api.MiddleWares
 
             //if ((visitorId == null && !context.User.Identity.IsAuthenticated) || !await userService.VistiorExists((long.Parse(visitorId))))
             //{
-                // a new visitor notification.
+            // a new visitor notification.
+
+            try {
 
                 var userAgent = context.Request.Headers["User-Agent"];
 
@@ -48,6 +50,11 @@ namespace UserManagerService.Api.MiddleWares
                     Device = device,
                     OperatingSystem = operatingSystem,
                 };
+            }
+            catch(Exception e)
+            {
+
+            };
 
                 //var id = await userService.AddVisitorAsync(visitor);
 

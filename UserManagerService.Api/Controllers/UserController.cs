@@ -203,8 +203,7 @@ namespace UserManagerService.Api.Controllers
         [HttpPost("profiles")]
         public async Task<IActionResult> GetProfiles([FromBody] GetUserProfilesModel input)
         {
-            var profiles = await _userService.GetUserProfilesByIdsAsync(input.UserIds);
-            return Ok(ResponseModel.Success(ResponseMessages.UserProfilesFetched, profiles));
+            return Ok(await _userService.GetUserProfilesByIdsAsync(input.UserIds));
         }
     }
 }

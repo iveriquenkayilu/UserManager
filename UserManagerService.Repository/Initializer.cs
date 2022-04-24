@@ -60,6 +60,7 @@ namespace UserManagerService.Repository
             {
                 var roles = await _dbContext.Roles.Select(r => r.Id).ToListAsync();
                 await CreateUser(roles, Admin.FirstName, Admin.LastName, Admin.Email, Admin.UserName, Admin.DefaultPassword);
+                await CreateUser(roles, "FirstName", "Last Name", Admin.Email, "user", Admin.DefaultPassword);
                 await _dbContext.SaveChangesAsync();
             }
         }

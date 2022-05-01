@@ -176,8 +176,16 @@ namespace UserManagerService.Api.Controllers
                 };
                 await _unitOfWork.AddAsync(orgUser);
                 await _unitOfWork.SaveAsync();
-                // TODO return data
-                return Ok(ResponseModel.Success(ResponseMessages.UserCreated));
+
+                var model = new UserProfile
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Username = user.UserName,
+                    Surname = user.Surname,
+                    OrganizationId = orgUser.OrganizationId
+                };
+                return Ok(ResponseModel.Success(ResponseMessages.UserCreated, model));
             }
             else
             {

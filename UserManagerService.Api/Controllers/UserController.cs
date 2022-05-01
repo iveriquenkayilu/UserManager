@@ -170,7 +170,7 @@ namespace UserManagerService.Api.Controllers
 
                 var orgUser = new OrganizationUser()
                 {
-                    OrganizationId = input.OrganizationId,
+                    OrganizationId = input.OrganizationId == 0 ? _userContext.OrganizationId : input.OrganizationId,
                     UserId = user.Id,
                     CreatorId = _userContext.UserId,
                 };

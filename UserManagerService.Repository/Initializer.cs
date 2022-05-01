@@ -100,7 +100,7 @@ namespace UserManagerService.Repository
                 _logger.LogError("Failed to create user");
         }
 
-
+        // add the second use too
         private async Task CreateAdminCompanyAsync(long userId)
         {
 

@@ -39,7 +39,7 @@ namespace UserManagerService.Api.MiddleWares
                 {
                     ResponseCode = (int)HttpStatusCode.InternalServerError,
                     Message = "Error occurred"
-                }.ToString());
+                });
             }
         }
     }

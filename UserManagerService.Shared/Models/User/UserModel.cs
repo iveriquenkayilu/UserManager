@@ -15,5 +15,6 @@ namespace UserManagerService.Shared.Models.User
         public DateTime UpdatedAt { get; set; }
 
         public bool IsConnected { get; set; }
+        public string Picture { get; set; }
     }
 }

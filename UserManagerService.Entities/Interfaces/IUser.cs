@@ -26,5 +26,6 @@ namespace UserManagerService.Entities.Interfaces
         bool IsConnected { get; set; }
 
         public string UserName { get; set; }
+        string Picture { get; set; }
     }
 }

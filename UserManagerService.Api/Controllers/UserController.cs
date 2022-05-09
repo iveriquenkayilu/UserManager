@@ -196,6 +196,22 @@ namespace UserManagerService.Api.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.ADMIN)]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(long id, [FromBody] UserInputModel input)
+        {
+            var model = await _userService.UpdateUserAsync(id, input);
+            return CustomResponse.Success("User updated successfully", model);
+        }
+
+        [Authorize(Roles = Roles.ADMIN)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(long id)
+        {
+            await _userService.DeleteUserAsync(id);
+            return CustomResponse.Success("User deleted successfully");
+        }
+
         [HttpGet("/api/me")]
         public async Task<IActionResult> Me() => Ok(await _userService.GetUserProfileAsync(_userContext.UserId));
 

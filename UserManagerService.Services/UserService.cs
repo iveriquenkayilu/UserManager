@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,8 @@ using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
 using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Constants;
+using UserManagerService.Shared.Exceptions;
+using UserManagerService.Shared.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Models.User;
 
@@ -37,7 +40,8 @@ namespace UserManagerService.Services
                     Surname = u.User.Surname,
                     Username = u.User.UserName,
                     OrganizationId = u.OrganizationId,
-                    OrganizationName = u.Organization.Name
+                    OrganizationName = u.Organization.Name,
+                    Picture = u.User.Picture
                 }).ToListAsync();
 
             return profiles;
@@ -49,12 +53,52 @@ namespace UserManagerService.Services
         //    return _mapper.Map<List<UserModel>>(users);
         //}
 
-        //public async Task<UserModel> GetAsync(long id) // with roles
-        //{
-        //    var user = await UnitOfWork.Query<User>(u => u.Id == id).FirstOrDefaultAsync();
 
-        //    return _mapper.Map<UserModel>(user);
-        //}
+        public async Task<UserModel> GetAsync(long id, UserInputModel input) // with roles
+        {
+            var user = await UnitOfWork.Query<User>(u => u.Id == id).FirstOrDefaultAsync();
+
+
+            return Mapper.Map<UserModel>(user);
+        }
+
+        public async Task<UserModel> GetAsync(long id) // with roles
+        {
+            var user = await UnitOfWork.Query<User>(u => u.Id == id).FirstOrDefaultAsync();
+
+            return Mapper.Map<UserModel>(user);
+        }
+
+        public async Task<UserModel> UpdateUserAsync(long id, UserInputModel input)
+        {
+            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to update user {id}");
+
+            // TODO validation
+
+            var user = await UnitOfWork.Query<User>(d => d.Id == id).FirstOrDefaultAsync();
+
+            if (user is null)
+                throw new CustomException($"User {id} not found");
+
+            user.CreatorId = UserContext.UserId;
+            user.UpdatedAt = DateTime.Now;
+            user.Name = input.Name;
+            user.UserName = input.Username;
+            user.Surname = input.Surname;
+            user.Email = input.Email;
+
+
+            UnitOfWork.Update(user);
+            await UnitOfWork.SaveAsync();
+
+            return Mapper.Map<UserModel>(user);
+        }
+
+        public async Task DeleteUserAsync(long id)
+        {
+            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to delete user {id}");
+            await UnitOfWork.SoftDeleteEntityAsync<User>(id);
+        }
         public async Task<User> GetEntityAsync(long id) => await UnitOfWork.GetAsync<User>(id);
 
         public async Task<UserProfile> GetUserProfileAsync(long id)

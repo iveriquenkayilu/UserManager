@@ -49,5 +49,6 @@ namespace UserManagerService.Interfaces.Repositories
         /// <param name="action">The action.</param>
         /// <returns></returns>
         Task ExecuteInTransactionAsync(Func<IUnitOfWork, Task> action);
+        Task SoftDeleteEntityAsync<T>(long id) where T : class, IBaseEntity;
     }
 }

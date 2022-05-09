@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
-using UserManagerService.Entities.Interfaces;
-using UserManagerService.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using UserManagerService.Entities.Interfaces;
+using UserManagerService.Interfaces.Repositories;
+using UserManagerService.Shared.Exceptions;
 
 namespace UserManagerService.Repository
 {
@@ -51,7 +52,7 @@ namespace UserManagerService.Repository
 
         public virtual void Update<T>(T entity) where T : class, IBaseEntity
         {
-        
+
             _context.Update(entity);
         }
 
@@ -69,13 +70,23 @@ namespace UserManagerService.Repository
 
         public Task<List<T>> GetAsync<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
             _context.Set<T>().Where(expression).ToListAsync();
+        public virtual void SoftDelete<T>(T entity) where T : class, IBaseEntity
+        {
+            entity.UpdatedAt = DateTime.Now;
+            entity.DeletedAt = DateTime.Now;
+            Update(entity);
+        }
 
-        //public virtual void SoftDelete<T>(T entity) where T : class, IBaseEntity
-        //{
-        //    entity.IsDeleted = true;
-        //    entity.UpdatedAt = DateTime.Now;
-        //    Update(entity);
-        //}
+        public async Task SoftDeleteEntityAsync<T>(long id) where T : class, IBaseEntity
+        {
+            var documentType = await Query<T>(d => d.Id == id).FirstOrDefaultAsync();
+
+            if (documentType is null)
+                throw new CustomException($"{nameof(T)} {id} not found");
+
+            SoftDelete(documentType);
+            await SaveAsync();
+        }
 
 
         public virtual T FirstOrDefault<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>

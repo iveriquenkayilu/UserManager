@@ -38,5 +38,7 @@ namespace UserManagerService.Services.Interfaces
         Task<bool> VistiorExists(long id);
         Task<UserProfile> GetUserProfileAsync(long id);
         Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<long> ids);
+        Task DeleteUserAsync(long id);
+        Task<UserModel> UpdateUserAsync(long id, UserInputModel input);
     }
 }

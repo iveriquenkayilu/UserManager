@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using UserManagerService.Shared.Exceptions;
+using UserManagerService.Shared.Models;
 
 namespace UserManagerService.Api.MiddleWares
 {
@@ -22,6 +24,12 @@ namespace UserManagerService.Api.MiddleWares
             try
             {
                 await _next(context);
+            }
+            catch (CustomException ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                await context.Response.WriteAsJsonAsync(
+                    ResponseModel.Fail(ex.Message));
             }
             catch (Exception ex)
             {

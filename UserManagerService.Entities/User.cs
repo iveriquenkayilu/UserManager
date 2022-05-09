@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using UserManagerService.Entities.Interfaces;
 using System;
+using UserManagerService.Entities.Interfaces;
 
 namespace UserManagerService.Entities
 {
@@ -40,5 +40,7 @@ namespace UserManagerService.Entities
         public bool IsConnected { get; set; } = false;
 
         public long CreatorId { get; set; }
+
+        public string Picture { get; set; }
     }
 }

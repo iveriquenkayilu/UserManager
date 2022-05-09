@@ -108,7 +108,8 @@ namespace UserManagerService.Services
                 Id = u.Id,
                 Name = u.Name,
                 Surname = u.Surname,
-                Username = u.UserName
+                Username = u.UserName,
+                Picture = u.Picture
             }).FirstOrDefaultAsync();
 
             var company = await UnitOfWork.Query<OrganizationUser>(o => o.UserId == id)

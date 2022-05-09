@@ -13,6 +13,8 @@
   <ItemGroup>
     <Compile Include="Migrations\20220413195843_mysql-initial.cs" />
     <Compile Include="Migrations\20220413195843_mysql-initial.Designer.cs" />
+    <Compile Include="Migrations\20220509160324_added-picture-to-users-table.cs" />
+    <Compile Include="Migrations\20220509160324_added-picture-to-users-table.Designer.cs" />
     <Compile Include="Migrations\ApplicationDbContextModelSnapshot.cs" />
   </ItemGroup>
 

@@ -104,24 +104,24 @@ namespace UserManagerService.Repository
         private async Task CreateAdminCompanyAsync(long userId)
         {
 
-            if (!await _dbContext.OrganizationTypes.AnyAsync())
+            if (!await _dbContext.CompanyTypes.AnyAsync())
             {
-                var type = new OrganizationType { Name = Admin.OrganizationType };
+                var type = new CompanyType { Name = Admin.OrganizationType };
                 await _dbContext.AddAsync(type);
                 await _dbContext.SaveChangesAsync();
             }
 
-            if (!await _dbContext.Organizations.AnyAsync())
+            if (!await _dbContext.Companies.AnyAsync())
             {
-                var typeId = (await _dbContext.OrganizationTypes.Where(o => o.Name == Admin.OrganizationName).SingleOrDefaultAsync()).Id;
-                var organization = new Organization { Name = Admin.OrganizationName, OrganizationTypeId = typeId };
+                var typeId = (await _dbContext.CompanyTypes.Where(o => o.Name == Admin.OrganizationName).SingleOrDefaultAsync()).Id;
+                var organization = new Company { Name = Admin.OrganizationName, CompanyTypeId = typeId };
                 await _dbContext.AddAsync(organization);
                 await _dbContext.SaveChangesAsync();
 
-                if (!await _dbContext.OrganizationUsers.AnyAsync())
+                if (!await _dbContext.CompanyUsers.AnyAsync())
                 {
 
-                    var organizationUser = new OrganizationUser { OrganizationId = organization.Id, UserId = userId };
+                    var organizationUser = new CompanyUser { CompanyId = organization.Id, UserId = userId };
                     await _dbContext.AddAsync(organizationUser);
                     await _dbContext.SaveChangesAsync();
                 }

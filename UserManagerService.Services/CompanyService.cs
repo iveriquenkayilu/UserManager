@@ -16,9 +16,9 @@ using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Services
 {
-    public class UserService : BaseService, IUserService
+    public class CompanyService : BaseService, ICompanyService
     {
-        public UserService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApiService> logger) : base(userContext, unitOfWork, mapper, logger)
+        public CompanyService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApiService> logger) : base(userContext, unitOfWork, mapper, logger)
         {
         }
 

@@ -35,9 +35,9 @@ namespace UserManagerService.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetOrganizationUsers()
+        public async Task<IActionResult> GetCompanyUsers()
         {
-            var users = await _unitOfWork.Query<OrganizationUser>(u => u.OrganizationId == _userContext.OrganizationId).Include(o => o.User)
+            var users = await _unitOfWork.Query<CompanyUser>(u => u.CompanyId == _userContext.OrganizationId).Include(o => o.User)
                 .Select(u => new UserModel
                 {
                     Id = u.User.Id,
@@ -90,8 +90,8 @@ namespace UserManagerService.Api.Controllers
                 await _signInManager.SignOutAsync(); // remove the cookie
                 var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
 
-                var company = await _unitOfWork.Query<OrganizationUser>(o => o.UserId == user.Id)
-                    .Include(o => o.Organization).Select(o => (Organization)o.Organization).FirstOrDefaultAsync();
+                var company = await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id)
+                    .Include(o => o.Company).Select(o => (Company)o.Company).FirstOrDefaultAsync();
 
                 tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company.Id, company.Name);
             }
@@ -121,8 +121,8 @@ namespace UserManagerService.Api.Controllers
                 return Ok(ResponseModel.Fail(ResponseMessages.UserNotFound));
 
             var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
-            var company = await _unitOfWork.Query<OrganizationUser>(o => o.UserId == user.Id)
-                    .Include(o => o.Organization).Select(o => (Organization)o.Organization).FirstOrDefaultAsync();
+            var company = await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id)
+                    .Include(o => o.Company).Select(o => (Company)o.Company).FirstOrDefaultAsync();
 
             var tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles, company.Id, company.Name);
 
@@ -168,9 +168,9 @@ namespace UserManagerService.Api.Controllers
                 //var createdUser = await _userRepository.GetUserByUsernameAsync(input.Username);
                 _logger.LogInformation($"Created user `{input.Username}` successfully");
 
-                var orgUser = new OrganizationUser()
+                var orgUser = new CompanyUser()
                 {
-                    OrganizationId = input.OrganizationId == 0 ? _userContext.OrganizationId : input.OrganizationId,
+                    CompanyId = input.OrganizationId == 0 ? _userContext.OrganizationId : input.OrganizationId,
                     UserId = user.Id,
                     CreatorId = _userContext.UserId,
                 };
@@ -183,7 +183,7 @@ namespace UserManagerService.Api.Controllers
                     Name = user.Name,
                     Username = user.UserName,
                     Surname = user.Surname,
-                    OrganizationId = orgUser.OrganizationId
+                    OrganizationId = orgUser.CompanyId
                 };
                 return Ok(ResponseModel.Success(ResponseMessages.UserCreated, model));
             }

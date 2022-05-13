@@ -2,7 +2,7 @@
 
 namespace UserManagerService.Entities
 {
-    public class OrganizationType : BaseEntity, IOrganizationType
+    public class CompanyType : BaseEntity, ICompanyType
     {
         public string Name { get; set; }
     }

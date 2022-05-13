@@ -1,6 +1,6 @@
 ﻿namespace UserManagerService.Entities.Interfaces
 {
-    public interface IOrganizationType : IBaseEntity
+    public interface ICompanyType : IBaseEntity
     {
         string Name { get; set; }
     }

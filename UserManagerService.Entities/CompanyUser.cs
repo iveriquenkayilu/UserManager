@@ -2,10 +2,10 @@
 
 namespace UserManagerService.Entities
 {
-    public class OrganizationUser : BaseEntity
+    public class CompanyUser : BaseEntity
     {
-        public long OrganizationId { get; set; }
-        public virtual IOrganization Organization { get; set; }
+        public long CompanyId { get; set; }
+        public virtual ICompany Company { get; set; }
         public long UserId { get; set; }
         public virtual IUser User { get; set; }
     }

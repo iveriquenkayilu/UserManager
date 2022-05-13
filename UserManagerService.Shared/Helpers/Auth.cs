@@ -35,7 +35,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             _logger = logger;
         }
 
-        public AuthTokenModel CreateSecurityToken(long userId, string username, List<string> roles, long orgId, string orgName)
+        public AuthTokenModel CreateSecurityToken(long userId, string username, List<string> roles, long companyId, string companyName)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -52,8 +52,8 @@ namespace OBS.UserManagementService.Domain.Helpers
             var claims = new List<Claim>();
             claims.Add(new Claim(ClaimTypes.Name, username));
             claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
-            claims.Add(new Claim("OrganizationId", orgId.ToString()));
-            claims.Add(new Claim("OrganizationName", orgName));
+            claims.Add(new Claim("CompanyId", companyId.ToString()));
+            claims.Add(new Claim("CompanyName", companyName));
             roles.ForEach(r =>
             {
                 //claims.Add(new Claim(ClaimTypes.Role, r.NormalizedName));

@@ -13,9 +13,9 @@ namespace UserManagerService.Repository
         }
 
         public DbSet<Visitor> Visitors { get; set; }
-        public DbSet<Organization> Organizations { get; set; }
-        public DbSet<OrganizationType> OrganizationTypes { get; set; }
-        public DbSet<OrganizationUser> OrganizationUsers { get; set; }
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<CompanyType> CompanyTypes { get; set; }
+        public DbSet<CompanyUser> CompanyUsers { get; set; }
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<ContactType> ContactTypes { get; set; }
         public DbSet<Address> Addresses { get; set; }
@@ -55,20 +55,20 @@ namespace UserManagerService.Repository
                 uk.HasOne(u => (User)u.User).WithMany().HasForeignKey(u => u.UserId);
             });
 
-            builder.Entity<Organization>(o =>
+            builder.Entity<Company>(o =>
             {
-                o.HasOne(u => (OrganizationType)u.OrganizationType).WithMany().HasForeignKey(u => u.OrganizationTypeId)
+                o.HasOne(u => (CompanyType)u.CompanyType).WithMany().HasForeignKey(u => u.CompanyTypeId)
                                 .OnDelete(DeleteBehavior.Restrict);
             });
 
-            builder.Entity<OrganizationUser>(o =>
+            builder.Entity<CompanyUser>(o =>
             {
-                o.HasIndex(u => new { u.OrganizationId, u.UserId }).IsUnique();
+                o.HasIndex(u => new { u.CompanyId, u.UserId }).IsUnique();
 
                 o.HasOne(u => (User)u.User).WithMany().HasForeignKey(u => u.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-                o.HasOne(u => (Organization)u.Organization).WithMany().HasForeignKey(u => u.OrganizationId)
+                o.HasOne(u => (Company)u.Company).WithMany().HasForeignKey(u => u.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
 

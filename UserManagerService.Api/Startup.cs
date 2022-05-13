@@ -77,6 +77,7 @@ namespace UserManagerService
 
             //services.AddScoped<IHttpOrchestrator, HttpOrchestrator>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IUnitOfWork, UnitOfWork<ApplicationDbContext>>();
             services.AddScoped<IApiService, ApiService>();
 
@@ -135,7 +136,7 @@ namespace UserManagerService
                 var roles = (userManager.GetRolesAsync(user).Result).ToList();
 
                 var organizationId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
-                .Where(c => c.Type == "OrganizationId")
+                .Where(c => c.Type == "CompanyId")
                 .Select(c => Int64.Parse(c.Value)).FirstOrDefault();
 
                 var organizationName = ((ClaimsIdentity)claimsPrincipal.Identity).Claims

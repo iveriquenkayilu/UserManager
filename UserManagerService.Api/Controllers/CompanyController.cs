@@ -49,14 +49,14 @@ namespace UserManagerService.Api.Controllers
             return CustomResponse.Success("Company deleted successfully");
         }
 
-        [HttpPost]
+        [HttpPost("users")]
         public async Task<IActionResult> AddUser([FromBody] CompanyUserInputModel input)
         {
             var model = await _companyService.AddUserAsync(input);
             return CustomResponse.Success("User added to Company successfully", model);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("users/{id}")]
         public async Task<IActionResult> DeleteUser([FromBody] CompanyUserInputModel input)
         {
             await _companyService.DeleteUserAsync(input);

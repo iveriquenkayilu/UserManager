@@ -9,9 +9,10 @@ namespace UserManagerService.Shared.Helpers
     {
         public AutoMapperProfiles()
         {
-            //CreateMap<User, GetUserResponse>().ReverseMap();
             CreateMap<User, UserModel>();
             CreateMap<CompanyUser, CompanyUserModel>().ReverseMap();
+            CreateMap<CompanyInputModel, CompanyModel>();
+            CreateMap<CompanyModel, Company>();
         }
     }
 }

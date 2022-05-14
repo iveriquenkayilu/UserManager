@@ -9,7 +9,6 @@ namespace UserManagerService.Services.Interfaces
         Task<CompanyModel> AddCompanyAsync(CompanyInputModel input);
         Task<CompanyUserModel> AddUserAsync(CompanyUserInputModel input);
         Task DeleteCompanyAsync(long id);
-        Task DeleteUserAsync(CompanyUserModel input);
         Task DeleteUserAsync(CompanyUserInputModel input);
         Task<List<CompanyModel>> GetCompaniesAsync();
         Task<CompanyModel> UpdateCompanyAsync(long id, CompanyInputModel input);

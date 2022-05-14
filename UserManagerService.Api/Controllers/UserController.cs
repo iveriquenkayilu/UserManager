@@ -177,6 +177,7 @@ namespace UserManagerService.Api.Controllers
                 //var createdUser = await _userRepository.GetUserByUsernameAsync(input.Username);
                 _logger.LogInformation($"Created user `{input.Username}` successfully");
 
+                //Auto add to company
                 var orgUser = new CompanyUser()
                 {
                     CompanyId = input.OrganizationId == 0 ? _userContext.OrganizationId : input.OrganizationId,

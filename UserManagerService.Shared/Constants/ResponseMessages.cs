@@ -18,6 +18,12 @@
 
         #endregion
 
+        #region Company
+
+        public const string CompaniesFetched = "CompaniesFetched";
+
+        #endregion
+
         #region Input
 
         public const string InvalidInput = "InvalidInput";

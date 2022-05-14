@@ -90,8 +90,17 @@ namespace UserManagerService.Api.Controllers
                 await _signInManager.SignOutAsync(); // remove the cookie
                 var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
 
-                var company = await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id)
-                    .Include(o => o.Company).Select(o => (Company)o.Company).FirstOrDefaultAsync();
+                if (input.CompanyId is not null)
+                {
+                    // check you belong to the company
+                }
+
+                // Get default company
+                var company = input.CompanyId is null ?
+                    await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id)
+                    .Include(o => o.Company).Select(o => (Company)o.Company).FirstOrDefaultAsync()
+                    : await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id && o.CompanyId == input.CompanyId)
+                    .Include(o => o.Company).Select(o => (Company)o.Company).SingleOrDefaultAsync();
 
                 tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company.Id, company.Name);
             }

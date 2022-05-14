@@ -12,5 +12,7 @@
         /// Gets or sets the password.
         /// </summary>
         public string Password { get; set; }
+
+        public long? CompanyId { get; set; }
     }
 }

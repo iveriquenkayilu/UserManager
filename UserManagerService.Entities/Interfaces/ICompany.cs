@@ -1,4 +1,6 @@
-﻿namespace UserManagerService.Entities.Interfaces
+﻿using System.Collections.Generic;
+
+namespace UserManagerService.Entities.Interfaces
 {
     public interface ICompany : IBaseEntity
     {
@@ -6,5 +8,6 @@
         string Description { get; set; }
         long CompanyTypeId { get; set; }
         ICompanyType CompanyType { get; set; }
+        List<CompanyUser> CompanyUsers { get; set; }
     }
 }

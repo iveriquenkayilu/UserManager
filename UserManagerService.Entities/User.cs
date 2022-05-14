@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
+using System.Collections.Generic;
 using UserManagerService.Entities.Interfaces;
 
 namespace UserManagerService.Entities
@@ -42,5 +43,7 @@ namespace UserManagerService.Entities
         public long CreatorId { get; set; }
 
         public string Picture { get; set; }
+
+        public List<CompanyUser> CompanyUsers { get; set; }
     }
 }

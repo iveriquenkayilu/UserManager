@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace UserManagerService.Entities.Interfaces
 {
@@ -27,5 +28,6 @@ namespace UserManagerService.Entities.Interfaces
 
         public string UserName { get; set; }
         string Picture { get; set; }
+        List<CompanyUser> CompanyUsers { get; set; }
     }
 }

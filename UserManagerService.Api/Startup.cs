@@ -140,7 +140,7 @@ namespace UserManagerService
                 .Select(c => Int64.Parse(c.Value)).FirstOrDefault();
 
                 var organizationName = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
-                .Where(c => c.Type == "OrganizationName")
+                .Where(c => c.Type == "CompanyName")
                 .Select(c => c.Value).FirstOrDefault();
 
                 return new UserContext(id, user.UserName, roles, organizationId, organizationName);

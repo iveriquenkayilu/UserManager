@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using UserManagerService.Entities;
+using UserManagerService.Shared.Models.Company;
 using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Shared.Helpers
@@ -10,6 +11,7 @@ namespace UserManagerService.Shared.Helpers
         {
             //CreateMap<User, GetUserResponse>().ReverseMap();
             CreateMap<User, UserModel>();
+            CreateMap<CompanyUser, CompanyUserModel>().ReverseMap();
         }
     }
 }

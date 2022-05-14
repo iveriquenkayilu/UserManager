@@ -12,6 +12,7 @@ using UserManagerService.Shared.Constants;
 using UserManagerService.Shared.Exceptions;
 using UserManagerService.Shared.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
+using UserManagerService.Shared.Models.Company;
 using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Services
@@ -22,163 +23,112 @@ namespace UserManagerService.Services
         {
         }
 
-        public async Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<long> ids)
+        public async Task<List<CompanyModel>> GetCompaniesAsync()
         {
-            Logger.LogInformation("Getting user profiles");
-
-            if (ids is null || ids.Count == 0)
-                return new List<UserProfile>(); // TODO use a custom exception
-
-            ids = ids.Distinct().ToList();
-
-            var profiles = await UnitOfWork.Query<CompanyUser>(u => ids.Contains(u.UserId))
-                .Include(o => o.Company).Include(o => o.User)
-                .Select(u => new UserProfile
+            var companies = await UnitOfWork.Query<Company>()
+                .Select(c => new CompanyModel
                 {
-                    Id = u.User.Id,
-                    Name = u.User.Name,
-                    Surname = u.User.Surname,
-                    Username = u.User.UserName,
-                    OrganizationId = u.CompanyId,
-                    OrganizationName = u.Company.Name,
-                    Picture = u.User.Picture
+                    Id = c.Id,
+                    Name = c.Name,
+                    CreatedAt = c.CreatedAt,
+                    Users = c.CompanyUsers.Select(u => new UserModel
+                    {
+                        Id = u.Id,
+                        Name = u.User.Name,
+                        Surname = u.User.Surname,
+                        CreatedAt = u.User.CreatedAt,
+                        Username = u.User.UserName,
+                        Picture = u.User.Picture
+                    }).ToList()
                 }).ToListAsync();
-
-            return profiles;
+            return companies;
         }
 
-        //public async Task<List<UserModel>> GetAsync()
-        //{
-        //    var users = await _userRepository.GetAsync();           
-        //    return _mapper.Map<List<UserModel>>(users);
-        //}
-
-
-        public async Task<UserModel> GetAsync(long id, UserInputModel input) // with roles
+        public async Task<CompanyModel> AddCompanyAsync(CompanyInputModel input)
         {
-            var user = await UnitOfWork.Query<User>(u => u.Id == id).FirstOrDefaultAsync();
-
-
-            return Mapper.Map<UserModel>(user);
+            var company = Mapper.Map<Company>(input);
+            company.CreatorId = UserContext.UserId;
+            await UnitOfWork.AddAsync(company);
+            await UnitOfWork.SaveAsync();
+            return Mapper.Map<CompanyModel>(company);
         }
 
-        public async Task<UserModel> GetAsync(long id) // with roles
+        public async Task<CompanyModel> UpdateCompanyAsync(long id, CompanyInputModel input)
         {
-            var user = await UnitOfWork.Query<User>(u => u.Id == id).FirstOrDefaultAsync();
-
-            return Mapper.Map<UserModel>(user);
-        }
-
-        public async Task<UserModel> UpdateUserAsync(long id, UserInputModel input)
-        {
-            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to update user {id}");
+            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to update company {id}");
 
             // TODO validation
 
-            var user = await UnitOfWork.Query<User>(d => d.Id == id).FirstOrDefaultAsync();
+            var company = await UnitOfWork.Query<Company>(d => d.Id == id).FirstOrDefaultAsync();
 
-            if (user is null)
-                throw new CustomException($"User {id} not found");
+            if (company is null)
+                throw new CustomException($"Company {id} not found");
 
-            user.CreatorId = UserContext.UserId;
-            user.UpdatedAt = DateTime.Now;
-            user.Name = input.Name;
-            user.UserName = input.Username;
-            user.Surname = input.Surname;
-            user.Email = input.Email;
+            //company.UpdatedBy = UserContext.UserId;
+            company.UpdatedAt = DateTime.Now;
+            company.Name = input.Name;
 
-
-            UnitOfWork.Update(user);
+            UnitOfWork.Update(company);
             await UnitOfWork.SaveAsync();
 
-            return Mapper.Map<UserModel>(user);
+            return Mapper.Map<CompanyModel>(company);
         }
 
-        public async Task DeleteUserAsync(long id)
+        public async Task DeleteCompanyAsync(long id)
         {
-            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to delete user {id}");
-            await UnitOfWork.SoftDeleteEntityAsync<User>(id);
-        }
-        public async Task<User> GetEntityAsync(long id) => await UnitOfWork.GetAsync<User>(id);
-
-        public async Task<UserProfile> GetUserProfileAsync(long id)
-        {
-            var profile = await UnitOfWork.Query<User>(u => u.Id == id).Select(u => new UserProfile
-            {
-                Id = u.Id,
-                Name = u.Name,
-                Surname = u.Surname,
-                Username = u.UserName,
-                Picture = u.Picture
-            }).FirstOrDefaultAsync();
-
-            var company = await UnitOfWork.Query<CompanyUser>(o => o.UserId == id)
-                   .Include(o => o.Company).Select(o => (Company)o.Company).FirstOrDefaultAsync();
-
-            if (company is not null)
-            {
-                profile.OrganizationId = company.Id;
-                profile.OrganizationName = company.Name;
-            }
-            return profile;
+            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to delete company {id}");
+            await UnitOfWork.SoftDeleteEntityAsync<Company>(id, UserContext.UserId);
         }
 
-        public async Task DeleteVisitorAsync(long id)
+
+        public async Task<CompanyModel> GetMyCompanyAsync()
         {
-            var visitor = await UnitOfWork.GetAsync<Visitor>(id);
-            if (visitor == null) return;
-            UnitOfWork.Delete<Visitor>(visitor);  // test if needs to save
+            Logger.LogInformation($"User {UserContext.UserId} is getting company data");
+
+            var companyUsers = await UnitOfWork.Query<CompanyUser>(c => c.UserId == UserContext.UserId)
+                .Include(o => o.Company).Include(o => o.User)
+                .Select(c => new CompanyModel
+                {
+                    Id = c.User.Id,
+                    Name = c.User.Name,
+                    Users = c.User.CompanyUsers.Select(u => new UserModel
+                    {
+                        Id = u.Id,
+                        Name = u.User.Name,
+
+                    }).ToList()
+                }).FirstOrDefaultAsync();
+
+            return companyUsers;
         }
 
-        /// <summary>
-        /// Checks if the visitor exists.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<bool> VistiorExists(long id) => await UnitOfWork.AnyAsync<Visitor>(v => v.Id == id);
-
-        //public async Task AddRoles(long currentUserId, long userId, List<string> roles)
-        //{
-        //    var currentUser = await _userRepository.GetAsync(currentUserId);
-        //    if (currentUser.Id != await GetAdminId()) throw new NotImplementedException(); // only admin can do this or a specific coach
-        //    var user =await _userRepository.GetAsync(userId);
-        //    _userRepository.AddRoles(user, roles);  // if doesn't work, go to repository, don't use userManager but the tables, roles
-        //}
-
-        public async Task<long> GetAdminId()
+        public async Task<CompanyUserModel> AddUserAsync(CompanyUserInputModel input)
         {
-            var user = await UnitOfWork.Query<User>(u => u.Email == Admin.Email).FirstOrDefaultAsync();
-            return user.Id;
-        }
+            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to add user {input.UserId} to company {input.CompanyId}");
 
-        //public async Task<UserModel> GetByPhoneNumber(string phoneNumber) => _mapper.Map<UserModel>( await _userRepository.GetByPhoneNumber(phoneNumber));
-
-        //public async Task<UserModel> GetByUserName(string userName) => _mapper.Map<UserModel>(await _userRepository.GetByUsername(userName));
-        //public async Task<IdentityResult> RegisterAsync(RegisterModel form)
-        //{
-        //    if (form == null) throw new NotImplementedException();
-        //    if (form.Password == null) throw new NotImplementedException();
-
-
-        //    var user = _mapper.Map<User>(form);
-        //    user.UserName = form.Email;
-
-        //    var password = form.Password;
-        //    return await _userRepository.AddAsync(user,form.Password);
-        //}
-
-        /// <summary>
-        /// Adds the visitor asynchronously.
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public async Task<long> AddVisitorAsync(VisitorModel input)
-        {
             // TODO validation
-            var visitor = Mapper.Map<Visitor>(input);
-            await UnitOfWork.AddAsync<Visitor>(visitor);
+            var companyUser = new CompanyUser { CompanyId=input.CompanyId, UserId= input.UserId };
+            companyUser.CreatorId = UserContext.UserId;
+            
+            await UnitOfWork.AddAsync(companyUser);
             await UnitOfWork.SaveAsync();
-            return visitor.Id;
+
+            return Mapper.Map<CompanyUserModel>(companyUser);
         }
+
+        public async Task DeleteUserAsync(CompanyUserInputModel input)
+        {
+            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to add user {input.UserId} to company {input.CompanyId}");
+
+            // TODO validation
+            var companyUser = await UnitOfWork.Query<CompanyUser>(c=> c.CompanyId == input.CompanyId && c.UserId == input.UserId)
+                .FirstOrDefaultAsync();
+            if (companyUser is null)
+                throw new CustomException("User doesn't belong to company");
+
+            UnitOfWork.Delete(companyUser);
+            await UnitOfWork.SaveAsync();         
+        }
+
     }
 }

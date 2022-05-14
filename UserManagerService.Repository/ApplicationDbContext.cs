@@ -65,10 +65,10 @@ namespace UserManagerService.Repository
             {
                 o.HasIndex(u => new { u.CompanyId, u.UserId }).IsUnique();
 
-                o.HasOne(u => (User)u.User).WithMany().HasForeignKey(u => u.UserId)
+                o.HasOne(u => (User)u.User).WithMany(u=>u.CompanyUsers).HasForeignKey(u => u.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-                o.HasOne(u => (Company)u.Company).WithMany().HasForeignKey(u => u.CompanyId)
+                o.HasOne(u => (Company)u.Company).WithMany(c => c.CompanyUsers).HasForeignKey(u => u.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
 

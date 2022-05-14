@@ -88,6 +88,18 @@ namespace UserManagerService.Repository
             await SaveAsync();
         }
 
+        public async Task SoftDeleteEntityAsync<T>(long id, long userId) where T : class, IBaseEntity
+        {
+            var documentType = await Query<T>(d => d.Id == id).FirstOrDefaultAsync();
+
+            if (documentType is null)
+                throw new CustomException($"{nameof(T)} {id} not found");
+
+            //documentType.UpdatedBy = userId;
+
+            SoftDelete(documentType);
+            await SaveAsync();
+        }
 
         public virtual T FirstOrDefault<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
             Query(expression).FirstOrDefault();

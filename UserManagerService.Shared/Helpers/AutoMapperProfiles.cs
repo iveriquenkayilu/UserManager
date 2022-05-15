@@ -12,7 +12,7 @@ namespace UserManagerService.Shared.Helpers
             CreateMap<User, UserModel>();
             CreateMap<CompanyUser, CompanyUserModel>().ReverseMap();
             CreateMap<Company, CompanyInputModel>();
-            CreateMap<CompanyModel, Company>();
+            CreateMap<CompanyModel, Company>().ReverseMap();
         }
     }
 }

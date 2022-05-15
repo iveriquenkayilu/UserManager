@@ -181,21 +181,21 @@ namespace UserManagerService
                     );
                 });
             }
-              //TODO remove this on Prod
-                services.AddCors(options =>
+
+            //TODO remove this on Prod
+            services.AddCors(options =>
+            {
+                options.AddPolicy("Policy",
+                builder =>
                 {
-                    options.AddPolicy("Policy",
-                    builder =>
-                    {
-                        builder
-                        //.WithOrigins("*")
-                       .WithOrigins(protocols.CorsUrls.ToArray()) // get urls from appsettings
-                      //.AllowCredentials()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                    });
+                    builder
+                     //.WithOrigins("*")
+                    .WithOrigins(protocols.CorsUrls.ToArray())
+                    .AllowCredentials()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
                 });
-           
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -208,7 +208,7 @@ namespace UserManagerService
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));
             }
-                app.UseCors("Policy"); // TODO remove this. It is for dev
+            app.UseCors("Policy"); // TODO remove this. It is for dev
 
             app.UseMiddleware<ExceptionMiddleWare>();
             app.UseMiddleware<UserMiddleWare>();

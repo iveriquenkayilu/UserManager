@@ -1,4 +1,6 @@
-﻿namespace UserManagerService.Shared.Settings
+﻿using System.Collections.Generic;
+
+namespace UserManagerService.Shared.Settings
 {
     /// <summary>
     /// Implements the web protocol settings.
@@ -12,5 +14,6 @@
         public string EncryptionKey { get; set; }
         public int AccessTokenExpiresInMinutes { get; set; }
         public int RefreshTokenExpiresInMinutes { get; set; }
+        public List<string> CorsUrls { get; set; }
     }
 }

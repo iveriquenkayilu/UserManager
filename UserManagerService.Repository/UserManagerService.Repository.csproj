@@ -17,6 +17,8 @@
     <Compile Include="Migrations\20220509160324_added-picture-to-users-table.Designer.cs" />
     <Compile Include="Migrations\20220513161242_renamed-organization-to-company.cs" />
     <Compile Include="Migrations\20220513161242_renamed-organization-to-company.Designer.cs" />
+    <Compile Include="Migrations\20220619081655_changed-long-to-guid.cs" />
+    <Compile Include="Migrations\20220619081655_changed-long-to-guid.Designer.cs" />
     <Compile Include="Migrations\ApplicationDbContextModelSnapshot.cs" />
   </ItemGroup>
 

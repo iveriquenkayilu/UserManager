@@ -1,12 +1,12 @@
-﻿using UserManagerService.Entities.Interfaces;
+﻿using System;
 
 namespace UserManagerService.Entities
 {
     public class CompanyUser : BaseEntity
     {
-        public long CompanyId { get; set; }
-        public virtual ICompany Company { get; set; }
-        public long UserId { get; set; }
-        public virtual IUser User { get; set; }
+        public Guid CompanyId { get; set; }
+        public virtual Company Company { get; set; }
+        public Guid UserId { get; set; }
+        public virtual User User { get; set; }
     }
 }

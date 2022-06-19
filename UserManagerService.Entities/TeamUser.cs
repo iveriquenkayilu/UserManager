@@ -1,12 +1,12 @@
-﻿using UserManagerService.Entities.Interfaces;
+﻿using System;
 
 namespace UserManagerService.Entities
 {
-    public class TeamUser : BaseEntity, ITeamUser
+    public class TeamUser : BaseEntity
     {
-        public long TeamId { get; set; }
-        public virtual ITeam Team { get; set; }
-        public long UserId { get; set; }
-        public virtual IUser User { get; set; }
+        public Guid TeamId { get; set; }
+        public virtual Team Team { get; set; }
+        public Guid UserId { get; set; }
+        public virtual User User { get; set; }
     }
 }

@@ -1,12 +1,9 @@
-﻿using UserManagerService.Entities.Interfaces;
-using System;
+﻿using System;
 
 namespace UserManagerService.Entities
 {
-    /// <summary>
-    /// Implements the anonymous user entity.
-    /// </summary>
-    public class ServiceApiKey : BaseEntity, IServiceApiKey  // for micro services
+
+    public class ServiceApiKey : BaseEntity  // for micro services
     {
         public string KeyName { get; set; }
         public string Value { get; set; }   // TODO hash +salt

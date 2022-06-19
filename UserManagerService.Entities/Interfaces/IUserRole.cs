@@ -1,9 +1,11 @@
-﻿namespace UserManagerService.Entities.Interfaces
+﻿using System;
+
+namespace UserManagerService.Entities.Interfaces
 {
     public interface IUserRole : IBaseEntity
     {
-        long UserId { get; set; }
-        long RoleId { get; set; }
+        Guid UserId { get; set; }
+        Guid RoleId { get; set; }
         IRole Role { get; set; }
         IUser User { get; set; }
     }

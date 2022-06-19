@@ -1,8 +1,6 @@
-﻿using UserManagerService.Entities.Interfaces;
-
-namespace UserManagerService.Entities
+﻿namespace UserManagerService.Entities
 {
-    public class CompanyType : BaseEntity, ICompanyType
+    public class CompanyType : BaseEntity
     {
         public string Name { get; set; }
     }

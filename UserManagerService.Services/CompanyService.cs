@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
 using UserManagerService.Services.Interfaces;
-using UserManagerService.Shared.Constants;
 using UserManagerService.Shared.Exceptions;
 using UserManagerService.Shared.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
@@ -53,7 +52,7 @@ namespace UserManagerService.Services
             return Mapper.Map<CompanyModel>(company);
         }
 
-        public async Task<CompanyModel> UpdateCompanyAsync(long id, CompanyInputModel input)
+        public async Task<CompanyModel> UpdateCompanyAsync(Guid id, CompanyInputModel input)
         {
             Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to update company {id}");
 
@@ -74,7 +73,7 @@ namespace UserManagerService.Services
             return Mapper.Map<CompanyModel>(company);
         }
 
-        public async Task DeleteCompanyAsync(long id)
+        public async Task DeleteCompanyAsync(Guid id)
         {
             Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to delete company {id}");
             await UnitOfWork.SoftDeleteEntityAsync<Company>(id, UserContext.UserId);
@@ -107,9 +106,9 @@ namespace UserManagerService.Services
             Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to add user {input.UserId} to company {input.CompanyId}");
 
             // TODO validation
-            var companyUser = new CompanyUser { CompanyId=input.CompanyId, UserId= input.UserId };
+            var companyUser = new CompanyUser { CompanyId = input.CompanyId, UserId = input.UserId };
             companyUser.CreatorId = UserContext.UserId;
-            
+
             await UnitOfWork.AddAsync(companyUser);
             await UnitOfWork.SaveAsync();
 
@@ -121,14 +120,13 @@ namespace UserManagerService.Services
             Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to add user {input.UserId} to company {input.CompanyId}");
 
             // TODO validation
-            var companyUser = await UnitOfWork.Query<CompanyUser>(c=> c.CompanyId == input.CompanyId && c.UserId == input.UserId)
+            var companyUser = await UnitOfWork.Query<CompanyUser>(c => c.CompanyId == input.CompanyId && c.UserId == input.UserId)
                 .FirstOrDefaultAsync();
             if (companyUser is null)
                 throw new CustomException("User doesn't belong to company");
 
             UnitOfWork.Delete(companyUser);
-            await UnitOfWork.SaveAsync();         
+            await UnitOfWork.SaveAsync();
         }
-
     }
 }

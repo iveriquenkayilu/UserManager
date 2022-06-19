@@ -22,7 +22,7 @@ namespace UserManagerService.Services
         {
         }
 
-        public async Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<long> ids)
+        public async Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<Guid> ids)
         {
             Logger.LogInformation("Getting user profiles");
 
@@ -39,8 +39,8 @@ namespace UserManagerService.Services
                     Name = u.User.Name,
                     Surname = u.User.Surname,
                     Username = u.User.UserName,
-                    OrganizationId = u.CompanyId,
-                    OrganizationName = u.Company.Name,
+                    CompanyId = u.CompanyId,
+                    CompanyName = u.Company.Name,
                     Picture = u.User.Picture
                 }).ToListAsync();
 
@@ -53,8 +53,7 @@ namespace UserManagerService.Services
         //    return _mapper.Map<List<UserModel>>(users);
         //}
 
-
-        public async Task<UserModel> GetAsync(long id, UserInputModel input) // with roles
+        public async Task<UserModel> GetAsync(Guid id, UserInputModel input) // with roles
         {
             var user = await UnitOfWork.Query<User>(u => u.Id == id).FirstOrDefaultAsync();
 
@@ -62,14 +61,14 @@ namespace UserManagerService.Services
             return Mapper.Map<UserModel>(user);
         }
 
-        public async Task<UserModel> GetAsync(long id) // with roles
+        public async Task<UserModel> GetAsync(Guid id) // with roles
         {
             var user = await UnitOfWork.Query<User>(u => u.Id == id).FirstOrDefaultAsync();
 
             return Mapper.Map<UserModel>(user);
         }
 
-        public async Task<UserModel> UpdateUserAsync(long id, UserInputModel input)
+        public async Task<UserModel> UpdateUserAsync(Guid id, UserInputModel input)
         {
             Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to update user {id}");
 
@@ -94,14 +93,14 @@ namespace UserManagerService.Services
             return Mapper.Map<UserModel>(user);
         }
 
-        public async Task DeleteUserAsync(long id)
+        public async Task DeleteUserAsync(Guid id)
         {
             Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to delete user {id}");
             await UnitOfWork.SoftDeleteEntityAsync<User>(id);
         }
-        public async Task<User> GetEntityAsync(long id) => await UnitOfWork.GetAsync<User>(id);
+        public async Task<User> GetEntityAsync(Guid id) => await UnitOfWork.GetAsync<User>(id);
 
-        public async Task<UserProfile> GetUserProfileAsync(long id)
+        public async Task<UserProfile> GetUserProfileAsync(Guid id)
         {
             var profile = await UnitOfWork.Query<User>(u => u.Id == id).Select(u => new UserProfile
             {
@@ -117,13 +116,13 @@ namespace UserManagerService.Services
 
             if (company is not null)
             {
-                profile.OrganizationId = company.Id;
-                profile.OrganizationName = company.Name;
+                profile.CompanyId = company.Id;
+                profile.CompanyName = company.Name;
             }
             return profile;
         }
 
-        public async Task DeleteVisitorAsync(long id)
+        public async Task DeleteVisitorAsync(Guid id)
         {
             var visitor = await UnitOfWork.GetAsync<Visitor>(id);
             if (visitor == null) return;
@@ -135,7 +134,7 @@ namespace UserManagerService.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<bool> VistiorExists(long id) => await UnitOfWork.AnyAsync<Visitor>(v => v.Id == id);
+        public async Task<bool> VistiorExists(Guid id) => await UnitOfWork.AnyAsync<Visitor>(v => v.Id == id);
 
         //public async Task AddRoles(long currentUserId, long userId, List<string> roles)
         //{
@@ -145,7 +144,7 @@ namespace UserManagerService.Services
         //    _userRepository.AddRoles(user, roles);  // if doesn't work, go to repository, don't use userManager but the tables, roles
         //}
 
-        public async Task<long> GetAdminId()
+        public async Task<Guid> GetAdminId()
         {
             var user = await UnitOfWork.Query<User>(u => u.Email == Admin.Email).FirstOrDefaultAsync();
             return user.Id;
@@ -167,12 +166,8 @@ namespace UserManagerService.Services
         //    return await _userRepository.AddAsync(user,form.Password);
         //}
 
-        /// <summary>
-        /// Adds the visitor asynchronously.
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public async Task<long> AddVisitorAsync(VisitorModel input)
+  
+        public async Task<Guid> AddVisitorAsync(VisitorModel input)
         {
             // TODO validation
             var visitor = Mapper.Map<Visitor>(input);

@@ -1,8 +1,6 @@
-﻿using UserManagerService.Entities.Interfaces;
-
-namespace UserManagerService.Entities
+﻿namespace UserManagerService.Entities
 {
-    public class Team : BaseEntity, ITeam
+    public class Team : BaseEntity
     {
         public string Name { get; set; }
         public string Description { get; set; }

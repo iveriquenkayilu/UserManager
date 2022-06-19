@@ -1,18 +1,11 @@
-﻿namespace UserManagerService.Shared.Models.User
+﻿using System;
+
+namespace UserManagerService.Shared.Models.User
 {
     public class LoginModel
     {
-
-        /// <summary>
-        /// Gets or sets the username.
-        /// </summary>
         public string Username { get; set; }
-
-        /// <summary>
-        /// Gets or sets the password.
-        /// </summary>
         public string Password { get; set; }
-
-        public long? CompanyId { get; set; }
+        public Guid? CompanyId { get; set; }
     }
 }

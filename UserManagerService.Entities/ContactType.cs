@@ -1,8 +1,6 @@
-﻿using UserManagerService.Entities.Interfaces;
-
-namespace UserManagerService.Entities
+﻿namespace UserManagerService.Entities
 {
-    public class ContactType : BaseEntity, IContactType
+    public class ContactType : BaseEntity
     {
         public string Name { get; set; }
         public string Description { get; set; }

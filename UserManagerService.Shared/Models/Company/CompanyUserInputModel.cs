@@ -1,8 +1,10 @@
-﻿namespace UserManagerService.Shared.Models.Company
+﻿using System;
+
+namespace UserManagerService.Shared.Models.Company
 {
     public class CompanyUserInputModel
     {
-        public long CompanyId { get; set; }
-        public long UserId { get; set; }
+        public Guid CompanyId { get; set; }
+        public Guid UserId { get; set; }
     }
 }

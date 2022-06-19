@@ -35,7 +35,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             _logger = logger;
         }
 
-        public AuthTokenModel CreateSecurityToken(long userId, string username, List<string> roles, long companyId, string companyName)
+        public AuthTokenModel CreateSecurityToken(Guid userId, string username, List<string> roles, Guid companyId, string companyName)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -116,7 +116,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             return ipAddress.ToString();
         }
 
-        private string GenerateAndCacheRefreshToken(long userId)
+        private string GenerateAndCacheRefreshToken(Guid userId)
         {
             var refreshToken = "";
             using (var rngCryptoServiceProvider = new RNGCryptoServiceProvider())

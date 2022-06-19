@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace UserManagerService.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCompanyUsers()
         {
-            var users = await _unitOfWork.Query<CompanyUser>(u => u.CompanyId == _userContext.OrganizationId).Include(o => o.User)
+            var users = await _unitOfWork.Query<CompanyUser>(u => u.CompanyId == _userContext.CompanyId).Include(o => o.User)
                 .Select(u => new UserModel
                 {
                     Id = u.User.Id,
@@ -92,7 +93,7 @@ namespace UserManagerService.Api.Controllers
 
                 if (input.CompanyId is not null)
                 {
-                    // check you belong to the company
+                    // check you beGuid to the company
                 }
 
                 // Get default company
@@ -180,7 +181,7 @@ namespace UserManagerService.Api.Controllers
                 //Auto add to company
                 var orgUser = new CompanyUser()
                 {
-                    CompanyId = input.OrganizationId == 0 ? _userContext.OrganizationId : input.OrganizationId,
+                    CompanyId = input.CompanyId == Guid.Empty ? _userContext.CompanyId : input.CompanyId,
                     UserId = user.Id,
                     CreatorId = _userContext.UserId,
                 };
@@ -193,7 +194,7 @@ namespace UserManagerService.Api.Controllers
                     Name = user.Name,
                     Username = user.UserName,
                     Surname = user.Surname,
-                    OrganizationId = orgUser.CompanyId
+                    CompanyId = orgUser.CompanyId
                 };
                 return Ok(ResponseModel.Success(ResponseMessages.UserCreated, model));
             }
@@ -208,7 +209,7 @@ namespace UserManagerService.Api.Controllers
 
         [Authorize(Roles = Roles.ADMIN)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(long id, [FromBody] UserInputModel input)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UserInputModel input)
         {
             var model = await _userService.UpdateUserAsync(id, input);
             return CustomResponse.Success("User updated successfully", model);
@@ -216,7 +217,7 @@ namespace UserManagerService.Api.Controllers
 
         [Authorize(Roles = Roles.ADMIN)]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(long id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             await _userService.DeleteUserAsync(id);
             return CustomResponse.Success("User deleted successfully");

@@ -40,7 +40,7 @@ namespace UserManagerService.Repository
         }
 
         public Task<List<T>> GetAsync<T>() where T : class, IBaseEntity => _context.Set<T>().ToListAsync();
-        public Task<T> GetAsync<T>(long id) where T : class, IBaseEntity => _context.Set<T>().FirstOrDefaultAsync();
+        public Task<T> GetAsync<T>(Guid id) where T : class, IBaseEntity => _context.Set<T>().FirstOrDefaultAsync();
 
 
         public async Task<T> AddAsync<T>(T entity) where T : class, IBaseEntity
@@ -56,15 +56,7 @@ namespace UserManagerService.Repository
             _context.Update(entity);
         }
 
-        /// <summary>
-        /// Updates the range asynchronously.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities">The entities.</param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public void UpdateRange<T>(IEnumerable<T> entities) where T : class, IBaseEntity => _context.UpdateRange(entities);
-
 
         public virtual void Delete<T>(T entity) where T : class, IBaseEntity => _context.Remove(entity);
 
@@ -77,7 +69,7 @@ namespace UserManagerService.Repository
             Update(entity);
         }
 
-        public async Task SoftDeleteEntityAsync<T>(long id) where T : class, IBaseEntity
+        public async Task SoftDeleteEntityAsync<T>(Guid id) where T : class, IBaseEntity
         {
             var documentType = await Query<T>(d => d.Id == id).FirstOrDefaultAsync();
 
@@ -88,7 +80,7 @@ namespace UserManagerService.Repository
             await SaveAsync();
         }
 
-        public async Task SoftDeleteEntityAsync<T>(long id, long userId) where T : class, IBaseEntity
+        public async Task SoftDeleteEntityAsync<T>(Guid id, Guid userId) where T : class, IBaseEntity
         {
             var documentType = await Query<T>(d => d.Id == id).FirstOrDefaultAsync();
 
@@ -103,7 +95,6 @@ namespace UserManagerService.Repository
 
         public virtual T FirstOrDefault<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
             Query(expression).FirstOrDefault();
-
 
         public virtual Task<T> FirstOrDefaultAsync<T>(Expression<Func<T, bool>> expression)
             where T : class, IBaseEntity => Query(expression).FirstOrDefaultAsync();

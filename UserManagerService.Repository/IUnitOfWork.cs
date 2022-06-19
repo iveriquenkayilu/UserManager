@@ -1,19 +1,18 @@
-﻿using UserManagerService.Entities.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using UserManagerService.Entities.Interfaces;
 
 namespace UserManagerService.Interfaces.Repositories
 {
     public interface IUnitOfWork : IDisposable
     {
-
         void Add<T>(T entity) where T : class, IBaseEntity;
 
         Task<List<T>> GetAsync<T>() where T : class, IBaseEntity;
-        Task<T> GetAsync<T>(long id) where T : class, IBaseEntity;
+        Task<T> GetAsync<T>(Guid id) where T : class, IBaseEntity;
         Task<List<T>> GetAsync<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity;
 
         Task<T> AddAsync<T>(T entity) where T : class, IBaseEntity;
@@ -43,13 +42,8 @@ namespace UserManagerService.Interfaces.Repositories
 
         Task AddRangeAsync<T>(IEnumerable<T> entities) where T : class, IBaseEntity;
 
-        /// <summary>
-        /// Executes the in transaction asynchronously.
-        /// </summary>
-        /// <param name="action">The action.</param>
-        /// <returns></returns>
         Task ExecuteInTransactionAsync(Func<IUnitOfWork, Task> action);
-        Task SoftDeleteEntityAsync<T>(long id) where T : class, IBaseEntity;
-        Task SoftDeleteEntityAsync<T>(long id, long userId) where T : class, IBaseEntity;
+        Task SoftDeleteEntityAsync<T>(Guid id) where T : class, IBaseEntity;
+        Task SoftDeleteEntityAsync<T>(Guid id, Guid userId) where T : class, IBaseEntity;
     }
 }

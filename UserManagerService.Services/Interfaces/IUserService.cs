@@ -1,7 +1,8 @@
-﻿using UserManagerService.Entities;
-using UserManagerService.Shared.Models.User;
-using System.Threading.Tasks;
+﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UserManagerService.Entities;
+using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Services.Interfaces
 {
@@ -12,33 +13,15 @@ namespace UserManagerService.Services.Interfaces
         ////Task<IdentityResult> RegisterAsync(RegisterModel form);
         //Task<UserModel> GetByPhoneNumber(string phoneNumber);
         //Task<UserModel> GetByUserName(string userName);
-        Task<long> GetAdminId();
+        Task<Guid> GetAdminId();
         //Task UpdateProfile(UserModel user, IFormFile image, bool ImageHasChanged);
-        Task<User> GetEntityAsync(long id);
-
-        /// <summary>
-        /// Deletes the visitor asynchronously.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task DeleteVisitorAsync(long id);
-
-        /// <summary>
-        /// Adds the visitor asynchronously.
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        Task<long> AddVisitorAsync(VisitorModel input);
-
-        /// <summary>
-        /// Checks if the visitor exists.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task<bool> VistiorExists(long id);
-        Task<UserProfile> GetUserProfileAsync(long id);
-        Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<long> ids);
-        Task DeleteUserAsync(long id);
-        Task<UserModel> UpdateUserAsync(long id, UserInputModel input);
+        Task<User> GetEntityAsync(Guid id);
+        Task DeleteVisitorAsync(Guid id);
+        Task<Guid> AddVisitorAsync(VisitorModel input);
+        Task<bool> VistiorExists(Guid id);
+        Task<UserProfile> GetUserProfileAsync(Guid id);
+        Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<Guid> ids);
+        Task DeleteUserAsync(Guid id);
+        Task<UserModel> UpdateUserAsync(Guid id, UserInputModel input);
     }
 }

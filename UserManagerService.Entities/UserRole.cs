@@ -4,14 +4,14 @@ using UserManagerService.Entities.Interfaces;
 
 namespace UserManagerService.Entities
 {
-    public class UserRole : IdentityUserRole<long>, IUserRole
+    public class UserRole : IdentityUserRole<Guid>, IBaseEntity
     {
-        public virtual IUser User { get; set; }
-        public virtual IRole Role { get; set; }
-        public long Id { get; set; }
+        public Guid Id { get; set; }
+        public virtual User User { get; set; }
+        public virtual Role Role { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
-        public long CreatorId { get; set; }
+        public Guid CreatorId { get; set; }
     }
 }

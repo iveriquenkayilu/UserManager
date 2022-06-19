@@ -127,23 +127,23 @@ namespace UserManagerService
                 var userManager = c.GetService<UserManager<User>>();
                 var roleManager = c.GetService<RoleManager<Role>>();
                 string userId = userManager.GetUserId(claimsPrincipal);
-                long id = 0;
+                Guid id = Guid.Parse(userId);
 
-                if (!long.TryParse(userId, out id))
+                if (string.IsNullOrEmpty(userId))
                     return new UserContext();
 
                 var user = (userManager.FindByIdAsync(id.ToString())).Result;
                 var roles = (userManager.GetRolesAsync(user).Result).ToList();
 
-                var organizationId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                var companyId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
                 .Where(c => c.Type == "CompanyId")
-                .Select(c => Int64.Parse(c.Value)).FirstOrDefault();
+                .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
 
-                var organizationName = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                var companyName = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
                 .Where(c => c.Type == "CompanyName")
                 .Select(c => c.Value).FirstOrDefault();
 
-                return new UserContext(id, user.UserName, roles, organizationId, organizationName);
+                return new UserContext(id, user.UserName, roles, companyId, companyName);
             });
 
             if (Environment.IsDevelopment())
@@ -189,7 +189,7 @@ namespace UserManagerService
                 builder =>
                 {
                     builder
-                     //.WithOrigins("*")
+                    //.WithOrigins("*")
                     .WithOrigins(protocols.CorsUrls.ToArray())
                     .AllowCredentials()
                     .AllowAnyHeader()

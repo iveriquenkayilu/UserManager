@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
 using UserManagerService.Entities;
 
 namespace UserManagerService.Repository
 {
-    public class ApplicationDbContext : IdentityDbContext<User, Role, long, IdentityUserClaim<long>, UserRole, IdentityUserLogin<long>, IdentityRoleClaim<long>, UserToken>
+    public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, IdentityUserClaim<Guid>, UserRole, IdentityUserLogin<Guid>, IdentityRoleClaim<Guid>, UserToken>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -35,12 +36,12 @@ namespace UserManagerService.Repository
             {
                 ur.Ignore(u => u.Id);
 
-                ur.HasOne(r => (User)r.User)
+                ur.HasOne(r => r.User)
                 .WithMany()
               //.WithMany(r => (List<UserRole>)r.UserRoles)
               .HasForeignKey(r => r.UserId);
 
-                ur.HasOne(r => (Role)r.Role)
+                ur.HasOne(r => r.Role)
                     .WithMany()
                     .HasForeignKey(r => r.RoleId);
             });
@@ -52,12 +53,12 @@ namespace UserManagerService.Repository
 
                 uk.HasKey(u => new { u.UserId, u.Value });
 
-                uk.HasOne(u => (User)u.User).WithMany().HasForeignKey(u => u.UserId);
+                uk.HasOne(u => u.User).WithMany().HasForeignKey(u => u.UserId);
             });
 
             builder.Entity<Company>(o =>
             {
-                o.HasOne(u => (CompanyType)u.CompanyType).WithMany().HasForeignKey(u => u.CompanyTypeId)
+                o.HasOne(u => u.CompanyType).WithMany().HasForeignKey(u => u.CompanyTypeId)
                                 .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -65,28 +66,27 @@ namespace UserManagerService.Repository
             {
                 o.HasIndex(u => new { u.CompanyId, u.UserId }).IsUnique();
 
-                o.HasOne(u => (User)u.User).WithMany(u=>u.CompanyUsers).HasForeignKey(u => u.UserId)
+                o.HasOne(u => u.User).WithMany(u => u.CompanyUsers).HasForeignKey(u => u.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-                o.HasOne(u => (Company)u.Company).WithMany(c => c.CompanyUsers).HasForeignKey(u => u.CompanyId)
+                o.HasOne(u => u.Company).WithMany(c => c.CompanyUsers).HasForeignKey(u => u.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<Contact>(c =>
             {
-
-                c.HasOne(u => (ContactType)u.ContactType).WithMany().HasForeignKey(u => u.ContactTypeId)
+                c.HasOne(u => u.ContactType).WithMany().HasForeignKey(u => u.ContactTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<TeamUser>(c =>
             {
-                c.HasOne(u => (Team)u.Team).WithMany().HasForeignKey(u => u.
+                c.HasOne(u => u.Team).WithMany().HasForeignKey(u => u.
                 TeamId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-                c.HasOne(u => (User)u.User).WithMany().HasForeignKey(u => u.
-                UserId)
+                c.HasOne(u => u.User).WithMany().HasForeignKey(u => u.
+                 UserId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
         }

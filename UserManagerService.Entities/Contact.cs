@@ -1,4 +1,4 @@
-﻿using UserManagerService.Entities.Interfaces;
+﻿using System;
 
 namespace UserManagerService.Entities
 {
@@ -6,7 +6,7 @@ namespace UserManagerService.Entities
     {
         public string Name { get; set; }
         public string Value { get; set; }
-        public long ContactTypeId { get; set; }
-        public virtual IContactType ContactType { get; set; }
+        public Guid ContactTypeId { get; set; }
+        public virtual ContactType ContactType { get; set; }
     }
 }

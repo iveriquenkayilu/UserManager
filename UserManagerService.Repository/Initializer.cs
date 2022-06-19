@@ -65,7 +65,7 @@ namespace UserManagerService.Repository
             }
         }
 
-        private async Task CreateUser(List<long> roles, string firstName, string lastName, string email, string userName,
+        private async Task CreateUser(List<Guid> roles, string firstName, string lastName, string email, string userName,
         string password)
         {
             _logger.LogInformation($"Create user with email `{email}` for application");
@@ -101,7 +101,7 @@ namespace UserManagerService.Repository
         }
 
         // add the second use too
-        private async Task CreateAdminCompanyAsync(long userId)
+        private async Task CreateAdminCompanyAsync(Guid userId)
         {
 
             if (!await _dbContext.CompanyTypes.AnyAsync())

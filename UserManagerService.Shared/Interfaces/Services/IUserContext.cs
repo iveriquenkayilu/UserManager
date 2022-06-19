@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace UserManagerService.Shared.Interfaces.Services
 {
     public interface IUserContext
     {
-        long UserId { get; set; }
+        Guid UserId { get; set; }
         string Username { get; set; }
-
         List<string> Roles { get; set; }
-        long OrganizationId { get; set; }
-        string OrganizationName { get; set; }
+        Guid CompanyId { get; set; }
+        string CompanyName { get; set; }
     }
 }

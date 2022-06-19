@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UserManagerService.Shared.Models.Company;
 
@@ -8,9 +9,9 @@ namespace UserManagerService.Services.Interfaces
     {
         Task<CompanyModel> AddCompanyAsync(CompanyInputModel input);
         Task<CompanyUserModel> AddUserAsync(CompanyUserInputModel input);
-        Task DeleteCompanyAsync(long id);
+        Task DeleteCompanyAsync(Guid id);
         Task DeleteUserAsync(CompanyUserInputModel input);
         Task<List<CompanyModel>> GetCompaniesAsync();
-        Task<CompanyModel> UpdateCompanyAsync(long id, CompanyInputModel input);
+        Task<CompanyModel> UpdateCompanyAsync(Guid id, CompanyInputModel input);
     }
 }

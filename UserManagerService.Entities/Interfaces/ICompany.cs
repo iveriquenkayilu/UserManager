@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace UserManagerService.Entities.Interfaces
 {
@@ -6,7 +7,7 @@ namespace UserManagerService.Entities.Interfaces
     {
         string Name { get; set; }
         string Description { get; set; }
-        long CompanyTypeId { get; set; }
+        Guid CompanyTypeId { get; set; }
         ICompanyType CompanyType { get; set; }
         List<CompanyUser> CompanyUsers { get; set; }
     }

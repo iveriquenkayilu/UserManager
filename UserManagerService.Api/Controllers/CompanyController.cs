@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Constants;
@@ -36,14 +37,14 @@ namespace UserManagerService.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(long id, [FromBody] CompanyInputModel input)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CompanyInputModel input)
         {
             var model = await _companyService.UpdateCompanyAsync(id, input);
             return CustomResponse.Success("Company updated successfully", model);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(long id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             await _companyService.DeleteCompanyAsync(id);
             return CustomResponse.Success("Company deleted successfully");

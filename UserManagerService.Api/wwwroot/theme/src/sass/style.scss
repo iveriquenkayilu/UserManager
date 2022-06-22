@@ -1,0 +1,17 @@
+//
+// Theme style
+//
+
+// Skin
+$skin: dark;
+
+// Initialize
+@import "init";
+
+// Components
+@import "components/components";
+
+
+// Layout
+@import "layout/layout";
+@import "layout/docs/layout";

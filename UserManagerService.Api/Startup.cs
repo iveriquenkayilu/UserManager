@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OBS.UserManagementService.Domain.Helpers;
@@ -31,11 +32,13 @@ namespace UserManagerService
     public class Startup
     {
         private readonly IWebHostEnvironment Environment;
+        private readonly ILogger<Startup> Logger;
         public IConfiguration Configuration { get; }
-        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment, ILogger<Startup> logger)
         {
             Configuration = configuration;
             Environment = environment;
+            Logger = logger;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -44,13 +47,13 @@ namespace UserManagerService
             services.AddHttpContextAccessor();
             services.AddMemoryCache();
 
-            //if (Environment.IsDevelopment())
-            //    services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
-            //    {
-            //        builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-            //    }));
-            //else
+            if (Environment.IsDevelopment())
+                services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
+                {
+                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                }));
+            else
             {
                 var connectionString = Configuration.GetConnectionString("MySqlConnection");
                 services.AddDbContext<ApplicationDbContext>(options =>
@@ -63,7 +66,8 @@ namespace UserManagerService
             services.AddIdentity<User, Role>(options => options.SignIn.RequireConfirmedAccount = true)
              .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
-            services.AddControllers();
+            //services.AddRazorPages();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
             //register the initializer
             services.AddAsyncInitializer<Initializer>();
@@ -114,7 +118,7 @@ namespace UserManagerService
             });
 
             // check between scoped and transcient
-            services.AddTransient<IUserContext, UserContext>(c =>
+            services.AddScoped<IUserContext, UserContext>(c =>
             {
                 //TODO Handle incorrect cases.
                 IHttpContextAccessor httpContextAccessor = c.GetService<IHttpContextAccessor>();
@@ -124,26 +128,34 @@ namespace UserManagerService
                 if (claimsPrincipal == null)
                     return new UserContext();
 
-                var userManager = c.GetService<UserManager<User>>();
-                var roleManager = c.GetService<RoleManager<Role>>();
-                string userId = userManager.GetUserId(claimsPrincipal);
-                Guid id = Guid.Parse(userId);
+                try
+                {
+                    var userManager = c.GetService<UserManager<User>>();
+                    var roleManager = c.GetService<RoleManager<Role>>();
+                    string userId = userManager.GetUserId(claimsPrincipal);
+                    Guid id = Guid.Parse(userId);
 
-                if (string.IsNullOrEmpty(userId))
-                    return new UserContext();
+                    if (string.IsNullOrEmpty(userId))
+                        return new UserContext();
 
-                var user = (userManager.FindByIdAsync(id.ToString())).Result;
-                var roles = (userManager.GetRolesAsync(user).Result).ToList();
+                    var user = (userManager.FindByIdAsync(id.ToString())).Result;
+                    var roles = (userManager.GetRolesAsync(user).Result).ToList();
 
-                var companyId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
-                .Where(c => c.Type == "CompanyId")
-                .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
+                    var companyId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                    .Where(c => c.Type == "CompanyId")
+                    .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
 
-                var companyName = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
-                .Where(c => c.Type == "CompanyName")
-                .Select(c => c.Value).FirstOrDefault();
+                    var companyName = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                    .Where(c => c.Type == "CompanyName")
+                    .Select(c => c.Value).FirstOrDefault();
 
-                return new UserContext(id, user.UserName, roles, companyId, companyName);
+                    return new UserContext(id, user.UserName, roles, companyId, companyName);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogInformation($"Error occured, {e.Message}", e);
+                };
+                return new UserContext();
             });
 
             if (Environment.IsDevelopment())
@@ -220,7 +232,7 @@ namespace UserManagerService
 
             app.UseHttpsRedirection();
 
-            //app.UseStaticFiles();
+            app.UseStaticFiles();
 
             app.UseRouting();
             //app.UseCors();
@@ -230,6 +242,9 @@ namespace UserManagerService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<SignalRHub>("/api/signalr");
+                endpoints.MapControllerRoute(
+                   name: "default",
+                   pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllers();
             });
         }

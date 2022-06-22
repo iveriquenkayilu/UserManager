@@ -1,0 +1,11 @@
+//
+// Get skin
+//
+
+@function getSkin() {
+    @if (variable-exists(skin)) {
+        @return $skin;
+    } @else {
+        @return default;
+    }
+}

@@ -58,7 +58,7 @@ namespace UserManagerService
                 var connectionString = Configuration.GetConnectionString("MySqlConnection");
                 services.AddDbContext<ApplicationDbContext>(options =>
                            options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 23)),
-                           options => options.EnableRetryOnFailure()));
+                           options => options.EnableRetryOnFailure(3)));
             }
 
             services.AddDatabaseDeveloperPageExceptionFilter();

@@ -30,7 +30,11 @@ namespace UserManagerService.Repository
             base.OnModelCreating(builder);
 
             builder.Entity<ServiceApiKey>().HasIndex(s => s.KeyName).IsUnique();
-            //builder.Entity<Role>().Ignore(r => r.CreatedAt);
+
+            builder.Entity<User>(u => {
+                u.HasIndex(i => i.Email).IsUnique();
+                u.HasIndex(i => i.NormalizedEmail).IsUnique();
+            });
 
             builder.Entity<UserRole>(ur =>
             {

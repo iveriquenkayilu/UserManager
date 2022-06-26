@@ -102,13 +102,17 @@ namespace UserManagerService.Services
 
         public async Task<UserProfile> GetUserProfileAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new CustomException("User id cannot be empty");
+
             var profile = await UnitOfWork.Query<User>(u => u.Id == id).Select(u => new UserProfile
             {
                 Id = u.Id,
                 Name = u.Name,
                 Surname = u.Surname,
                 Username = u.UserName,
-                Picture = u.Picture
+                Picture = u.Picture,
+                Email = u.Email
             }).FirstOrDefaultAsync();
 
             var company = await UnitOfWork.Query<CompanyUser>(o => o.UserId == id)
@@ -166,7 +170,7 @@ namespace UserManagerService.Services
         //    return await _userRepository.AddAsync(user,form.Password);
         //}
 
-  
+
         public async Task<Guid> AddVisitorAsync(VisitorModel input)
         {
             // TODO validation

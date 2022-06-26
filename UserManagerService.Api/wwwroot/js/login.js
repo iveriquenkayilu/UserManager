@@ -1,26 +1,32 @@
 ﻿$(document).ready(function () {
-    localStorage.removeItem("Auth");
-    localStorage.removeItem("Profile");
+    //localStorage.removeItem("Auth");
+    //localStorage.removeItem("Profile");
 });
-//kt_sign_in_submit
+
 var login = async function () {
     var bodyData = {
+        Email: $('#Email').val(),
         Username: $('#Username').val(),
         Password: $('#Password').val()
     };
     var jsonStringData = JSON.stringify(bodyData);
-    var url = "/api/auth/login";
+    //var url = domain+ "/api/auth/login";
 
     $.ajax({
         method: "POST",
-        url: domain + url,
+        url: "/api/login",
         headers: { 'Content-Type': 'application/json;charset=utf-8' },
         data: jsonStringData,
-        success: function (data, status, request) {
+        success: function (result, status, request) {
             //var headers = request.getAllResponseHeaders(); 
-            data.data.expiresAt = moment(Date.now()).add(data.data.duration, 'm').toDate();
-            localStorage.setItem('Auth', JSON.stringify(data.data));
-            setCookie('Authentication', data.data.accessToken, 1);
+            if (result.error || result.responseCode==500) {
+                alert2('error', result.message);
+                return;
+            }
+                
+            result.data.expiresAt = moment(Date.now()).add(result.data.duration, 'm').toDate();
+            localStorage.setItem('Auth', JSON.stringify(result.data));
+            setCookie('Authentication', result.data.accessToken, 1);
             alert2('success', `Logged in successfully`);
             setTimeout(window.location.href = "/home", 3000)
             //window.location.href = "/home";

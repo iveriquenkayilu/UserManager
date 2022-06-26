@@ -27,6 +27,7 @@ namespace UserManagerService.Api.MiddleWares
             }
             catch (CustomException ex)
             {
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 _logger.LogError(ex.Message, ex);
                 await context.Response.WriteAsJsonAsync(
                     ResponseModel.Fail(ex.Message));
@@ -35,10 +36,10 @@ namespace UserManagerService.Api.MiddleWares
             {
                 _logger.LogError($"Something went wrong, encountered exception {ex}", ex);
 
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 await context.Response.WriteAsJsonAsync(new
-                {
-                    ResponseCode = (int)HttpStatusCode.InternalServerError,
-                    Message = "Error occurred"
+                {  
+                    Message = "Internal Error occurred"
                 });
             }
         }

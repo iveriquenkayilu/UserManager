@@ -15,6 +15,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using UserManagerService.Api.MiddleWares;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
@@ -57,7 +58,7 @@ namespace UserManagerService
             {
                 var connectionString = Configuration.GetConnectionString("MySqlConnection");
                 services.AddDbContext<ApplicationDbContext>(options =>
-                           options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 23)),
+                           options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 29)),
                            options => options.EnableRetryOnFailure(3)));
             }
 
@@ -115,10 +116,18 @@ namespace UserManagerService
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(protocols.EncryptionKey)),
                     //AuthenticationType = "JWT" // Might not be important
                 };
+                x.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["Authentication"];
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             // check between scoped and transcient
-            services.AddScoped<IUserContext, UserContext>(c =>
+            services.AddTransient<IUserContext, UserContext>(c =>
             {
                 //TODO Handle incorrect cases.
                 IHttpContextAccessor httpContextAccessor = c.GetService<IHttpContextAccessor>();
@@ -128,17 +137,21 @@ namespace UserManagerService
                 if (claimsPrincipal == null)
                     return new UserContext();
 
+                var userId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                .Where(c => c.Type == ClaimTypes.NameIdentifier)
+                .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
+
+                if (userId == Guid.Empty)
+                    return new UserContext();
+
                 try
                 {
                     var userManager = c.GetService<UserManager<User>>();
                     var roleManager = c.GetService<RoleManager<Role>>();
-                    string userId = userManager.GetUserId(claimsPrincipal);
-                    Guid id = Guid.Parse(userId);
+                    //string userId = userManager.GetUserId(claimsPrincipal);
+                    //id = Guid.Parse(userId);
 
-                    if (string.IsNullOrEmpty(userId))
-                        return new UserContext();
-
-                    var user = (userManager.FindByIdAsync(id.ToString())).Result;
+                    var user = (userManager.FindByIdAsync(userId.ToString())).Result;
                     var roles = (userManager.GetRolesAsync(user).Result).ToList();
 
                     var companyId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
@@ -149,7 +162,7 @@ namespace UserManagerService
                     .Where(c => c.Type == "CompanyName")
                     .Select(c => c.Value).FirstOrDefault();
 
-                    return new UserContext(id, user.UserName, roles, companyId, companyName);
+                    return new UserContext(userId, user.UserName, roles, companyId, companyName);
                 }
                 catch (Exception e)
                 {

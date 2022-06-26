@@ -1,16 +1,56 @@
 ﻿
 $(document).ready(function () {
 
-    var redirectTo = localStorage.getItem("RedirectTo")
-    if (redirectTo) {
-        if (redirectTo != window.location.href) {
-            localStorage.removeItem("RedirectTo");
-            window.location.href = redirectTo;
-        }
-    }
-
+    //var redirectTo = localStorage.getItem("RedirectTo")
+    //if (redirectTo) {
+    //    if (redirectTo != window.location.href) {
+    //        localStorage.removeItem("RedirectTo");
+    //        window.location.href = redirectTo;
+    //    }
+    //}
     getProfileFromLocalStorage();
+    var symbol = localStorage.getItem('lang');
+    if (!symbol)
+        symbol = "en";
+
+    var languages = [
+        { lang: "English", flag: "assets/media/flags/united-states.svg", symbol: "en" },
+        { lang: "French", flag: "assets/media/flags/france.svg", symbol: "fr" },
+        { lang: "German", flag: "assets/media/flags/germany.svg", symbol: "de" },
+        { lang: "Spanish", flag: "assets/media/flags/spain.svg", symbol: "es" },
+    ];
+
+    var language = languages.find(l => l.symbol == symbol);
+    if (language) {
+        $('#selected_lang').prepend(language.lang);
+        $('#lang_image').attr('src', language.flag);
+    }
+  
+    languages.forEach(l => {
+        var active = "";
+        if (l.symbol == symbol)
+            active = " active";
+
+        var onClick = `onclick=changeLanguage("${l.symbol}")`
+        var lan = '<div class="menu-item px-3">' +
+            '<a href="javascript:;" '+onClick+' data-lang='+l.symbol+' class="menu-link d-flex px-5 language' + active + '">' +
+            '<span class="symbol symbol-20px me-4">' +
+            '<img class="rounded-1" src=' + l.flag + ' alt="metronic" />' +
+            '</span>' + l.lang + '</a ></div >';
+        $('#languages').append(lan);
+    });
+
 });
+
+//$(".language").on("click", function () {
+//    var symbol = $(this).data('lang');
+//    changeLanguage(symbol);
+//});
+
+var changeLanguage = function (symbol) {
+    localStorage.setItem('lang', symbol);
+    window.location.reload();
+};
 
 var getTokensFromLocalStorage = function () {
     const auth = localStorage.getItem('Auth');
@@ -22,35 +62,54 @@ var getProfileFromLocalStorage = function () {
     const auth = localStorage.getItem('Auth');
     // if auth exists and not exipr
     if (auth != null && auth != undefined) {
-        /*tokens = JSON.parse(auth);*/
-        const profile = localStorage.getItem('Profile');
+
+        const profileString = localStorage.getItem('Profile');
+         var profile= JSON.parse(profileString);
         if (profile) {
             // use it, or update it after 5 min for example
             if (profile.expiresAt > Date.now())
-                fillUserProfile(JSON.parse(profile));
+                fillUserProfile(profile);
             else
                 getUserProfile();
         }
         else
             getUserProfile();
     }
-    else
-        redirectToLogin();
 };
 
 var getUserProfile = function () {
     // get profile
-    ajaxRequest("/api/auth/me", "GET").then((result) => {
-        result.expiresAt = moment(Date.now()).add(5, 'm').toDate();
-        localStorage.setItem('Profile', JSON.stringify(result));
-        fillUserProfile(result);
+
+    $.ajax({
+        method: "GET",
+        url: "/api/me", //domain +
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        },
+        success: function (result, status,request) {
+
+            if (result.status == 401) {
+                alert2('error', `Failed to get profile`);
+                return;
+            }
+
+            result.expiresAt = moment(Date.now()).add(5, 'm').toDate();
+            localStorage.setItem('Profile', JSON.stringify(result));
+            fillUserProfile(result);
+        },
+        error: function (error) {
+            alert2('error', `Failed to get profile`);
+        }
     });
 };
 
 var fillUserProfile = function (profile) {
-    if (profile?.name)
-        $('#profile_name').html(profile.name);
+    var fullName = profile?.name + " " + profile?.surname;
+    if (fullName)
+        $('#profile_name').prepend(fullName);
+    $('#user_email').html(profile?.email);
 }
+
 var redirectToLogin = function () {
 
     if (!window.location.href.includes("/home/login")) {
@@ -70,37 +129,6 @@ $('#logout_button').click(function () {
     document.cookie = 'Authentication=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
     redirectToLogin();
 });
-
-async function ajaxRequest(url, method = "POST", jsonStringData = null) {
-    // if the token is expired, request new one
-    //if (tokens.expiresAt < Date.now()) ajaxRequest().then()
-    //refreshFirst then use that token 
-    //else 
-    var auth = getTokensFromLocalStorage();
-    return $.ajax({
-        method: method,
-        url: domain + url,
-        headers: {
-            'Content-Type': 'application/json;charset=utf-8',
-            'Authorization': 'Bearer ' + auth.accessToken
-            /*'Access-Control-Allow-Origin': '*'*/
-        },
-        data: jsonStringData, // stringfy for body data, serialiaz for forms, or use formData
-    }).then((data, status, result) => {
-
-        if (result.status == 401) {
-            localStorage.setItem('RedirectTo', window.location.href);
-            redirectToLogin();
-        }
-        return data;
-    }).catch(error => {
-        if (error.status == 401) {
-            localStorage.setItem('RedirectTo', window.location.href);
-            redirectToLogin();
-        }
-        return error;
-    });
-};
 
 app.factory('httpRequest', function ($http) {
     return {

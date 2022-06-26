@@ -19,7 +19,6 @@ using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Api.Controllers
 {
-    [ApiController]
     [Route("api/users")]
     public class UserController : BaseController
     {
@@ -77,11 +76,13 @@ namespace UserManagerService.Api.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel input)
         {
             _logger.LogInformation($"User {_userContext.Username} is getting the token");
-            if (string.IsNullOrEmpty(input.Username) || string.IsNullOrEmpty(input.Password))
+            if ((string.IsNullOrEmpty(input.Username) && string.IsNullOrEmpty(input.Email)) || string.IsNullOrEmpty(input.Password))
                 return Ok(ResponseModel.Fail(ResponseMessages.InvalidInput));
 
             var tokens = new AuthTokenModel();
-            var user = await _signInManager.UserManager.FindByNameAsync(input.Username);
+            var user = string.IsNullOrEmpty(input.Email) ?
+                await _signInManager.UserManager.FindByNameAsync(input.Username):
+                  await _signInManager.UserManager.FindByEmailAsync(input.Email);
             if (user is null)
                 return Ok(ResponseModel.Fail(ResponseMessages.WrongCredentials));
 

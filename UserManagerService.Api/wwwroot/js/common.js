@@ -47,7 +47,6 @@ var alert2 = function (type, message, timer = null, link = null, position = null
     });
 };
 
-
 var alertConfirm = function (callBack, message = null) {
     swal({
         title: 'Are you sure?',

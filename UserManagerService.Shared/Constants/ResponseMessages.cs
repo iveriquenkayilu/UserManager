@@ -9,7 +9,7 @@
         public const string EmailExists = "EmailExists";
         public const string UserCreated = "UserCreated";
         public const string FailedToCreatUser = "FailedToCreatUser";
-        public const string WrongCredentials = "FailedToCreatUser";
+        public const string WrongCredentials = "WrongCredentials";
         public const string InvalidRefreshToken = "InvalidRefreshToken";
         public const string RefreshTokenFailed = "RefreshTokenFailed";
         public const string UserNotFound = "UserNotFound";

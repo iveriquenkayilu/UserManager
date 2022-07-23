@@ -1,4 +1,5 @@
 ﻿const domain = "https://rainycorp.net";
+const domainUsers = "https://users.rainycorp.net";
 //"https://localhost:44332";
 //angular.element($0).scope().request
 
@@ -68,6 +69,14 @@ function setCookie(cname, cvalue, exdays) {
     let expires = "expires=" + d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
+
+//function setCookie(cookieName, cookieValue, daysToExpire) {
+//    let expirationDate = new Date();
+//    expirationDate.setDate(expirationDate.getDate() + daysToExpire);
+//    let expires = "expires=" + expirationDate.toUTCString();
+
+//    document.cookie = cookieName + "=" + cookieValue + ";" + expires + ";path=/";
+//}
 
 //Checking this
 var now, timeToExpire;

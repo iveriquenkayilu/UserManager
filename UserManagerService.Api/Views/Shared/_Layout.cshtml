@@ -21,12 +21,14 @@
     <link href="assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
     <!--end::Global Stylesheets Bundle-->
 
+    <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
     <link href="~/lib/angular-datatables/plugins/bootstrap/datatables.bootstrap.min.css?@DateTime.Now.Ticks" rel="stylesheet" />
+    
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <!--end::Head-->
 <!--begin::Body-->
-<body id="kt_body" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled toolbar-fixed toolbar-tablet-and-mobile-fixed aside-enabled aside-fixed" style="--kt-toolbar-height:55px;--kt-toolbar-height-tablet-and-mobile:55px">
+<body id="kt_body" data-kt-aside-minimize="on" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled toolbar-fixed toolbar-tablet-and-mobile-fixed aside-enabled aside-fixed" style="--kt-toolbar-height:55px;--kt-toolbar-height-tablet-and-mobile:55px" ng-app="crowd-funding">
     <!--begin::Main-->
     <!--begin::Root-->
     <div class="d-flex flex-column flex-root">
@@ -48,7 +50,7 @@
 
                 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
                     <!--begin::Toolbar-->
-                  
+
                     <partial name="Toolbar" />
 
                     <!--end::Toolbar-->
@@ -108,6 +110,11 @@
     <!--begin::Global Javascript Bundle(used by all pages)-->
     <script src="assets/plugins/global/plugins.bundle.js"></script>
     <script src="assets/js/scripts.bundle.js"></script>
+
+    @*<script src="~/lib/jquery/dist/jquery.min.js"></script>*@
+    @*<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>*@
+    <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+
     <!--end::Global Javascript Bundle-->
     <!--begin::Page Vendors Javascript(used by this page)-->
     <script src="assets/plugins/custom/fullcalendar/fullcalendar.bundle.js"></script>
@@ -119,18 +126,19 @@
     <script src="assets/js/custom/modals/upgrade-plan.js"></script>
     <!--end::Page Custom Javascript-->
     <!--end::Javascript-->
-    @*<script src="~/lib/jquery/dist/jquery.min.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-        <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>*@
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="~/lib/angular.js/angular.min.js"></script>
+    @*<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>*@
     <script src="~/lib/angular-datatables/angular-datatables.min.js" type="text/javascript"></script>
+    <script src="~/lib/angular-datatables/plugins/buttons/angular-datatables.buttons.min.js"></script>
+    <script src="~/lib/i18next/i18next.min.js"></script>
+    <script src="~/lib/jquery-i18next/jquery-i18next.min.js"></script>
     <script>
-        var app = angular.module("tigerstamina", ['datatables']);
+        var app = angular.module("crowd-funding", ['datatables', 'datatables.buttons']);
     </script>
 
     <script src="~/js/common.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/sweetalert/sweetalert.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 <!--end::Body-->

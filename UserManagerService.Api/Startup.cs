@@ -207,7 +207,6 @@ namespace UserManagerService
                 });
             }
 
-            //TODO remove this on Prod
             services.AddCors(options =>
             {
                 options.AddPolicy("Policy",
@@ -233,7 +232,7 @@ namespace UserManagerService
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));
             }
-            app.UseCors("Policy"); // TODO remove this. It is for dev
+            app.UseCors("Policy");
 
             app.UseMiddleware<ExceptionMiddleWare>();
             app.UseMiddleware<UserMiddleWare>();

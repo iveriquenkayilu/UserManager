@@ -1,4 +1,10 @@
 ﻿
+var languages = [
+    { lang: "English", flag: "assets/media/flags/united-states.svg", symbol: "en" },
+    { lang: "French", flag: "assets/media/flags/france.svg", symbol: "fr" },
+    { lang: "German", flag: "assets/media/flags/germany.svg", symbol: "de" },
+    { lang: "Spanish", flag: "assets/media/flags/spain.svg", symbol: "es" },
+];
 $(document).ready(function () {
 
     //var redirectTo = localStorage.getItem("RedirectTo")
@@ -12,14 +18,6 @@ $(document).ready(function () {
     var symbol = localStorage.getItem('lang');
     if (!symbol)
         symbol = "en";
-
-    var languages = [
-        { lang: "English", flag: "assets/media/flags/united-states.svg", symbol: "en" },
-        { lang: "French", flag: "assets/media/flags/france.svg", symbol: "fr" },
-        { lang: "German", flag: "assets/media/flags/germany.svg", symbol: "de" },
-        { lang: "Spanish", flag: "assets/media/flags/spain.svg", symbol: "es" },
-    ];
-
     var language = languages.find(l => l.symbol == symbol);
     if (language) {
         $('#selected_lang').prepend(language.lang);
@@ -40,7 +38,61 @@ $(document).ready(function () {
         $('#languages').append(lan);
     });
 
+    getTranslations(language); // = i18next.t('key');
 });
+
+var getTranslations = function (lang) {
+    var data = {
+        query: 'query{translations {english, ' + lang.lang.toLowerCase()+'}}',
+        //"variables": {  }
+    };
+
+    var url = "https://translation.rainycorp.net/graphql";
+
+    fetch(url, {
+        method: 'POST', // or 'PUT'
+        headers: {
+            'Content-Type': 'application/json',
+              //'Content-Type': 'application/graphql'
+        },
+        body: JSON.stringify(data),
+    })
+        .then(response => response.json())
+        .then(result => {
+
+            if (result?.status == 401) {
+                
+                //alert2('error', `Failed to get translations`);
+                return;
+            }
+            var symbol = localStorage.getItem('lang');
+            var language = languages.find(l => l.symbol == symbol);
+        
+            var translation = result.data.translations.reduce(function (acc, curr) {
+                var key = curr['english'];
+                acc[key] = curr[language.lang.toLowerCase()];
+                return acc;
+            }, {});
+
+            //i18next
+            jqueryI18next.init({
+                lng: symbol,
+                debug: true,
+                resources: {
+                    [symbol]: {
+                        translation
+                    }
+                }
+            }, (err, t) => {
+                // initialized and ready to go!
+                console.log("i18next initialized");
+                //document.getElementById('output').innerHTML = i18next.t('key');
+            });
+        })
+        .catch((error) => {
+           // alert2('error', `Failed to get translations`);
+        });
+};
 
 //$(".language").on("click", function () {
 //    var symbol = $(this).data('lang');
@@ -79,17 +131,23 @@ var getProfileFromLocalStorage = function () {
 
 var getUserProfile = function () {
     // get profile
+    var url = domainUsers + "/api/me";
 
+    const auth = getTokensFromLocalStorage();
+    if (!auth)
+        return;
+    var accessToken = auth.accessToken;
     $.ajax({
         method: "GET",
-        url: "/api/me", //domain +
+        url,
         headers: {
-            'Content-Type': 'application/json;charset=utf-8'
+            'Content-Type': 'application/json;charset=utf-8',
+            'Authorization': 'Bearer ' + accessToken
         },
         success: function (result, status,request) {
 
             if (result.status == 401) {
-                alert2('error', `Failed to get profile`);
+                //alert2('error', `Failed to get profile`);
                 return;
             }
 
@@ -98,7 +156,7 @@ var getUserProfile = function () {
             fillUserProfile(result);
         },
         error: function (error) {
-            alert2('error', `Failed to get profile`);
+            //('error', `Failed to get profile`);
         }
     });
 };
@@ -122,13 +180,77 @@ var redirectToLogin = function () {
 //    something();
 //}, 1000);
 
+$('#go_to_login_button').click(function () {
+    redirectToLogin();
+});
+
 $('#logout_button').click(function () {
     localStorage.removeItem("Auth");
     localStorage.removeItem("Profile");
     // could send a request to the backend
     document.cookie = 'Authentication=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
-    redirectToLogin();
+    window.location.href = "/";
+    //redirectToLogin();
 });
+
+var httpInterceptor = function ($q) {
+    return {
+        // optional method
+        request: function (config) {
+            config.headers["Authorization"] = "Bearer " + JSON.parse(localStorage.getItem("Auth")).accessToken;;
+            return config;
+        },
+        // optional method
+        response: function (response) {
+            // do something on success
+            return response;
+        },
+        // optional method
+        responseError: async function (response) {
+
+            if (response.status === 401 && !response.config._retry) {
+                response.config._retry = true;
+
+                try {
+                    const accessToken = await retryInterceptor(response);
+                    if (accessToken) {
+                        response.config.headers.Authorization = `Bearer ${accessToken}`;
+                        return $q.resolve(response.config);
+                    }
+                }
+                catch (e) {
+                    return $q.reject(e);
+                };
+            }
+            return $q.reject(response);
+        },
+    };
+};
+
+app.config(function ($httpProvider) {
+    $httpProvider.interceptors.push(httpInterceptor);
+});
+
+async function retryInterceptor(err) {
+
+    const refreshToken = JSON.parse(localStorage.getItem("Auth")).refreshToken;
+
+    return fetch(window.authenticationSettings.domain + "/api/auth/refresh-token", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken })
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.error)
+                throw new Error(result.message);
+            localStorage.setItem('Auth', JSON.stringify(result.data));
+            setCookie(window.authenticationSettings.cookieName, result.data.accessToken, 1);
+            return result.data.accessToken;
+        });
+}
 
 app.factory('httpRequest', function ($http) {
     return {

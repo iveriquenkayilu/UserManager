@@ -47,11 +47,19 @@ namespace UserManagerService.Services
             return profiles;
         }
 
-        //public async Task<List<UserModel>> GetAsync()
-        //{
-        //    var users = await _userRepository.GetAsync();           
-        //    return _mapper.Map<List<UserModel>>(users);
-        //}
+        public async Task<List<UserModel>> GetUsersAsync()
+            => await UnitOfWork.Query<User>()
+                .Select(u => new UserModel
+                {
+                    Id = u.Id,
+                    CreatedAt = u.CreatedAt,
+                    IsConnected = u.IsConnected,
+                    Name = u.Name,
+                    Surname = u.Surname,
+                    Email = u.Email,
+                    UpdatedAt = u.UpdatedAt,
+                    Username = u.UserName
+                }).ToListAsync();
 
         public async Task<UserModel> GetAsync(Guid id, UserInputModel input) // with roles
         {

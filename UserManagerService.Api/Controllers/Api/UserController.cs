@@ -34,6 +34,7 @@ namespace UserManagerService.Api.Controllers
             _userService = userService;
         }
 
+        //TODO extract logic to the service
         [HttpGet]
         public async Task<IActionResult> GetCompanyUsers()
         {
@@ -56,19 +57,8 @@ namespace UserManagerService.Api.Controllers
         [HttpGet("admin")]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _unitOfWork.Query<User>()
-                .Select(u => new UserModel
-                {
-                    Id = u.Id,
-                    CreatedAt = u.CreatedAt,
-                    IsConnected = u.IsConnected,
-                    Name = u.Name,
-                    Surname = u.Surname,
-                    UpdatedAt = u.UpdatedAt,
-                    Username = u.UserName
-                }).ToListAsync();
-
-            return Ok(users);
+            var users = await _userService.GetUsersAsync();
+            return CustomResponse.Success("Users fetched successfully", users);
         }
 
         [AllowAnonymous]
@@ -81,7 +71,7 @@ namespace UserManagerService.Api.Controllers
 
             var tokens = new AuthTokenModel();
             var user = string.IsNullOrEmpty(input.Email) ?
-                await _signInManager.UserManager.FindByNameAsync(input.Username):
+                await _signInManager.UserManager.FindByNameAsync(input.Username) :
                   await _signInManager.UserManager.FindByEmailAsync(input.Email);
             if (user is null)
                 return Ok(ResponseModel.Fail(ResponseMessages.WrongCredentials));

@@ -21,6 +21,9 @@ var login = async function () {
             //var headers = request.getAllResponseHeaders(); 
             if (result.error || result.responseCode==500) {
                 alert2('error', result.message);
+                submitButton.removeAttribute('data-kt-indicator');
+                // Enable button
+                submitButton.disabled = false;
                 return;
             }
                 

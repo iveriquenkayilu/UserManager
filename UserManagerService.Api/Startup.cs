@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using OBS.UserManagementService.Domain.Helpers;
 using System;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -246,6 +247,25 @@ namespace UserManagerService
 
             app.UseStaticFiles();
 
+            app.UseStatusCodePages(context =>
+            {
+                var response = context.HttpContext.Response;
+
+                var isApiRequest = context.HttpContext.Request.Path.StartsWithSegments("/api");
+                
+                if (!isApiRequest)
+                {
+                    
+                    if (response.StatusCode == (int)HttpStatusCode.Unauthorized ||
+                        response.StatusCode == (int)HttpStatusCode.Forbidden)
+                    {
+                        var message = "Unauthorized";
+                        response.Redirect($"/Home/Error?message={message}");
+                    }                      
+                }
+
+                return Task.CompletedTask;
+            });
             app.UseRouting();
             //app.UseCors();
             app.UseAuthentication();

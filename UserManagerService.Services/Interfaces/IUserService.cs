@@ -23,5 +23,6 @@ namespace UserManagerService.Services.Interfaces
         Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<Guid> ids);
         Task DeleteUserAsync(Guid id);
         Task<UserModel> UpdateUserAsync(Guid id, UserInputModel input);
+        Task<List<UserModel>> GetUsersAsync();
     }
 }

@@ -100,14 +100,14 @@ namespace UserManagerService.Repository
             where T : class, IBaseEntity => Query(expression).FirstOrDefaultAsync();
 
 
-        public virtual IQueryable<T> Query<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity => _context.Set<T>().Where(expression);
+        public virtual IQueryable<T> Query<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity => _context.Set<T>().Where(e => e.DeletedAt != null).Where(expression);
 
 
-        public virtual IQueryable<T> Query<T>() where T : class, IBaseEntity => _context.Set<T>();
+        public virtual IQueryable<T> Query<T>() where T : class, IBaseEntity => _context.Set<T>().Where(e=>e.DeletedAt !=null);
 
 
         public Task<bool> AnyAsync<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
-            _context.Set<T>().AnyAsync(expression);
+            Query<T>().AnyAsync(expression);
 
         public void Save() => _context.SaveChanges();
         public virtual Task SaveAsync() => _context.SaveChangesAsync();

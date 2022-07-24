@@ -84,6 +84,7 @@ namespace UserManagerService
             //services.AddScoped<IHttpOrchestrator, HttpOrchestrator>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICompanyService, CompanyService>();
+            services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IUnitOfWork, UnitOfWork<ApplicationDbContext>>();
             services.AddScoped<IApiService, ApiService>();
 

@@ -24,6 +24,15 @@
 
         #endregion
 
+        #region Roles
+
+        public const string RolesFetched = "Roles fetched";
+        public const string RoleCreated = "Role created successfully";
+        public const string RoleUpdated = "Role updated successfully";
+        public const string RoleDeleted = "Role deleted successfully";
+
+        #endregion
+
         #region Input
 
         public const string InvalidInput = "InvalidInput";

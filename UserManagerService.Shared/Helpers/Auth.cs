@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using UserManagerService.Shared.Interfaces.Shared;
+using UserManagerService.Shared.Models.Company;
 using UserManagerService.Shared.Models.User;
 using UserManagerService.Shared.Settings;
 
@@ -35,7 +36,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             _logger = logger;
         }
 
-        public AuthTokenModel CreateSecurityToken(Guid userId, string username, List<string> roles, Guid companyId, string companyName)
+        public AuthTokenModel CreateSecurityToken(Guid userId, string username, List<string> roles, CompanyShortModel company)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -52,8 +53,10 @@ namespace OBS.UserManagementService.Domain.Helpers
             var claims = new List<Claim>();
             claims.Add(new Claim(ClaimTypes.Name, username));
             claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
-            claims.Add(new Claim("CompanyId", companyId.ToString()));
-            claims.Add(new Claim("CompanyName", companyName));
+
+            claims.Add(new Claim("CompanyId", company == null ? Guid.Empty.ToString() : company.Id.ToString()));
+            claims.Add(new Claim("CompanyName", company == null ? "" : company.Name));
+
             roles.ForEach(r =>
             {
                 //claims.Add(new Claim(ClaimTypes.Role, r.NormalizedName));

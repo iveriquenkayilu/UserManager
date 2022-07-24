@@ -15,6 +15,8 @@ using UserManagerService.Shared.Constants;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Interfaces.Shared;
 using UserManagerService.Shared.Models;
+using UserManagerService.Shared.Models.Company;
+using UserManagerService.Shared.Models.Roles;
 using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Api.Controllers
@@ -25,13 +27,15 @@ namespace UserManagerService.Api.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly SignInManager<User> _signInManager;
         private readonly IUserService _userService;
+        private readonly IRoleService _roleService;
         private readonly IAuth _auth;
-        public UserController(IUnitOfWork unitOfWork, SignInManager<User> signInManager, IUserContext userContext, IAuth auth, ILogger<UserController> logger, IUserService userService) : base(userContext, logger)
+        public UserController(IUnitOfWork unitOfWork, SignInManager<User> signInManager, IUserContext userContext, IAuth auth, ILogger<UserController> logger, IUserService userService, IRoleService roleService) : base(userContext, logger)
         {
             _unitOfWork = unitOfWork;
             _signInManager = signInManager;
             _auth = auth;
             _userService = userService;
+            _roleService = roleService;
         }
 
         //TODO extract logic to the service
@@ -90,11 +94,19 @@ namespace UserManagerService.Api.Controllers
                 // Get default company
                 var company = input.CompanyId is null ?
                     await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id)
-                    .Include(o => o.Company).Select(o => (Company)o.Company).FirstOrDefaultAsync()
+                    .Include(o => o.Company).Select(o => new CompanyShortModel
+                    {
+                        Id = o.Company.Id,
+                        Name = o.Company.Name
+                    }).FirstOrDefaultAsync()
                     : await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id && o.CompanyId == input.CompanyId)
-                    .Include(o => o.Company).Select(o => (Company)o.Company).SingleOrDefaultAsync();
+                    .Include(o => o.Company).Select(o => new CompanyShortModel
+                    {
+                        Id = o.Company.Id,
+                        Name = o.Company.Name
+                    }).SingleOrDefaultAsync();
 
-                tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company.Id, company.Name);
+                tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company);
             }
             var result = (string.IsNullOrEmpty(tokens.AccessToken) || string.IsNullOrEmpty(tokens.RefreshToken))
                     ? ResponseModel.Fail(ResponseMessages.AuthenticationFailed)
@@ -123,9 +135,13 @@ namespace UserManagerService.Api.Controllers
 
             var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
             var company = await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id)
-                    .Include(o => o.Company).Select(o => (Company)o.Company).FirstOrDefaultAsync();
+                    .Include(o => o.Company).Select(o => new CompanyShortModel
+                    {
+                        Id = o.Company.Id,
+                        Name = o.Company.Name
+                    }).FirstOrDefaultAsync();
 
-            var tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles, company.Id, company.Name);
+            var tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles, company);
 
             var result = tokens != null
                 ? ResponseModel.Success(ResponseMessages.TokensRefreshed, tokens)
@@ -230,6 +246,20 @@ namespace UserManagerService.Api.Controllers
         public async Task<IActionResult> GetProfiles([FromBody] GetUserProfilesModel input)
         {
             return Ok(await _userService.GetUserProfilesByIdsAsync(input.UserIds));
+        }
+
+        [HttpPost("{UserId}/roles")]
+        public async Task<IActionResult> AssignRoles([FromBody] UserRoleInputModel input)
+        {
+            var model = await _roleService.AssignRolesToUserAsync(input);
+            return CustomResponse.Success("Roles assigned to user successfully", model);
+        }
+
+        [HttpDelete("{UserId}/roles")]
+        public async Task<IActionResult> RemoveRoles([FromBody] UserRoleInputModel input)
+        {
+            await _roleService.RemoveRolesFromUserAsync(input);
+            return CustomResponse.Success("Roles removed from user successfully");
         }
     }
 }

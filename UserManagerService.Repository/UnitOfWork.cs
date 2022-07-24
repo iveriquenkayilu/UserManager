@@ -99,12 +99,9 @@ namespace UserManagerService.Repository
         public virtual Task<T> FirstOrDefaultAsync<T>(Expression<Func<T, bool>> expression)
             where T : class, IBaseEntity => Query(expression).FirstOrDefaultAsync();
 
+        public virtual IQueryable<T> Query<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity => _context.Set<T>().Where(e => e.DeletedAt == null).Where(expression);
 
-        public virtual IQueryable<T> Query<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity => _context.Set<T>().Where(e => e.DeletedAt != null).Where(expression);
-
-
-        public virtual IQueryable<T> Query<T>() where T : class, IBaseEntity => _context.Set<T>().Where(e=>e.DeletedAt !=null);
-
+        public virtual IQueryable<T> Query<T>() where T : class, IBaseEntity => Query<T>(e => true);
 
         public Task<bool> AnyAsync<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
             Query<T>().AnyAsync(expression);

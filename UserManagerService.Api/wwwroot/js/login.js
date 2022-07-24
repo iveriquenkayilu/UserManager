@@ -10,7 +10,7 @@ var login = async function () {
         Password: $('#Password').val()
     };
     var jsonStringData = JSON.stringify(bodyData);
-    var url = "https://users.rainycorp.net"+ "/api/login";
+    var url ="/api/login";
 
     $.ajax({
         method: "POST",

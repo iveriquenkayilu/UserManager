@@ -130,8 +130,9 @@ var getProfileFromLocalStorage = function () {
 };
 
 var getUserProfile = function () {
-    // get profile
-    var url = domainUsers + "/api/me";
+    // get profile domainUsers
+
+    var url = "/api/me";
 
     const auth = getTokensFromLocalStorage();
     if (!auth)

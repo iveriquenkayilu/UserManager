@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UserManagerService.Shared.Constants;
 using UserManagerService.Shared.Interfaces.Services;
 
 namespace UserManagerService.Services
@@ -41,5 +42,14 @@ namespace UserManagerService.Services
             CompanyId = companyId;
             CompanyName = companyName;
         }
+
+        public bool IsUserAdmin()
+          => Roles == null ? false :
+          Roles.Select(r => r.ToUpper()).Contains(RoleConstants.ADMIN);
+
+        public List<string> GetRoles()
+            => Roles == null
+            ? new List<string>()
+            : Roles.Select(r => r.ToUpper()).ToList();
     }
 }

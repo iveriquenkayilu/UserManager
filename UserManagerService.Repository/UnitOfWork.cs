@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using UserManagerService.Entities.Interfaces;
 using UserManagerService.Interfaces.Repositories;
 using UserManagerService.Shared.Exceptions;
+using UserManagerService.Shared.Interfaces.Services;
 
 namespace UserManagerService.Repository
 {
@@ -17,13 +18,14 @@ namespace UserManagerService.Repository
     {
         private bool _disposed;
         private readonly TContext _context;
+        private readonly IUserContext _userContext;
         private readonly ILogger<UnitOfWork<TContext>> _logger;
 
-
-        public UnitOfWork(TContext dbContext, ILogger<UnitOfWork<TContext>> logger)
+        public UnitOfWork(TContext dbContext, ILogger<UnitOfWork<TContext>> logger, IUserContext userContext)
         {
             _context = dbContext;
             _logger = logger;
+            _userContext = userContext;
         }
 
 
@@ -46,6 +48,9 @@ namespace UserManagerService.Repository
         public async Task<T> AddAsync<T>(T entity) where T : class, IBaseEntity
         {
             entity.CreatedAt = DateTime.Now;
+            if (entity.CreatorId == Guid.Empty)
+                entity.CreatorId = _userContext.UserId;
+
             await _context.AddAsync(entity);
             return entity;
         }

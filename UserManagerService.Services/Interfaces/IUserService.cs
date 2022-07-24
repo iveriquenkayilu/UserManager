@@ -24,5 +24,6 @@ namespace UserManagerService.Services.Interfaces
         Task DeleteUserAsync(Guid id);
         Task<UserModel> UpdateUserAsync(Guid id, UserInputModel input);
         Task<List<UserModel>> GetUsersAsync();
+        Task<AuthTokenModel> GetAuthTokenAsync(LoginModel input);
     }
 }

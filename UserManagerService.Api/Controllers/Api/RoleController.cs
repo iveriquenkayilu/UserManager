@@ -11,7 +11,7 @@ using UserManagerService.Shared.Models.Roles;
 
 namespace UserManagerService.Api.Controllers
 {
-    [Authorize(Roles = Roles.ADMIN)]
+    [Authorize(Roles = RoleConstants.ADMIN)]
     [Route("api/roles")]
     [ApiController]
     public class RoleController : BaseController

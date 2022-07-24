@@ -22,6 +22,7 @@ namespace UserManagerService.Repository
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamUser> TeamUsers { get; set; }
+        public DbSet<LoginSession> LoginSessions { get; set; }
 
         //public DbSet<ServiceApiKey> ServiceApiKeys { get; set; }
 

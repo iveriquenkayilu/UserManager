@@ -11,7 +11,7 @@ using UserManagerService.Shared.Models.Company;
 
 namespace UserManagerService.Api.Controllers
 {
-    [Authorize(Roles = Roles.ADMIN)]
+    [Authorize(Roles = RoleConstants.ADMIN)]
     [Route("api/companies")]
     [ApiController]
     public class CompanyController : BaseController

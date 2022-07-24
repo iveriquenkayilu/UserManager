@@ -1,6 +1,6 @@
 ﻿namespace UserManagerService.Shared.Constants
 {
-    public class Roles
+    public class RoleConstants
     {
         public const string ADMIN = "ADMIN";
     }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,14 +13,20 @@ using UserManagerService.Shared.Constants;
 using UserManagerService.Shared.Exceptions;
 using UserManagerService.Shared.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
+using UserManagerService.Shared.Interfaces.Shared;
+using UserManagerService.Shared.Models.Company;
 using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Services
 {
     public class UserService : BaseService, IUserService
     {
-        public UserService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApiService> logger) : base(userContext, unitOfWork, mapper, logger)
+        private readonly SignInManager<User> _signInManager;
+        private readonly IAuthHelper _authHelper;
+        public UserService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApiService> logger, IAuthHelper authHelper, SignInManager<User> signInManager) : base(userContext, unitOfWork, mapper, logger)
         {
+            _authHelper = authHelper;
+            _signInManager = signInManager;
         }
 
         public async Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<Guid> ids)
@@ -132,6 +139,59 @@ namespace UserManagerService.Services
                 profile.CompanyName = company.Name;
             }
             return profile;
+        }
+
+        public async Task<AuthTokenModel> GetAuthTokenAsync(LoginModel input)
+        {
+            Logger.LogInformation($"User {input.Username} {input.Email} is getting the token");
+            if ((string.IsNullOrEmpty(input.Username) && string.IsNullOrEmpty(input.Email)) || string.IsNullOrEmpty(input.Password))
+                throw new CustomException(ResponseMessages.InvalidInput);
+
+            var tokens = new AuthTokenModel();
+            var user = string.IsNullOrEmpty(input.Email) ?
+                await _signInManager.UserManager.FindByNameAsync(input.Username) :
+                  await _signInManager.UserManager.FindByEmailAsync(input.Email);
+            if (user is null)
+                throw new CustomException(ResponseMessages.WrongCredentials);
+
+            var signedIn = await _signInManager.PasswordSignInAsync(user, input.Password, true, false);
+            if (signedIn.Succeeded)
+            {
+                await _signInManager.SignOutAsync(); // remove the cookie
+                var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
+
+                // Get default company
+                var company = input.CompanyId is null ?
+                    await UnitOfWork.Query<CompanyUser>(o => o.UserId == user.Id)
+                    .Include(o => o.Company).Select(o => new CompanyShortModel
+                    {
+                        Id = o.Company.Id,
+                        Name = o.Company.Name
+                    }).FirstOrDefaultAsync()
+                    : await UnitOfWork.Query<CompanyUser>(o => o.UserId == user.Id && o.CompanyId == input.CompanyId)
+                    .Include(o => o.Company).Select(o => new CompanyShortModel
+                    {
+                        Id = o.Company.Id,
+                        Name = o.Company.Name
+                    }).SingleOrDefaultAsync();
+
+                var visitor = _authHelper.GetVisitorInfo();
+
+                var session = new LoginSession
+                {
+                    Device = visitor.Device,
+                    IpAdress = visitor.AddressIp,
+                    Status = "200"
+                };
+                await UnitOfWork.AddAsync(session);
+                await UnitOfWork.SaveAsync();
+
+                tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company);
+            }
+            else
+                throw new CustomException(ResponseMessages.AuthenticationFailed);
+
+            return tokens;
         }
 
         public async Task DeleteVisitorAsync(Guid id)

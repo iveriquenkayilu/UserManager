@@ -28,8 +28,8 @@ namespace UserManagerService.Api.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly IUserService _userService;
         private readonly IRoleService _roleService;
-        private readonly IAuth _auth;
-        public UserController(IUnitOfWork unitOfWork, SignInManager<User> signInManager, IUserContext userContext, IAuth auth, ILogger<UserController> logger, IUserService userService, IRoleService roleService) : base(userContext, logger)
+        private readonly IAuthHelper _auth;
+        public UserController(IUnitOfWork unitOfWork, SignInManager<User> signInManager, IUserContext userContext, IAuthHelper auth, ILogger<UserController> logger, IUserService userService, IRoleService roleService) : base(userContext, logger)
         {
             _unitOfWork = unitOfWork;
             _signInManager = signInManager;
@@ -57,7 +57,7 @@ namespace UserManagerService.Api.Controllers
             return Ok(users);
         }
 
-        [Authorize(Roles = Roles.ADMIN)]
+        [Authorize(Roles = RoleConstants.ADMIN)]
         [HttpGet("admin")]
         public async Task<IActionResult> GetUsers()
         {
@@ -69,45 +69,7 @@ namespace UserManagerService.Api.Controllers
         [HttpPost("/api/login")]
         public async Task<IActionResult> Login([FromBody] LoginModel input)
         {
-            _logger.LogInformation($"User {_userContext.Username} is getting the token");
-            if ((string.IsNullOrEmpty(input.Username) && string.IsNullOrEmpty(input.Email)) || string.IsNullOrEmpty(input.Password))
-                return Ok(ResponseModel.Fail(ResponseMessages.InvalidInput));
-
-            var tokens = new AuthTokenModel();
-            var user = string.IsNullOrEmpty(input.Email) ?
-                await _signInManager.UserManager.FindByNameAsync(input.Username) :
-                  await _signInManager.UserManager.FindByEmailAsync(input.Email);
-            if (user is null)
-                return Ok(ResponseModel.Fail(ResponseMessages.WrongCredentials));
-
-            var signedIn = await _signInManager.PasswordSignInAsync(user, input.Password, true, false);
-            if (signedIn.Succeeded)
-            {
-                await _signInManager.SignOutAsync(); // remove the cookie
-                var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
-
-                if (input.CompanyId is not null)
-                {
-                    // check you beGuid to the company
-                }
-
-                // Get default company
-                var company = input.CompanyId is null ?
-                    await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id)
-                    .Include(o => o.Company).Select(o => new CompanyShortModel
-                    {
-                        Id = o.Company.Id,
-                        Name = o.Company.Name
-                    }).FirstOrDefaultAsync()
-                    : await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id && o.CompanyId == input.CompanyId)
-                    .Include(o => o.Company).Select(o => new CompanyShortModel
-                    {
-                        Id = o.Company.Id,
-                        Name = o.Company.Name
-                    }).SingleOrDefaultAsync();
-
-                tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company);
-            }
+            var tokens = await _userService.GetAuthTokenAsync(input);
             var result = (string.IsNullOrEmpty(tokens.AccessToken) || string.IsNullOrEmpty(tokens.RefreshToken))
                     ? ResponseModel.Fail(ResponseMessages.AuthenticationFailed)
                     : ResponseModel.Success(ResponseMessages.UserAuthenticated, tokens);
@@ -149,7 +111,7 @@ namespace UserManagerService.Api.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = Roles.ADMIN)]
+        [AllowAnonymous]
         [HttpPost("/api/register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel input)
         {
@@ -185,15 +147,18 @@ namespace UserManagerService.Api.Controllers
                 //var createdUser = await _userRepository.GetUserByUsernameAsync(input.Username);
                 _logger.LogInformation($"Created user `{input.Username}` successfully");
 
-                //Auto add to company
-                var orgUser = new CompanyUser()
+                if (_userContext.IsUserAdmin() && input.CompanyId != Guid.Empty)
                 {
-                    CompanyId = input.CompanyId == Guid.Empty ? _userContext.CompanyId : input.CompanyId,
-                    UserId = user.Id,
-                    CreatorId = _userContext.UserId,
-                };
-                await _unitOfWork.AddAsync(orgUser);
-                await _unitOfWork.SaveAsync();
+                    var orgUser = new CompanyUser()
+                    {
+                        CompanyId = input.CompanyId == Guid.Empty ? _userContext.CompanyId : input.CompanyId,
+                        UserId = user.Id,
+                        CreatorId = _userContext.UserId,
+                    };
+                    await _unitOfWork.AddAsync(orgUser);
+                    await _unitOfWork.SaveAsync();
+                    input.CompanyId = orgUser.CompanyId;
+                }
 
                 var model = new UserProfile
                 {
@@ -201,7 +166,7 @@ namespace UserManagerService.Api.Controllers
                     Name = user.Name,
                     Username = user.UserName,
                     Surname = user.Surname,
-                    CompanyId = orgUser.CompanyId
+                    CompanyId = input.CompanyId
                 };
                 return Ok(ResponseModel.Success(ResponseMessages.UserCreated, model));
             }
@@ -214,7 +179,7 @@ namespace UserManagerService.Api.Controllers
             }
         }
 
-        [Authorize(Roles = Roles.ADMIN)]
+        [Authorize(Roles = RoleConstants.ADMIN)]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UserInputModel input)
         {
@@ -222,7 +187,7 @@ namespace UserManagerService.Api.Controllers
             return CustomResponse.Success("User updated successfully", model);
         }
 
-        [Authorize(Roles = Roles.ADMIN)]
+        [Authorize(Roles = RoleConstants.ADMIN)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

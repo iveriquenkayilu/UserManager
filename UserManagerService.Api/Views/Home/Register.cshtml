@@ -87,6 +87,11 @@
                             <label class="form-label fw-bolder text-dark fs-6">Email</label>
                             <input class="form-control form-control-lg form-control-solid" type="email" placeholder="" name="email" autocomplete="off" />
                         </div>
+
+                        <div class="fv-row mb-7">
+                            <label class="form-label fw-bolder text-dark fs-6">Username</label>
+                            <input class="form-control form-control-lg form-control-solid" type="text" placeholder="" name="username" autocomplete="off" />
+                        </div>
                         <!--end::Input group-->
                         <!--begin::Input group-->
                         <div class="mb-10 fv-row" data-kt-password-meter="true">
@@ -163,9 +168,12 @@
     <script src="assets/js/scripts.bundle.js"></script>
     <!--end::Global Javascript Bundle-->
     <!--begin::Page Custom Javascript(used by this page)-->
-    <script src="assets/js/custom/authentication/sign-up/general.js"></script>
+    @*<script src="assets/js/custom/authentication/sign-up/general.js"></script>*@
     <!--end::Page Custom Javascript-->
     <!--end::Javascript-->
+
+    <script src="~/js/common.js" asp-append-version="true"></script>
+    <script src="~/js/register.js" asp-append-version="true"></script>
 </body>
 <!--end::Body-->
 </html>

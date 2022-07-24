@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using UAParser;
 using UserManagerService.Shared.Interfaces.Shared;
 using UserManagerService.Shared.Models.Company;
 using UserManagerService.Shared.Models.User;
@@ -17,13 +18,13 @@ using UserManagerService.Shared.Settings;
 
 namespace OBS.UserManagementService.Domain.Helpers
 {
-    public class Auth : IAuth
+    public class AuthHelper : IAuthHelper
     {
         private readonly WebProtocolSettings _webProtocolSettings;
         private readonly IMemoryCache _cache;
         private readonly IHttpContextAccessor _httpContext;
-        private readonly ILogger<Auth> _logger;
-        public Auth(IOptions<WebProtocolSettings> webProtocolSettings, IMemoryCache cache, IHttpContextAccessor httpContext, ILogger<Auth> logger)
+        private readonly ILogger<AuthHelper> _logger;
+        public AuthHelper(IOptions<WebProtocolSettings> webProtocolSettings, IMemoryCache cache, IHttpContextAccessor httpContext, ILogger<AuthHelper> logger)
         {
             if (webProtocolSettings.Value.AccessTokenExpiresInMinutes <= 0)
                 throw new Exception("Access Token cannot expire after a nonpositive minute value");
@@ -108,7 +109,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             return _cache.Get(refreshToken) is null ? true : false;
         }
 
-        private string GetRequestIPAddress()
+        public string GetRequestIPAddress()
         {
             var ipAddress = _httpContext.HttpContext.Connection.RemoteIpAddress;
 
@@ -119,6 +120,35 @@ namespace OBS.UserManagementService.Domain.Helpers
             return ipAddress.ToString();
         }
 
+        public  VisitorModel GetVisitorInfo()
+        {
+            var visitor = new VisitorModel();
+            try
+            {
+
+                var userAgent = _httpContext.HttpContext.Request.Headers["User-Agent"];
+
+                var parser = Parser.GetDefault();
+                var operatingSystem = parser.ParseOS(userAgent).ToString();
+                var accessType = parser.ParseUserAgent(userAgent).ToString();
+                var device = parser.ParseDevice(userAgent).ToString();
+                var addressIp = GetRequestIPAddress();
+
+                visitor = new VisitorModel
+                {
+                    AccessType = accessType,
+                    AddressIp = addressIp,
+                    Device = device,
+                    OperatingSystem = operatingSystem,
+                };
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Failed  to get visitor info", e.Message,e);
+            };
+
+            return visitor;
+        }
         private string GenerateAndCacheRefreshToken(Guid userId)
         {
             var refreshToken = "";

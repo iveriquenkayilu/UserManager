@@ -10,5 +10,8 @@ namespace UserManagerService.Shared.Interfaces.Services
         List<string> Roles { get; set; }
         Guid CompanyId { get; set; }
         string CompanyName { get; set; }
+
+        List<string> GetRoles();
+        bool IsUserAdmin();
     }
 }

@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
-using UserManagerService.Services.Interfaces;
-using UserManagerService.Shared.Models.User;
-using System;
-using System.Linq;
 using System.Threading.Tasks;
-using UAParser;
+using UserManagerService.Services.Interfaces;
+using UserManagerService.Shared.Interfaces.Shared;
 
 namespace UserManagerService.Api.MiddleWares
 {
@@ -22,7 +19,7 @@ namespace UserManagerService.Api.MiddleWares
         /// <param name="context"></param>
         /// <param name="userService"></param>
         /// <returns></returns>
-        public async Task InvokeAsync(HttpContext context, IUserService userService) //IRealTimeHub realTimeHub
+        public async Task InvokeAsync(HttpContext context, IUserService userService, IAuthHelper authHelper) //IRealTimeHub realTimeHub
         {
             //string visitorId = context.Request.Cookies["VisitorId"];
 
@@ -33,61 +30,27 @@ namespace UserManagerService.Api.MiddleWares
             //{
             // a new visitor notification.
 
-            try {
+            var visitor = authHelper.GetVisitorInfo();
 
-                var userAgent = context.Request.Headers["User-Agent"];
+            //var id = await userService.AddVisitorAsync(visitor);
 
-                var parser = Parser.GetDefault();
-                var operatingSystem = parser.ParseOS(userAgent).ToString();
-                var accessType = parser.ParseUserAgent(userAgent).ToString();
-                var device = parser.ParseDevice(userAgent).ToString();
-                var addressIp = GetIpAddress(context);
-
-                var visitor = new VisitorModel
-                {
-                    AccessType = accessType,
-                    AddressIp = addressIp,
-                    Device = device,
-                    OperatingSystem = operatingSystem,
-                };
-            }
-            catch(Exception e)
-            {
-
-            };
-
-                //var id = await userService.AddVisitorAsync(visitor);
-
-                //context.Response.Cookies.Append("VisitorId", id.ToString(), new CookieOptions()
-                //{
-                //    Path = "/",
-                //    HttpOnly = true,
-                //    Secure = false,
-                //});
-                //Test maybe not await
-                //await realTimeHub.SendNotificationAsync(new AddNotificationModel
-                //{
-                //    LinkId = id,
-                //    To = NotificationOption.AdminAndCoaches,
-                //    Type = NotificationType.NewVisitor,
-                //    LinkParameter = id.ToString()
-                //});
+            //context.Response.Cookies.Append("VisitorId", id.ToString(), new CookieOptions()
+            //{
+            //    Path = "/",
+            //    HttpOnly = true,
+            //    Secure = false,
+            //});
+            //Test maybe not await
+            //await realTimeHub.SendNotificationAsync(new AddNotificationModel
+            //{
+            //    LinkId = id,
+            //    To = NotificationOption.AdminAndCoaches,
+            //    Type = NotificationType.NewVisitor,
+            //    LinkParameter = id.ToString()
+            //});
             //}
             await _requestDelegate(context);
 
-        }
-
-        private string GetIpAddress(HttpContext context)
-        {
-            var ipAddress = context.Connection.RemoteIpAddress;
-
-            if (ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
-            {
-                ipAddress = System.Net.Dns.GetHostEntry(ipAddress).AddressList
-                    .First(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
-            }
-
-            return ipAddress.ToString();
         }
     }
 }

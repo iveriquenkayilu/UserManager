@@ -98,7 +98,7 @@ namespace UserManagerService
             services.Configure<WebProtocolSettings>(Configuration.GetSection("WebProtocolSettings"));
             var protocols = Configuration.GetSection("WebProtocolSettings").Get<WebProtocolSettings>();
 
-            services.AddSingleton<IAuth, Auth>();
+            services.AddSingleton<IAuthHelper, AuthHelper>();
 
             services.AddAuthentication(x =>
             {

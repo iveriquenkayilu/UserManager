@@ -22,21 +22,22 @@
     <!--end::Global Stylesheets Bundle-->
 
     <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
-    <link href="~/lib/angular-datatables/plugins/bootstrap/datatables.bootstrap.min.css?@DateTime.Now.Ticks" rel="stylesheet" />
-    
+    <link href="~/lib/angular-datatables/plugins/bootstrap/datatables.bootstrap.min.css?@DateTime.Now.Ticks" rel="stylesheet" /> 
+   <link href="~/css/site.css" rel="stylesheet" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <!--end::Head-->
 <!--begin::Body-->
-<body id="kt_body" data-kt-aside-minimize="on" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled toolbar-fixed toolbar-tablet-and-mobile-fixed aside-enabled aside-fixed" style="--kt-toolbar-height:55px;--kt-toolbar-height-tablet-and-mobile:55px" ng-app="user-manager">
+@*data-kt-aside-minimize="on"*@
+@*aside-enabled aside-fixed*@
+<body id="kt_body" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled toolbar-fixed toolbar-tablet-and-mobile-fixed" style="--kt-toolbar-height:55px;--kt-toolbar-height-tablet-and-mobile:55px" ng-app="user-manager">
     <!--begin::Main-->
     <!--begin::Root-->
     <div class="d-flex flex-column flex-root">
         <!--begin::Page-->
         <div class="page d-flex flex-row flex-column-fluid">
             <!--begin::Aside-->
-
-            <partial name="_SideNav" />
+            @*<partial name="_SideNav" />*@
 
             <!--end::Aside-->
             <!--begin::Wrapper-->

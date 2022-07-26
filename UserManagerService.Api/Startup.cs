@@ -244,29 +244,29 @@ namespace UserManagerService
                 await next.Invoke();
             });
 
+            app.UseStatusCodePages(async context =>
+            {
+                var response = context.HttpContext.Response;
+
+                if ((response.StatusCode == (int)HttpStatusCode.Unauthorized ||
+             response.StatusCode == (int)HttpStatusCode.Forbidden) &&
+             !context.HttpContext.Request.Path.StartsWithSegments("/api"))
+                    response.Redirect("/Home/Login");
+
+                //if (response.StatusCode == (int)HttpStatusCode.Unauthorized ||
+                //    response.StatusCode == (int)HttpStatusCode.Forbidden)
+                //{
+                //    var message = "Unauthorized";
+                //    response.Redirect($"/Home/Error?message={message}");
+                //}
+
+
+                //return Task.CompletedTask;
+            });
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
 
-            app.UseStatusCodePages(context =>
-            {
-                var response = context.HttpContext.Response;
-
-                var isApiRequest = context.HttpContext.Request.Path.StartsWithSegments("/api");
-                
-                if (!isApiRequest)
-                {
-                    
-                    if (response.StatusCode == (int)HttpStatusCode.Unauthorized ||
-                        response.StatusCode == (int)HttpStatusCode.Forbidden)
-                    {
-                        var message = "Unauthorized";
-                        response.Redirect($"/Home/Error?message={message}");
-                    }                      
-                }
-
-                return Task.CompletedTask;
-            });
             app.UseRouting();
             //app.UseCors();
             app.UseAuthentication();

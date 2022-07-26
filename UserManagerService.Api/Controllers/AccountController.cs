@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using UserManagerService.Api.Models.Account;
 
 namespace UserManagerService.Api.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
         [HttpGet]

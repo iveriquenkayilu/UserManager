@@ -1,6 +1,9 @@
 ﻿app.controller("users", function ($scope, $http, DTOptionsBuilder, httpRequest) {
 
     $scope.init = function () {
+        $('#admin-link').addClass("active");
+        $('#users-link').addClass("active");
+
         const profile = localStorage.getItem('Profile');
         $scope.user = JSON.parse(profile);
         $scope.users = [];

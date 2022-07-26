@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using UserManagerService.Models;
 
 namespace UserManagerService.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly SignInManager<User> _signInManager;
@@ -20,9 +22,11 @@ namespace UserManagerService.Controllers
 
         public IActionResult Index() => View();
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Login() => View();
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Register() => View();
 

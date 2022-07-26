@@ -3,6 +3,9 @@
     $scope.init = function () {
         //const profile = localStorage.getItem('Profile');
         //$scope.user = JSON.parse(profile);
+        $('#admin-link').addClass("active");
+        $('#roles-link').addClass("active");
+
         $scope.roles = [];
         $scope.dateFormat = 'dd/MM/yyyy hh:mm:ss';
         $scope.auth = { accessToken: "" };

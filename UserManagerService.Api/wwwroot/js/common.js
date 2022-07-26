@@ -70,6 +70,32 @@ function setCookie(cname, cvalue, exdays) {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
+function inIframe() {
+    try {
+        return window.self !== window.top;
+    } catch (e) {
+        return true;
+    }
+}
+
+var getTokensFromLocalStorage = function () {
+    const auth = localStorage.getItem('Auth');
+    return JSON.parse(auth);
+}
+
+var sendDataToParent = function () {
+    var data = getTokensFromLocalStorage();
+    if (data) {
+        debugger;
+        const message = JSON.stringify({
+            message: 'Data from user management',
+            date: Date.now(),
+            data: data
+        });
+        window.parent.postMessage(message, '*');
+    }
+};
+
 //function setCookie(cookieName, cookieValue, daysToExpire) {
 //    let expirationDate = new Date();
 //    expirationDate.setDate(expirationDate.getDate() + daysToExpire);

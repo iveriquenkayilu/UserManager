@@ -14,6 +14,7 @@ $(document).ready(function () {
     //        window.location.href = redirectTo;
     //    }
     //}
+
     getProfileFromLocalStorage();
     var symbol = localStorage.getItem('lang');
     if (!symbol)
@@ -104,10 +105,27 @@ var changeLanguage = function (symbol) {
     window.location.reload();
 };
 
-var getTokensFromLocalStorage = function () {
-    const auth = localStorage.getItem('Auth');
-    return JSON.parse(auth);
-}
+window.addEventListener('message', function (e) {
+    debugger;
+    
+    if (inIframe()) // Can remove stuff
+    {
+        //document.getElementById('topbar').style.display = 'none';
+        //$('#topbar').removeClass('align-items-stretch flex-shrink-0');
+        $('.topbar').hide();
+        //$('#topbar').css('display', 'none');
+
+        if (e.data) {
+            console.log("User management received data");
+            const data = JSON.parse(e.data);
+            localStorage.setItem('Auth', JSON.stringify(data));
+            setCookie('Authentication', data.accessToken, 1);
+            window.location.reload();
+        }
+        if(e.data ==null)
+            sendDataToParent();
+    }
+});
 
 var getProfileFromLocalStorage = function () {
 

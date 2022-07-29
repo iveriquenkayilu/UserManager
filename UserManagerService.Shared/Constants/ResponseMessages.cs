@@ -15,6 +15,7 @@
         public const string UserNotFound = "UserNotFound";
         public const string TokensRefreshed = "TokensRefreshed";
         public const string UserProfilesFetched = "UserProfilesFetched";
+        public const string Unauthorized = "Unauthorized";
 
         #endregion
 

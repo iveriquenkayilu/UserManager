@@ -179,7 +179,6 @@ namespace UserManagerService.Api.Controllers
             }
         }
 
-        [Authorize(Roles = RoleConstants.ADMIN)]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UserInputModel input)
         {

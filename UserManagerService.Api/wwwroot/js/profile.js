@@ -30,35 +30,46 @@
             .withOption("pageLength", 7).withOption('order', [0, 'desc']);  //'<"top"Blf>tipr'
     };
 
+    $scope.edit = function () {
+        //$scope.requestInput = {
+        //    name: "",
+        //    surname: "",
+        //    email: "",
+        //    username:""
+        //};
+        $('#profileModal').modal('show');
+    };
+
     //Edit
-    $scope.addUser = function () {
+    $scope.updateProfile = function () {
         var model = angular.copy($scope.requestInput);
         debugger;
-        if (model.password != model.repeatedPassword)
-        {
-            alert2("error", "Password does not match repeated password");
-            return;
-        }           
+        // validation
+        //if (true)
+        //{
+        //    alert2("error", "");
+        //    return;
+        //}           
 
         var requestModel = {
-            method: "POST", url: domain + '/api/auth/register',
+            method: "PUT", url:'/api/users/'+$scope.user.id+'',
             errorMessage: "Failed to send request",
             model: model,
-            successCallBack: $scope.addUserCallBack,
+            successCallBack: $scope.updateProfileCallBack,
             //errorCallBack: $scope.addRequestErrorCallBack
         };
         httpRequest.send(requestModel);
     }
 
-    $scope.addUserCallBack = function (result) {
+    $scope.updateProfileCallBack = function (result) {
         debugger;
         if (result.data.error) {
             alert2("error", result.data.message);
         }
         if (result.data.error == false && result.data.data != null) {
-            $scope.users.push(result.data.data);
-            alert2("success", "User created successfully", 5000, null, 'top-right');
-            $('#usersModal').modal('hide');
+            $scope.user=(result.data.data);
+            alert2("success", "User updated successfully", 5000, null, 'top-right');
+            $('#profileModal').modal('hide');
         }        
     };
 });

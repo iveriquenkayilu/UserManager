@@ -14,7 +14,10 @@ $(document).ready(function () {
     //        window.location.href = redirectTo;
     //    }
     //}
-
+    debugger;
+    if (inIframe()) {
+        sendDataToParent();
+    }
     getProfileFromLocalStorage();
     var symbol = localStorage.getItem('lang');
     if (!symbol)

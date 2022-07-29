@@ -23,7 +23,7 @@ namespace UserManagerService.Services
     {
         private readonly SignInManager<User> _signInManager;
         private readonly IAuthHelper _authHelper;
-        public UserService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApiService> logger, IAuthHelper authHelper, SignInManager<User> signInManager) : base(userContext, unitOfWork, mapper, logger)
+        public UserService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<UserService> logger, IAuthHelper authHelper, SignInManager<User> signInManager) : base(userContext, unitOfWork, mapper, logger)
         {
             _authHelper = authHelper;
             _signInManager = signInManager;
@@ -88,6 +88,12 @@ namespace UserManagerService.Services
             Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to update user {id}");
 
             // TODO validation
+
+            if (id != UserContext.UserId)
+            {
+                Logger.LogError($"User {UserContext.UserId} cannot update user {id} info");
+                throw new CustomException(ResponseMessages.Unauthorized);
+            }
 
             var user = await UnitOfWork.Query<User>(d => d.Id == id).FirstOrDefaultAsync();
 

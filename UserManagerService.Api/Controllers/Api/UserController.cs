@@ -197,19 +197,13 @@ namespace UserManagerService.Api.Controllers
         [HttpGet("/api/me")]
         public async Task<IActionResult> Me() => Ok(await _userService.GetUserProfileAsync(_userContext.UserId));
 
-        [HttpPost("profiles/get")]
+        //[ApiKey]
+        [AllowAnonymous]
+        [HttpPost("profiles")]
         public async Task<IActionResult> Profiles([FromBody] GetUserProfilesModel input)
         {
             var profiles = await _userService.GetUserProfilesByIdsAsync(input.UserIds);
             return Ok(ResponseModel.Success(ResponseMessages.UserProfilesFetched, profiles));
-        }
-
-        [AllowAnonymous]
-        [ApiKey]
-        [HttpPost("profiles")]
-        public async Task<IActionResult> GetProfiles([FromBody] GetUserProfilesModel input)
-        {
-            return Ok(await _userService.GetUserProfilesByIdsAsync(input.UserIds));
         }
 
         [HttpPost("{UserId}/roles")]

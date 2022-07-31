@@ -233,8 +233,7 @@ namespace UserManagerService
                 app.UseMigrationsEndPoint();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));
-            }
-            app.UseCors("Policy");
+            } 
 
             app.UseMiddleware<ExceptionMiddleWare>();
             app.UseMiddleware<UserMiddleWare>();
@@ -268,17 +267,17 @@ namespace UserManagerService
             app.UseStaticFiles();
 
             app.UseRouting();
-            //app.UseCors();
+            app.UseCors("Policy");
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<SignalRHub>("/api/signalr");
+                endpoints.MapControllers();
                 endpoints.MapControllerRoute(
                    name: "default",
-                   pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapControllers();
+                   pattern: "{controller=Home}/{action=Index}/{id?}");        
             });
         }
     }

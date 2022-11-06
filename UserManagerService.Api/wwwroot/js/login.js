@@ -31,7 +31,11 @@ var login = async function () {
             localStorage.setItem('Auth', JSON.stringify(result.data));
             setCookie('Authentication', result.data.accessToken, 1);
             alert2('success', `Logged in successfully`);
-                
+
+            if (inIframe()) {
+                setTimeout(sendDataToParent(),5000);
+            }
+            else
             setTimeout(window.location.href = "/home", 3000)
             //window.location.href = "/home";
         },

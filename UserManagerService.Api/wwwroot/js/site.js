@@ -51,7 +51,8 @@ var getTranslations = function (lang) {
         //"variables": {  }
     };
 
-    var url = "https://translation.rainycorp.net/graphql";
+    var url = //"https://localhost:7001/graphql";
+        "https://translation.rainycorp.net/graphql";
 
     fetch(url, {
         method: 'POST', // or 'PUT'
@@ -107,28 +108,6 @@ var changeLanguage = function (symbol) {
     localStorage.setItem('lang', symbol);
     window.location.reload();
 };
-
-window.addEventListener('message', function (e) {
-    debugger;
-    
-    if (inIframe()) // Can remove stuff
-    {
-        //document.getElementById('topbar').style.display = 'none';
-        //$('#topbar').removeClass('align-items-stretch flex-shrink-0');
-        $('.topbar').hide();
-        //$('#topbar').css('display', 'none');
-
-        if (e.data) {
-            console.log("User management received data");
-            const data = JSON.parse(e.data);
-            localStorage.setItem('Auth', JSON.stringify(data));
-            setCookie('Authentication', data.accessToken, 1);
-            window.location.reload();
-        }
-        if(e.data ==null)
-            sendDataToParent();
-    }
-});
 
 var getProfileFromLocalStorage = function () {
 

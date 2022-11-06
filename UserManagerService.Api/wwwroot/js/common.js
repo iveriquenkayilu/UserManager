@@ -96,6 +96,28 @@ var sendDataToParent = function () {
     }
 };
 
+window.addEventListener('message', function (e) {
+    debugger;
+
+    if (inIframe()) // Can remove stuff
+    {
+        //document.getElementById('topbar').style.display = 'none';
+        //$('#topbar').removeClass('align-items-stretch flex-shrink-0');
+        $('.topbar').hide();
+        //$('#topbar').css('display', 'none');
+
+        if (e.data) {
+            console.log("User management received data");
+            const data = JSON.parse(e.data);
+            localStorage.setItem('Auth', JSON.stringify(data));
+            setCookie('Authentication', data.accessToken, 1);
+            window.location.reload();
+        }
+        if (e.data == null)
+            sendDataToParent();
+    }
+});
+
 //function setCookie(cookieName, cookieValue, daysToExpire) {
 //    let expirationDate = new Date();
 //    expirationDate.setDate(expirationDate.getDate() + daysToExpire);

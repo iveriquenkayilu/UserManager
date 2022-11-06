@@ -24,7 +24,7 @@ namespace UserManagerService.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login() => User.Identity.IsAuthenticated ? RedirectToAction(nameof(Index)) : View();
 
         [AllowAnonymous]
         [HttpGet]

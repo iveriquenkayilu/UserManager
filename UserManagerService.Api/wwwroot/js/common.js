@@ -97,7 +97,7 @@ var sendDataToParent = function () {
 };
 
 window.addEventListener('message', function (e) {
-    debugger;
+    //debugger;
 
     if (inIframe()) // Can remove stuff
     {

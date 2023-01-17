@@ -39,6 +39,18 @@ namespace OBS.UserManagementService.Domain.Helpers
 
         public AuthTokenModel CreateSecurityToken(Guid userId, string username, List<string> roles, CompanyShortModel company)
         {
+            // TODO Input validation
+
+            var accessToken = GetAccessToken(userId, username, roles, company);
+            // create refresh token
+            var refreshToken = GenerateAndCacheRefreshToken(userId);
+
+            // 5. Return Token from method
+            return new AuthTokenModel { AccessToken = accessToken.AccessToken, RefreshToken = refreshToken, Duration = _webProtocolSettings.AccessTokenExpiresInMinutes };
+        }
+
+        public AccessTokenModel GetAccessToken(Guid userId, string username, List<string> roles, CompanyShortModel company)
+        {
             if (string.IsNullOrEmpty(username))
             {
                 return null;
@@ -58,29 +70,26 @@ namespace OBS.UserManagementService.Domain.Helpers
             claims.Add(new Claim("CompanyId", company == null ? Guid.Empty.ToString() : company.Id.ToString()));
             claims.Add(new Claim("CompanyName", company == null ? "" : company.Name));
 
-            roles.ForEach(r =>
-            {
-                //claims.Add(new Claim(ClaimTypes.Role, r.NormalizedName));
-                claims.Add(new Claim(ClaimTypes.Role, r));
-            });
+            if (roles != null)
+                roles.ForEach(r =>
+                {
+                    //claims.Add(new Claim(ClaimTypes.Role, r.NormalizedName));
+                    claims.Add(new Claim(ClaimTypes.Role, r));
+                });
+
+            var expiresAt = DateTime.UtcNow.AddMinutes(_webProtocolSettings.AccessTokenExpiresInMinutes);
 
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(_webProtocolSettings.AccessTokenExpiresInMinutes),
+                Expires = expiresAt,
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
             //4. Create Token
             var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            // create refresh token
-            var refreshToken = GenerateAndCacheRefreshToken(userId);
-
-            // 5. Return Token from method
-            return new AuthTokenModel { AccessToken = tokenHandler.WriteToken(token), RefreshToken = refreshToken, Duration = _webProtocolSettings.AccessTokenExpiresInMinutes };
+            return new AccessTokenModel { AccessToken = tokenHandler.WriteToken(token), ExpiresAt = expiresAt };
         }
-
         public RefreshTokenModel GetCachedRefreshTokenWithRequestIpValidation(string refreshToken)
         {
             var token = _cache.Get<RefreshTokenModel>(refreshToken);
@@ -120,7 +129,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             return ipAddress.ToString();
         }
 
-        public  VisitorModel GetVisitorInfo()
+        public VisitorModel GetVisitorInfo()
         {
             var visitor = new VisitorModel();
             try
@@ -144,7 +153,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             }
             catch (Exception e)
             {
-                _logger.LogError("Failed  to get visitor info", e.Message,e);
+                _logger.LogError("Failed  to get visitor info", e.Message, e);
             };
 
             return visitor;

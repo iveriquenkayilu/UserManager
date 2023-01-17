@@ -20,7 +20,8 @@ namespace UserManagerService.Shared.Helpers
             CreateMap<UserRoleInputModel, UserRole>();
             CreateMap<UserRoleModel, UserRoleModel>();
 
-			CreateMap<UserProfile, MyProfile>();
-		}
+            CreateMap<UserProfile, MyProfile>();
+            CreateMap<LoginToCompanyInputModel, LoginInputModel>();
+        }
     }
 }

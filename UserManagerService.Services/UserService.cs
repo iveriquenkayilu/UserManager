@@ -144,36 +144,15 @@ namespace UserManagerService.Services
 			}).FirstOrDefaultAsync();
 		}
 
-		public async Task<LoginOutputModel> GetAuthTokenAsync(LoginModel input)
+		public async Task<AccessTokenModel> GetAuthTokenAsync(LoginInputModel input) //zero company
 		{
-			Logger.LogInformation($"User {input.Username} {input.Email} is getting the token");
-			if ((string.IsNullOrEmpty(input.Username) && string.IsNullOrEmpty(input.Email)) || string.IsNullOrEmpty(input.Password))
-				throw new CustomException(ResponseMessages.InvalidInput);
+			var user = await LoginAsync(input);
+			return _authHelper.GetAccessToken(user.Id, user.UserName, null, null);			
+		}
 
-			var user = string.IsNullOrEmpty(input.Email) ?
-				await _signInManager.UserManager.FindByNameAsync(input.Username) :
-				  await _signInManager.UserManager.FindByEmailAsync(input.Email);
-			if (user is null)
-				throw new CustomException(ResponseMessages.WrongCredentials);
-
-			var signedIn = await _signInManager.PasswordSignInAsync(user, input.Password, true, false);
-			if (signedIn.Succeeded)
-			{
-				await _signInManager.SignOutAsync(); // remove the cookie
-
-				var visitor = _authHelper.GetVisitorInfo();
-
-				var session = new LoginSession
-				{
-					Device = visitor.Device,
-					IpAdress = visitor.AddressIp,
-					Status = "200"
-				};
-				await UnitOfWork.AddAsync(session);
-				await UnitOfWork.SaveAsync();
-			}
-			else
-				throw new CustomException(ResponseMessages.AuthenticationFailed);
+		public async Task<LoginOutputModel> GetAuthTokenAsync(LoginToCompanyInputModel input) // 1 or multiple companies
+		{
+			var user = await LoginAsync(Mapper.Map<LoginInputModel>(input));
 
 			var companies = await _companyService.GetCompaniesAsync(user.Id);
 
@@ -252,5 +231,39 @@ namespace UserManagerService.Services
 			await UnitOfWork.SaveAsync();
 			return visitor.Id;
 		}
-	}
+
+        private async Task<User> LoginAsync(LoginInputModel input)
+        {
+            Logger.LogInformation($"User {input.Username} {input.Email} is getting the token");
+            if ((string.IsNullOrEmpty(input.Username) && string.IsNullOrEmpty(input.Email)) || string.IsNullOrEmpty(input.Password))
+                throw new CustomException(ResponseMessages.InvalidInput);
+
+            var user = string.IsNullOrEmpty(input.Email) ?
+                await _signInManager.UserManager.FindByNameAsync(input.Username) :
+                  await _signInManager.UserManager.FindByEmailAsync(input.Email);
+            if (user is null)
+                throw new CustomException(ResponseMessages.WrongCredentials);
+
+            var signedIn = await _signInManager.PasswordSignInAsync(user, input.Password, true, false);
+            if (signedIn.Succeeded)
+            {
+                await _signInManager.SignOutAsync(); // remove the cookie
+
+                var visitor = _authHelper.GetVisitorInfo();
+
+                var session = new LoginSession
+                {
+                    Device = visitor.Device,
+                    IpAdress = visitor.AddressIp,
+                    Status = "200"
+                };
+                await UnitOfWork.AddAsync(session);
+                await UnitOfWork.SaveAsync();
+            }
+            else
+                throw new CustomException(ResponseMessages.AuthenticationFailed);
+
+            return user;
+        }
+    }
 }

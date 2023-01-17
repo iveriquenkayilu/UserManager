@@ -41,7 +41,7 @@ namespace UserManagerService.Controllers
         //}
 
         //[HttpPost]
-        //public async Task<IActionResult> Login(LoginModel input)
+        //public async Task<IActionResult> Login(LoginToCompanyInputModel input)
         //{
         //    if (input == null) return View();
         //    if (string.IsNullOrEmpty(input.Username)) return View();

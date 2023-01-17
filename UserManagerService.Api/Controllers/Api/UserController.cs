@@ -66,8 +66,8 @@ namespace UserManagerService.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("/api/login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel input)
+        [HttpPost("/api/v2/login")] // Company Login
+        public async Task<IActionResult> Login([FromBody] LoginToCompanyInputModel input)
         {
             var output = await _userService.GetAuthTokenAsync(input);
 
@@ -81,16 +81,16 @@ namespace UserManagerService.Api.Controllers
 
         }
 
-        //[AllowAnonymous] // simple login?
-        //[HttpPost("/api/v2/login")]
-        //public async Task<IActionResult> Login([FromBody] LoginModel input)
-        //{
-        //	var output = await _userService.GetAuthTokenAsync(input);
-        //	var result = (string.IsNullOrEmpty(output.AccessToken) || string.IsNullOrEmpty(output.RefreshToken))
-        //			? ResponseModel.Fail(ResponseMessages.AuthenticationFailed)
-        //			: ResponseModel.Success(ResponseMessages.UserAuthenticated, output);
-        //	return Ok(result);
-        //}
+        [AllowAnonymous]
+        [HttpPost("/api/v1/login")] // Simple
+        public async Task<IActionResult> Login([FromBody] LoginInputModel input)
+        {
+            var output = await _userService.GetAuthTokenAsync(input);
+            var result = (string.IsNullOrEmpty(output.AccessToken))
+                    ? ResponseModel.Fail(ResponseMessages.AuthenticationFailed)
+                    : ResponseModel.Success(ResponseMessages.UserAuthenticated, output);
+            return Ok(result);
+        }
 
         [AllowAnonymous]
         [HttpPost("/api/refresh-token")]

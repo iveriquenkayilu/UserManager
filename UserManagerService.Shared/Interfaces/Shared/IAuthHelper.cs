@@ -12,5 +12,6 @@ namespace UserManagerService.Shared.Interfaces.Shared
         RefreshTokenModel GetCachedRefreshTokenWithRequestIpValidation(string refreshToken);
         string GetRequestIPAddress();
         VisitorModel GetVisitorInfo();
+        AccessTokenModel GetAccessToken(Guid userId, string username, List<string> roles, CompanyShortModel company);
     }
 }

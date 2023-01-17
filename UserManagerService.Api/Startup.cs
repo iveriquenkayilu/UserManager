@@ -85,6 +85,7 @@ namespace UserManagerService
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<SimpleRoleService>();
             services.AddScoped<IUnitOfWork, UnitOfWork<ApplicationDbContext>>();
             services.AddScoped<IApiService, ApiService>();
 
@@ -154,7 +155,6 @@ namespace UserManagerService
                     //id = Guid.Parse(userId);
 
                     var user = (userManager.FindByIdAsync(userId.ToString())).Result;
-                    var roles = (userManager.GetRolesAsync(user).Result).ToList();
 
                     var companyId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
                     .Where(c => c.Type == "CompanyId")
@@ -163,6 +163,13 @@ namespace UserManagerService
                     var companyName = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
                     .Where(c => c.Type == "CompanyName")
                     .Select(c => c.Value).FirstOrDefault();
+
+                    var roles = (userManager.GetRolesAsync(user).Result).ToList();
+                    if (companyId != Guid.Empty || userId != Guid.Empty)
+                    {
+                        var roleService = c.GetRequiredService<SimpleRoleService>();
+                        var r = roleService.GetUserRolesAsync(userId, companyId).Result;
+                    }
 
                     return new UserContext(userId, user.UserName, roles, companyId, companyName);
                 }
@@ -233,7 +240,7 @@ namespace UserManagerService
                 app.UseMigrationsEndPoint();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));
-            } 
+            }
 
             app.UseMiddleware<ExceptionMiddleWare>();
             app.UseMiddleware<UserMiddleWare>();
@@ -277,7 +284,7 @@ namespace UserManagerService
                 endpoints.MapControllers();
                 endpoints.MapControllerRoute(
                    name: "default",
-                   pattern: "{controller=Home}/{action=Index}/{id?}");        
+                   pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

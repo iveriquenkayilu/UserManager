@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace UserManagerService.Shared.Models.User
 {
-    public class LoginModel
+    public class LoginToCompanyInputModel
     {
         public string Email { get; set; }
         public string Username { get; set; }

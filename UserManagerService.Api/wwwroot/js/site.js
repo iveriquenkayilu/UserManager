@@ -14,7 +14,7 @@ $(document).ready(function () {
     //        window.location.href = redirectTo;
     //    }
     //}
-    debugger;
+   
     if (inIframe()) {
         sendDataToParent();
     }

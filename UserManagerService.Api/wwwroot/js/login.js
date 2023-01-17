@@ -10,7 +10,7 @@ var login = async function () {
         Password: $('#Password').val()
     };
     var jsonStringData = JSON.stringify(bodyData);
-    var url ="/api/login";
+    var url ="/api/v2/login";
 
     $.ajax({
         method: "POST",

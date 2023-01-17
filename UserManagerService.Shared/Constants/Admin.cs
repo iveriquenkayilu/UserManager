@@ -7,7 +7,7 @@
         public const string DefaultPassword = "CnVw+bxSSK4ZuTXUgUeCGQ==";
         public const string FirstName = "Admin";
         public const string LastName = "Admin";
-        public const string OrganizationName = "AdminOrganization";
-        public const string OrganizationType = "AdminOrganization";
-    }
+		public const string DefaultCompany = "DefaultCompany";
+		public const string DefaultCompanyType = "Default";
+	}
 }

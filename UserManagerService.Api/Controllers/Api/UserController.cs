@@ -7,11 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UserManagerService.Api.Attributes;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
 using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Constants;
+using UserManagerService.Shared.Exceptions;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Interfaces.Shared;
 using UserManagerService.Shared.Models;
@@ -69,12 +69,28 @@ namespace UserManagerService.Api.Controllers
         [HttpPost("/api/login")]
         public async Task<IActionResult> Login([FromBody] LoginModel input)
         {
-            var tokens = await _userService.GetAuthTokenAsync(input);
-            var result = (string.IsNullOrEmpty(tokens.AccessToken) || string.IsNullOrEmpty(tokens.RefreshToken))
-                    ? ResponseModel.Fail(ResponseMessages.AuthenticationFailed)
-                    : ResponseModel.Success(ResponseMessages.UserAuthenticated, tokens);
-            return Ok(result);
+            var output = await _userService.GetAuthTokenAsync(input);
+
+            if (output.Companies is not null)
+                return CustomResponse.Success(ResponseMessages.UserAuthenticated, output.Companies);
+
+            if (string.IsNullOrEmpty(output.AuthTokens.AccessToken) || string.IsNullOrEmpty(output.AuthTokens.RefreshToken))
+                return CustomResponse.Fail(ResponseMessages.AuthenticationFailed);
+            else
+                return CustomResponse.Success(ResponseMessages.UserAuthenticated, output.AuthTokens);
+
         }
+
+        //[AllowAnonymous] // simple login?
+        //[HttpPost("/api/v2/login")]
+        //public async Task<IActionResult> Login([FromBody] LoginModel input)
+        //{
+        //	var output = await _userService.GetAuthTokenAsync(input);
+        //	var result = (string.IsNullOrEmpty(output.AccessToken) || string.IsNullOrEmpty(output.RefreshToken))
+        //			? ResponseModel.Fail(ResponseMessages.AuthenticationFailed)
+        //			: ResponseModel.Success(ResponseMessages.UserAuthenticated, output);
+        //	return Ok(result);
+        //}
 
         [AllowAnonymous]
         [HttpPost("/api/refresh-token")]
@@ -95,13 +111,16 @@ namespace UserManagerService.Api.Controllers
             if (user is null)
                 return Ok(ResponseModel.Fail(ResponseMessages.UserNotFound));
 
-            var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
-            var company = await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id)
+            var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user); // TODO get roles with company always, Make role:companyId
+            var company = await _unitOfWork.Query<CompanyUser>(o => o.UserId == user.Id && o.CompanyId == input.CompanyId)
                     .Include(o => o.Company).Select(o => new CompanyShortModel
                     {
                         Id = o.Company.Id,
                         Name = o.Company.Name
-                    }).FirstOrDefaultAsync();
+                    }).SingleOrDefaultAsync();
+
+            if (company is null)
+                throw new CustomException(ResponseMessages.RefreshTokenFailed);
 
             var tokens = _auth.CreateSecurityToken(user.Id, user.UserName, roles, company);
 
@@ -165,8 +184,7 @@ namespace UserManagerService.Api.Controllers
                     Id = user.Id,
                     Name = user.Name,
                     Username = user.UserName,
-                    Surname = user.Surname,
-                    CompanyId = input.CompanyId
+                    Surname = user.Surname
                 };
                 return Ok(ResponseModel.Success(ResponseMessages.UserCreated, model));
             }
@@ -195,7 +213,7 @@ namespace UserManagerService.Api.Controllers
         }
 
         [HttpGet("/api/me")]
-        public async Task<IActionResult> Me() => Ok(await _userService.GetUserProfileAsync(_userContext.UserId));
+        public async Task<IActionResult> Me() => Ok(await _userService.GetMyProfileAsync(_userContext.UserId));
 
         //[ApiKey]
         [AllowAnonymous]

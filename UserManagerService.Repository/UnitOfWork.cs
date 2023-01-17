@@ -14,170 +14,176 @@ using UserManagerService.Shared.Interfaces.Services;
 
 namespace UserManagerService.Repository
 {
-    public class UnitOfWork<TContext> : IUnitOfWork where TContext : DbContext
-    {
-        private bool _disposed;
-        private readonly TContext _context;
-        private readonly IUserContext _userContext;
-        private readonly ILogger<UnitOfWork<TContext>> _logger;
+	public class UnitOfWork<TContext> : IUnitOfWork where TContext : DbContext
+	{
+		private bool _disposed;
+		private readonly TContext _context;
+		private readonly IUserContext _userContext;
+		private readonly ILogger<UnitOfWork<TContext>> _logger;
 
-        public UnitOfWork(TContext dbContext, ILogger<UnitOfWork<TContext>> logger, IUserContext userContext)
-        {
-            _context = dbContext;
-            _logger = logger;
-            _userContext = userContext;
-        }
-
-
-        public virtual List<T> Get<T>() where T : class, IBaseEntity => _context.Set<T>().ToList();
+		public UnitOfWork(TContext dbContext, ILogger<UnitOfWork<TContext>> logger, IUserContext userContext)
+		{
+			_context = dbContext;
+			_logger = logger;
+			_userContext = userContext;
+		}
 
 
-        public virtual List<T> Get<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity => Query(expression).ToList();
+		public virtual List<T> Get<T>() where T : class, IBaseEntity => _context.Set<T>().ToList();
 
 
-        public virtual void Add<T>(T entity) where T : class, IBaseEntity
-        {
-            entity.CreatedAt = DateTime.Now;
-            _context.Add(entity);
-        }
-
-        public Task<List<T>> GetAsync<T>() where T : class, IBaseEntity => _context.Set<T>().ToListAsync();
-        public Task<T> GetAsync<T>(Guid id) where T : class, IBaseEntity => _context.Set<T>().FirstOrDefaultAsync();
+		public virtual List<T> Get<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity => Query(expression).ToList();
 
 
-        public async Task<T> AddAsync<T>(T entity) where T : class, IBaseEntity
-        {
-            entity.CreatedAt = DateTime.Now;
-            if (entity.CreatorId == Guid.Empty)
-                entity.CreatorId = _userContext.UserId;
+		public virtual void Add<T>(T entity) where T : class, IBaseEntity
+		{
+			entity.CreatedAt = DateTime.Now;
+			_context.Add(entity);
+		}
 
-            await _context.AddAsync(entity);
-            return entity;
-        }
+		public Task<List<T>> GetAsync<T>() where T : class, IBaseEntity => _context.Set<T>().ToListAsync();
+		public Task<T> GetAsync<T>(Guid id) where T : class, IBaseEntity => _context.Set<T>().FirstOrDefaultAsync();
 
-        public virtual void Update<T>(T entity) where T : class, IBaseEntity
-        {
 
-            _context.Update(entity);
-        }
+		public async Task<T> AddAsync<T>(T entity) where T : class, IBaseEntity
+		{
+			entity.CreatedAt = DateTime.Now;
+			if (entity.CreatorId == Guid.Empty)
+				entity.CreatorId = _userContext.UserId;
 
-        public void UpdateRange<T>(IEnumerable<T> entities) where T : class, IBaseEntity => _context.UpdateRange(entities);
+			await _context.AddAsync(entity);
+			return entity;
+		}
 
-        public virtual void Delete<T>(T entity) where T : class, IBaseEntity => _context.Remove(entity);
+		public virtual void Update<T>(T entity) where T : class, IBaseEntity
+		{
 
-        public Task<List<T>> GetAsync<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
-            _context.Set<T>().Where(expression).ToListAsync();
-        public virtual void SoftDelete<T>(T entity) where T : class, IBaseEntity
-        {
-            entity.UpdatedAt = DateTime.Now;
-            entity.DeletedAt = DateTime.Now;
-            Update(entity);
-        }
+			_context.Update(entity);
+		}
 
-        public async Task SoftDeleteEntityAsync<T>(Guid id) where T : class, IBaseEntity
-        {
-            var documentType = await Query<T>(d => d.Id == id).FirstOrDefaultAsync();
+		public void UpdateRange<T>(IEnumerable<T> entities) where T : class, IBaseEntity => _context.UpdateRange(entities);
 
-            if (documentType is null)
-                throw new CustomException($"{nameof(T)} {id} not found");
+		public virtual void Delete<T>(T entity) where T : class, IBaseEntity => _context.Remove(entity);
 
-            SoftDelete(documentType);
-            await SaveAsync();
-        }
+		public Task<List<T>> GetAsync<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
+			_context.Set<T>().Where(expression).ToListAsync();
+		public virtual void SoftDelete<T>(T entity) where T : class, IBaseEntity
+		{
+			entity.UpdatedAt = DateTime.Now;
+			entity.DeletedAt = DateTime.Now;
+			Update(entity);
+		}
 
-        public async Task SoftDeleteEntityAsync<T>(Guid id, Guid userId) where T : class, IBaseEntity
-        {
-            var documentType = await Query<T>(d => d.Id == id).FirstOrDefaultAsync();
+		public async Task SoftDeleteEntityAsync<T>(Guid id) where T : class, IBaseEntity
+		{
+			var documentType = await Query<T>(d => d.Id == id).FirstOrDefaultAsync();
 
-            if (documentType is null)
-                throw new CustomException($"{nameof(T)} {id} not found");
+			if (documentType is null)
+				throw new CustomException($"{nameof(T)} {id} not found");
 
-            //documentType.UpdatedBy = userId;
+			SoftDelete(documentType);
+			await SaveAsync();
+		}
 
-            SoftDelete(documentType);
-            await SaveAsync();
-        }
+		public async Task SoftDeleteEntityAsync<T>(Guid id, Guid userId) where T : class, IBaseEntity
+		{
+			var documentType = await Query<T>(d => d.Id == id).FirstOrDefaultAsync();
 
-        public virtual T FirstOrDefault<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
-            Query(expression).FirstOrDefault();
+			if (documentType is null)
+				throw new CustomException($"{nameof(T)} {id} not found");
 
-        public virtual Task<T> FirstOrDefaultAsync<T>(Expression<Func<T, bool>> expression)
-            where T : class, IBaseEntity => Query(expression).FirstOrDefaultAsync();
+			//documentType.UpdatedBy = userId;
 
-        public virtual IQueryable<T> Query<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity => _context.Set<T>().Where(e => e.DeletedAt == null).Where(expression);
+			SoftDelete(documentType);
+			await SaveAsync();
+		}
 
-        public virtual IQueryable<T> Query<T>() where T : class, IBaseEntity => Query<T>(e => true);
+		public virtual T FirstOrDefault<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
+			Query(expression).FirstOrDefault();
 
-        public Task<bool> AnyAsync<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
-            Query<T>().AnyAsync(expression);
+		public virtual Task<T> FirstOrDefaultAsync<T>(Expression<Func<T, bool>> expression)
+			where T : class, IBaseEntity => Query(expression).FirstOrDefaultAsync();
 
-        public void Save() => _context.SaveChanges();
-        public virtual Task SaveAsync() => _context.SaveChangesAsync();
+		public virtual IQueryable<T> Query<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity => _context.Set<T>().Where(e => e.DeletedAt == null).Where(expression);
 
-        public Task AddRangeAsync<T>(IEnumerable<T> entities) where T : class, IBaseEntity => _context.AddRangeAsync(entities);
 
-        /// <summary>
-        /// Executes the in transaction asynchronously.
-        /// </summary>
-        /// <param name="action">The action.</param>
-        /// <param name="isolationLevel">The isolation level.</param>
-        /// <returns></returns>
-        public virtual Task ExecuteInTransactionAsync(Func<IUnitOfWork, Task> action, IsolationLevel isolationLevel)
-        {
-            IExecutionStrategy strategy = _context.Database.CreateExecutionStrategy();
+		public virtual IQueryable<T> Query<T>() where T : class, IBaseEntity => Query<T>(e => true);
+		public virtual IQueryable<T> QueryByCompanyId<T>(Expression<Func<T, bool>> expression) where T : class, IBaseCompanyEntity
+		  => _context.Set<T>().Where(e => e.DeletedAt == null && e.CompanyId == _userContext.CompanyId).Where(expression);
 
-            return strategy.ExecuteAsync(async () =>
-            {
-                using (IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync(isolationLevel))
-                {
-                    try
-                    {
-                        // Execute the action itself
-                        await action(this);
+		public virtual IQueryable<T> QueryByCompanyId<T>() where T : class, IBaseCompanyEntity
+		  => QueryByCompanyId<T>(e => true);
 
-                        // save changes.
-                        await SaveAsync();
+		public Task<bool> AnyAsync<T>(Expression<Func<T, bool>> expression) where T : class, IBaseEntity =>
+			Query<T>().AnyAsync(expression);
 
-                        transaction.Commit();
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(e, "Transaction failed while creating an execution strategy.");
-                        _logger.LogWarning("Trying to rollback...");
-                        transaction.Rollback();
-                        _logger.LogWarning("Rollback successfully!");
-                        throw;
-                    }
-                }
-            });
-        }
+		public void Save() => _context.SaveChanges();
+		public virtual Task SaveAsync() => _context.SaveChangesAsync();
 
-        /// <summary>
-        /// Executes the in transaction asynchronously.
-        /// </summary>
-        /// <param name="action">The action.</param>
-        /// <returns></returns>
-        public virtual Task ExecuteInTransactionAsync(Func<IUnitOfWork, Task> action) => ExecuteInTransactionAsync(action, IsolationLevel.ReadCommitted);
+		public Task AddRangeAsync<T>(IEnumerable<T> entities) where T : class, IBaseEntity => _context.AddRangeAsync(entities);
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed && disposing)
-            {
-                _disposed = true;
-                _context.Dispose();
-            }
-        }
-    }
+		/// <summary>
+		/// Executes the in transaction asynchronously.
+		/// </summary>
+		/// <param name="action">The action.</param>
+		/// <param name="isolationLevel">The isolation level.</param>
+		/// <returns></returns>
+		public virtual Task ExecuteInTransactionAsync(Func<IUnitOfWork, Task> action, IsolationLevel isolationLevel)
+		{
+			IExecutionStrategy strategy = _context.Database.CreateExecutionStrategy();
+
+			return strategy.ExecuteAsync(async () =>
+			{
+				using (IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync(isolationLevel))
+				{
+					try
+					{
+						// Execute the action itself
+						await action(this);
+
+						// save changes.
+						await SaveAsync();
+
+						transaction.Commit();
+					}
+					catch (Exception e)
+					{
+						_logger.LogError(e, "Transaction failed while creating an execution strategy.");
+						_logger.LogWarning("Trying to rollback...");
+						transaction.Rollback();
+						_logger.LogWarning("Rollback successfully!");
+						throw;
+					}
+				}
+			});
+		}
+
+		/// <summary>
+		/// Executes the in transaction asynchronously.
+		/// </summary>
+		/// <param name="action">The action.</param>
+		/// <returns></returns>
+		public virtual Task ExecuteInTransactionAsync(Func<IUnitOfWork, Task> action) => ExecuteInTransactionAsync(action, IsolationLevel.ReadCommitted);
+
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+		/// <summary>
+		/// Releases unmanaged and - optionally - managed resources.
+		/// </summary>
+		/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!_disposed && disposing)
+			{
+				_disposed = true;
+				_context.Dispose();
+			}
+		}
+	}
 }

@@ -9,8 +9,6 @@ namespace UserManagerService.Shared.Models.User
         public string Email { get; set; }
         public string Name { get; set; }
         public string Surname { get; set; }
-        public Guid CompanyId { get; set; }
-        public string CompanyName { get; set; }
         public string Picture { get; set; }
     }
 }

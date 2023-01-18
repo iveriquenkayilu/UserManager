@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace UserManagerService.Repository.Migrations
 {
-    public partial class mysqlinitial : Migration
+    public partial class mysql_initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

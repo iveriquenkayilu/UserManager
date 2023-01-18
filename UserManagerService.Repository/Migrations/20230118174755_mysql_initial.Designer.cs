@@ -11,8 +11,8 @@ using UserManagerService.Repository;
 namespace UserManagerService.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230118172342_modified_typo_login_sessions_table")]
-    partial class modified_typo_login_sessions_table
+    [Migration("20230118174755_mysql_initial")]
+    partial class mysql_initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

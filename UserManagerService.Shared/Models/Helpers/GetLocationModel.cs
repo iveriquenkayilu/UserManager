@@ -5,6 +5,7 @@ namespace UserManagerService.Shared.Models.Helpers
     public class GetLocationModel
     {
         public string Location { get; set; }
+        public string JSON { get; set; }
         public string ip { get; set; }
         public bool success { get; set; }
         public string type { get; set; }

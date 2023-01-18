@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -171,13 +172,20 @@ namespace OBS.UserManagementService.Domain.Helpers
                 return new GetLocationModel { Location = "In your Network" };
 
             var url = $"https://ipwho.is/{ip}";
-            var location = new GetLocationModel();
+            var location = new GetLocationModel { Location = "Location Not Found" };
             try
             {
                 var result = await _httpOrchestrator.GetAsync<GetLocationModel>(url);
-                //var data = JsonConvert.DeserializeObject<ResponseModel<List<UserProfileModel>>>(result);
-                location = result;
-                location.Location = result.city;
+
+                if (!result.success)
+                    return location;
+                else
+                {
+                    location = result;
+                    location.JSON = JsonConvert.SerializeObject(result);
+                    location.Location = $"{result.city} {result.country} {result.continent}, lat: {result.latitude} lng: {result.longitude}";
+                    _logger.LogInformation($"{ip} location: {location.Location}");
+                }
 
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)

@@ -11,7 +11,7 @@ using UserManagerService.Repository;
 namespace UserManagerService.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230117200827_mysql-initial")]
+    [Migration("20230118102413_mysql-initial")]
     partial class mysqlinitial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

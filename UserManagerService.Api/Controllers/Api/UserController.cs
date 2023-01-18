@@ -215,6 +215,13 @@ namespace UserManagerService.Api.Controllers
         [HttpGet("/api/me")]
         public async Task<IActionResult> Me() => Ok(await _userService.GetMyProfileAsync(_userContext.UserId));
 
+        [HttpGet("/api/sessions")]
+        public async Task<IActionResult> LoginHistory()
+        {
+            var loginHistory = await _userService.GetLoginSessionsAsync();
+            return CustomResponse.Success("Login history fetched successfully", loginHistory);
+        }
+
         //[ApiKey]
         [AllowAnonymous]
         [HttpPost("profiles")]

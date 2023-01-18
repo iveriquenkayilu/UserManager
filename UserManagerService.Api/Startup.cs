@@ -25,6 +25,7 @@ using UserManagerService.Services;
 using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Helpers;
 using UserManagerService.Shared.Hubs;
+using UserManagerService.Shared.Interfaces.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Interfaces.Shared;
 using UserManagerService.Shared.Settings;
@@ -81,13 +82,15 @@ namespace UserManagerService
             });
             // registers Repository services
 
-            //services.AddScoped<IHttpOrchestrator, HttpOrchestrator>();
+
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<SimpleRoleService>();
             services.AddScoped<IUnitOfWork, UnitOfWork<ApplicationDbContext>>();
             services.AddScoped<IApiService, ApiService>();
+
+            services.AddSingleton<IHttpOrchestrator, HttpOrchestrator>();
 
             // registers AutoMapper
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);

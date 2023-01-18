@@ -1,7 +1,7 @@
 ﻿app.controller("profile", function ($scope, $http, DTOptionsBuilder, httpRequest) {
 
     $scope.init = function (id = null) {
-        $('#profile-link').addClass("active");
+        //$('#profile-link').addClass("active");
 
         const profile = localStorage.getItem('Profile');
         $scope.user = JSON.parse(profile);

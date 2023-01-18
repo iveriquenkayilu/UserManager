@@ -71,7 +71,6 @@ namespace UserManagerService.Services
         {
             var user = await UnitOfWork.Query<User>(u => u.Id == id).FirstOrDefaultAsync();
 
-
             return Mapper.Map<UserModel>(user);
         }
 
@@ -197,6 +196,22 @@ namespace UserManagerService.Services
             UnitOfWork.Delete<Visitor>(visitor);  // test if needs to save
         }
 
+        public async Task<List<LoginSessionModel>> GetLoginSessionsAsync()
+        {
+            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to get their login history");
+
+            return await UnitOfWork.Query<LoginSession>(l => l.CreatorId == UserContext.UserId)
+                .Select(l => new LoginSessionModel
+                {
+                    CreatedAt = l.CreatedAt,
+                    Device = l.Device,
+                    IpAddress = l.IpAdress,
+                    Location = l.Location,
+                    Status = l.Status,
+                    Id = l.Id
+                }).ToListAsync();
+        }
+
         /// <summary>
         /// Checks if the visitor exists.
         /// </summary>
@@ -262,12 +277,14 @@ namespace UserManagerService.Services
                 await _signInManager.SignOutAsync(); // remove the cookie
 
                 var visitor = _authHelper.GetVisitorInfo();
+                var location = await _authHelper.GetIpAddressLocation(visitor.AddressIp);
 
                 var session = new LoginSession
                 {
                     Device = visitor.Device,
                     IpAdress = visitor.AddressIp,
-                    Status = "200"
+                    Status = "200",
+                    Location = location.Location
                 };
                 await UnitOfWork.AddAsync(session);
                 await UnitOfWork.SaveAsync();

@@ -10,9 +10,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using UAParser;
+using UserManagerService.Shared.Interfaces.Helpers;
 using UserManagerService.Shared.Interfaces.Shared;
 using UserManagerService.Shared.Models.Company;
+using UserManagerService.Shared.Models.Helpers;
 using UserManagerService.Shared.Models.User;
 using UserManagerService.Shared.Settings;
 
@@ -21,10 +24,11 @@ namespace OBS.UserManagementService.Domain.Helpers
     public class AuthHelper : IAuthHelper
     {
         private readonly WebProtocolSettings _webProtocolSettings;
+        private readonly IHttpOrchestrator _httpOrchestrator;
         private readonly IMemoryCache _cache;
         private readonly IHttpContextAccessor _httpContext;
         private readonly ILogger<AuthHelper> _logger;
-        public AuthHelper(IOptions<WebProtocolSettings> webProtocolSettings, IMemoryCache cache, IHttpContextAccessor httpContext, ILogger<AuthHelper> logger)
+        public AuthHelper(IOptions<WebProtocolSettings> webProtocolSettings, IHttpOrchestrator httpOrchestrator, IMemoryCache cache, IHttpContextAccessor httpContext, ILogger<AuthHelper> logger)
         {
             if (webProtocolSettings.Value.AccessTokenExpiresInMinutes <= 0)
                 throw new Exception("Access Token cannot expire after a nonpositive minute value");
@@ -34,6 +38,7 @@ namespace OBS.UserManagementService.Domain.Helpers
             _webProtocolSettings = webProtocolSettings.Value;
             _cache = cache;
             _httpContext = httpContext;
+            _httpOrchestrator = httpOrchestrator;
             _logger = logger;
         }
 
@@ -157,6 +162,51 @@ namespace OBS.UserManagementService.Domain.Helpers
             };
 
             return visitor;
+        }
+
+        public async Task<GetLocationModel> GetIpAddressLocation(string ip)
+        {
+
+            if (IsPrivateIPAdrress(ip))
+                return new GetLocationModel { Location = "In your Network" };
+
+            var url = $"https://ipwho.is/{ip}";
+            var location = new GetLocationModel();
+            try
+            {
+                var result = await _httpOrchestrator.GetAsync<GetLocationModel>(url);
+                //var data = JsonConvert.DeserializeObject<ResponseModel<List<UserProfileModel>>>(result);
+                location = result;
+                location.Location = result.city;
+
+            }
+            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+            {
+                // Handle timeout.
+                Console.WriteLine("Timed out: " + ex.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation("Error occured: " + e.Message, e);
+            };
+            return location;
+        }
+
+        private bool IsPrivateIPAdrress(string ipAddress)
+        {
+            int[] ipParts = ipAddress.Split(new String[] { "." }, StringSplitOptions.RemoveEmptyEntries)
+                                     .Select(s => int.Parse(s)).ToArray();
+            // in private ip range
+            if (ipParts[0] == 10 ||
+                (ipParts[0] == 192 && ipParts[1] == 168) ||
+                (ipParts[0] == 172 && (ipParts[1] >= 16 && ipParts[1] <= 31)))
+            {
+                return true;
+            }
+
+            // IP Address is probably public.
+            // This doesn't catch some VPN ranges like OpenVPN and Hamachi.
+            return false;
         }
         private string GenerateAndCacheRefreshToken(Guid userId)
         {

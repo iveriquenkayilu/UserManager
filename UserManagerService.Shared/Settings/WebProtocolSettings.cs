@@ -15,5 +15,7 @@ namespace UserManagerService.Shared.Settings
         public int AccessTokenExpiresInMinutes { get; set; }
         public int RefreshTokenExpiresInMinutes { get; set; }
         public List<string> CorsUrls { get; set; }
+
+        public int InstanceId { get; set; }
     }
 }

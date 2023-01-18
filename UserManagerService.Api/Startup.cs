@@ -246,7 +246,11 @@ namespace UserManagerService
             app.UseMiddleware<UserMiddleWare>();
             app.Use(async (context, next) =>
             {
-                context.Response.Headers.Add("Service", "UMS");
+                var protocols = Configuration.GetSection("WebProtocolSettings").Get<WebProtocolSettings>();
+                if (protocols.InstanceId == 0)
+                    context.Response.Headers.Add("Service", "UMS");
+                else
+                    context.Response.Headers.Add("Service", $"UMS-{protocols.InstanceId}");
                 await next.Invoke();
             });
 

@@ -15,7 +15,6 @@ namespace UserManagerService.Repository
 
         public DbSet<Visitor> Visitors { get; set; }
         public DbSet<Company> Companies { get; set; }
-        public DbSet<CompanyType> CompanyTypes { get; set; }
         public DbSet<CompanyUser> CompanyUsers { get; set; }
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<ContactType> ContactTypes { get; set; }
@@ -59,12 +58,6 @@ namespace UserManagerService.Repository
                 uk.HasKey(u => new { u.UserId, u.Value });
 
                 uk.HasOne(u => u.User).WithMany().HasForeignKey(u => u.UserId);
-            });
-
-            builder.Entity<Company>(o =>
-            {
-                o.HasOne(u => u.CompanyType).WithMany().HasForeignKey(u => u.CompanyTypeId)
-                                .OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<CompanyUser>(o =>

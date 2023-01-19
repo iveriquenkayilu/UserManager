@@ -146,9 +146,6 @@ namespace UserManagerService.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("CompanyTypeId")
-                        .HasColumnType("char(36)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -164,6 +161,9 @@ namespace UserManagerService.Repository.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -171,39 +171,8 @@ namespace UserManagerService.Repository.Migrations
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CompanyTypeId");
 
                     b.ToTable("Companies");
-                });
-
-            modelBuilder.Entity("UserManagerService.Entities.CompanyType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("CreatorId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CompanyTypes");
                 });
 
             modelBuilder.Entity("UserManagerService.Entities.CompanyUser", b =>
@@ -336,7 +305,7 @@ namespace UserManagerService.Repository.Migrations
                     b.Property<string>("Device")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("IpAdress")
+                    b.Property<string>("IpAddress")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Location")
@@ -748,17 +717,6 @@ namespace UserManagerService.Repository.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("UserManagerService.Entities.Company", b =>
-                {
-                    b.HasOne("UserManagerService.Entities.CompanyType", "CompanyType")
-                        .WithMany()
-                        .HasForeignKey("CompanyTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CompanyType");
                 });
 
             modelBuilder.Entity("UserManagerService.Entities.CompanyUser", b =>

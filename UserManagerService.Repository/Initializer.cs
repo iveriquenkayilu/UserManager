@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UserManagerService.Entities;
+using UserManagerService.Entities.Datatypes;
 using UserManagerService.Shared.Constants;
 
 namespace UserManagerService.Repository
@@ -103,18 +104,10 @@ namespace UserManagerService.Repository
 
 		private async Task<Guid> CreateDefaultCompanyAsync()
 		{
-			if (!await _dbContext.CompanyTypes.AnyAsync())
-			{
-				var type = new CompanyType { Name = Admin.DefaultCompanyType };
-				await _dbContext.AddAsync(type);
-				await _dbContext.SaveChangesAsync();
-			}
 
 			if (!await _dbContext.Companies.AnyAsync())
 			{
-				var typeId = (await _dbContext.CompanyTypes.Where(o => o.Name == Admin.DefaultCompanyType).SingleOrDefaultAsync()).Id;
-
-				var organization = new Company { Name = Admin.DefaultCompany, CompanyTypeId = typeId };
+				var organization = new Company { Name = Admin.DefaultCompany, Type = CompanyTypeOption.LLC };
 				await _dbContext.AddAsync(organization);
 				await _dbContext.SaveChangesAsync();
 			}

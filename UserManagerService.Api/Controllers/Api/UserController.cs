@@ -184,7 +184,8 @@ namespace UserManagerService.Api.Controllers
                     Id = user.Id,
                     Name = user.Name,
                     Username = user.UserName,
-                    Surname = user.Surname
+                    Surname = user.Surname,
+                    Email = user.Email
                 };
                 return Ok(ResponseModel.Success(ResponseMessages.UserCreated, model));
             }
@@ -216,9 +217,9 @@ namespace UserManagerService.Api.Controllers
         public async Task<IActionResult> Me() => Ok(await _userService.GetMyProfileAsync(_userContext.UserId));
 
         [HttpGet("/api/sessions")]
-        public async Task<IActionResult> LoginHistory()
+        public async Task<IActionResult> LoginHistory([FromQuery] LoginSessionInputModel input)
         {
-            var loginHistory = await _userService.GetLoginSessionsAsync();
+            var loginHistory = await _userService.GetLoginSessionsAsync(input);
             return CustomResponse.Success("Login history fetched successfully", loginHistory);
         }
 

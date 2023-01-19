@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
@@ -196,16 +197,21 @@ namespace UserManagerService.Services
             UnitOfWork.Delete<Visitor>(visitor);  // test if needs to save
         }
 
-        public async Task<List<LoginSessionModel>> GetLoginSessionsAsync()
+        public async Task<List<LoginSessionModel>> GetLoginSessionsAsync(LoginSessionInputModel input)
         {
             Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to get their login history");
 
+            Expression<Func<LoginSession, bool>> predicate = l =>
+            (input.StartDate != null && input.EndDate != null) ?
+                l.CreatedAt <= input.EndDate && l.CreatedAt >= input.StartDate : true;
+
             return await UnitOfWork.Query<LoginSession>(l => l.CreatorId == UserContext.UserId)
+                .Where(predicate)
                 .Select(l => new LoginSessionModel
                 {
                     CreatedAt = l.CreatedAt,
                     Device = l.Device,
-                    IpAddress = l.IpAdress,
+                    IpAddress = l.IpAddress,
                     Location = l.Location,
                     Status = l.Status,
                     Id = l.Id
@@ -282,7 +288,7 @@ namespace UserManagerService.Services
                 var session = new LoginSession
                 {
                     Device = visitor.Device,
-                    IpAdress = visitor.AddressIp,
+                    IpAddress = visitor.AddressIp,
                     Status = "200",
                     Location = location.Location
                 };

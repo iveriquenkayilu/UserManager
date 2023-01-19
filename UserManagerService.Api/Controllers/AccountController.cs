@@ -15,7 +15,7 @@ namespace UserManagerService.Api.Controllers
         public IActionResult Profile() => View(nameof(Index));
 
         //[HttpGet("/Account/Edit/{userId}")]
-        [HttpGet("{userId}")]
+        [HttpGet]
         public IActionResult Edit(Guid userId) => View(new EditAccountModel { UserId = userId });
     }
 }

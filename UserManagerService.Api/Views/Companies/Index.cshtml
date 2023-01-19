@@ -1,0 +1,96 @@
+﻿
+@{
+    ViewData["Title"] = "Companies";
+    ViewData["Section"] = "User Management";
+}
+
+<h5>Companies</h5>
+
+<!--begin::Card-->
+<div class="card" ng-controller="companies" ng-init="init()" ng-cloak>
+
+    <!--begin::Card body-->
+    <div class="card-body  mt-6 pt-0">
+
+        <table class="table table-bordered table-striped table-hover table-checkable mx-auto align-middle table-row-dashed fs-6 gy-5" datatable="ng" dt-options="dtOptions" id="kt_table_companies" ng-cloak>
+            <thead>
+                <tr class="text-center">
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="text-center" ng-repeat="u in companies track by $index">
+                    <td> {{u.id}} </td>
+                    <td>{{u.name}}</td>
+                    <td>{{u.description}}</td>
+                    <td>{{u.type}}</td>
+                    <td> {{u.createdAt | date: dateFormat }} </td>
+                    <th>
+                        @*<a href="javascript:;" class="" ng-click="more(u.id)"><i class="fas fa-plus"> </i> </a>*@
+                        <a href="javascript:;" class="" ng-click="edit(u.id)"><i class="fas fa-edit"> </i> </a>
+                        <a href="javascript:;" class="" ng-click="delete(u.id)"><i class="fas fa-trash"> </i> </a>
+                    </th>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+    <!--end::Card body-->
+
+
+    <div class="modal fade" id="companiesModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Company Modal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" class="mt-2" id="add_request_form" enctype="multipart/form-data">
+                        @*<label>Add Test Form </label>*@
+
+                        <div class="row">
+                            <div class="form-group col-md-4">
+                                <label>Name </label>
+                                <input class="form-control" name="Name" placeholder="Name" type="text" ng-model="requestInput.name" />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Type </label>
+                                <select class="form-control" ng-model="requestInput.typeId">
+                                    <option value="" ng-repeat="u in companis track by $index"></option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Username </label>
+                                <input class="form-control" placeholder="Username" type="text" ng-model="requestInput.username" />
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-md-4">
+                                <label>Description </label>
+                                <textarea class="form-control" placeholder="Description" ng-model="requestInput.description">
+                                </textarea>
+                            </div>
+
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    @*<button type="button" ng-click="addProvider()" class="btn btn-secondary btn_modal"> Submit </button>*@
+                    <button type="button" ng-click="isEdit?action(3): action(1)" class="btn btn-secondary btn_modal"> Submit </button>
+                    <button type="button" class="btn btn-secondary btn_modal" data-bs-dismiss="modal" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end::Card-->
+

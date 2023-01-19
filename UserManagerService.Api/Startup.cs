@@ -17,6 +17,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using UserManagerService.Api.MiddleWares;
 using UserManagerService.Entities;
@@ -51,13 +52,13 @@ namespace UserManagerService
             services.AddHttpContextAccessor();
             services.AddMemoryCache();
 
-            if (Environment.IsDevelopment())
-                services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
-                {
-                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-                }));
-            else
+            //if (Environment.IsDevelopment())
+            //    services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
+            //    {
+            //        builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            //    }));
+            //else
             {
                 var connectionString = Configuration.GetConnectionString("MySqlConnection");
                 services.AddDbContext<ApplicationDbContext>(options =>
@@ -71,7 +72,10 @@ namespace UserManagerService
              .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
             //services.AddRazorPages();
-            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
             //register the initializer
             services.AddAsyncInitializer<Initializer>();

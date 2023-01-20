@@ -15,6 +15,7 @@ using UserManagerService.Shared.Exceptions;
 using UserManagerService.Shared.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Interfaces.Shared;
+using UserManagerService.Shared.Models.Company;
 using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Services
@@ -120,11 +121,11 @@ namespace UserManagerService.Services
         }
         public async Task<User> GetEntityAsync(Guid id) => await UnitOfWork.GetAsync<User>(id);
 
-        public async Task<MyProfile> GetMyProfileAsync(Guid id)
+        public async Task<MyProfile> GetMyProfileAsync()
         {
-            var profile = await GetUserProfileAsync(id);
+            var profile = await GetUserProfileAsync(UserContext.UserId);
             var myProfile = Mapper.Map<MyProfile>(profile);
-            myProfile.Companies = await _companyService.GetCompaniesAsync(id);
+            myProfile.Companies = await _companyService.GetUserCompaniesAsync(UserContext.UserId);
             return myProfile;
         }
 
@@ -146,15 +147,15 @@ namespace UserManagerService.Services
 
         public async Task<AccessTokenModel> GetAuthTokenAsync(LoginInputModel input) //zero company
         {
-            var user = await LoginAsync(input);
+            var user = await LoginAsync(input, Guid.Empty);
             return _authHelper.GetAccessToken(user.Id, user.UserName, null, null);
         }
 
         public async Task<LoginOutputModel> GetAuthTokenAsync(LoginToCompanyInputModel input) // 1 or multiple companies
         {
-            var user = await LoginAsync(Mapper.Map<LoginInputModel>(input));
+            var user = await LoginAsync(Mapper.Map<LoginInputModel>(input), input.CompanyId ?? Guid.Empty);
 
-            var companies = await _companyService.GetCompaniesAsync(user.Id);
+            var companies = await _companyService.GetUserCompaniesAsync(user.Id);
 
             if (companies.Count == 0)
             {
@@ -265,7 +266,7 @@ namespace UserManagerService.Services
             return visitor.Id;
         }
 
-        private async Task<User> LoginAsync(LoginInputModel input)
+        private async Task<User> LoginAsync(LoginInputModel input, Guid companyId) // Can use the other model that has companyId, and remove companyId as parm
         {
             Logger.LogInformation($"User {input.Username} {input.Email} is getting the token");
             if ((string.IsNullOrEmpty(input.Username) && string.IsNullOrEmpty(input.Email)) || string.IsNullOrEmpty(input.Password))
@@ -290,7 +291,9 @@ namespace UserManagerService.Services
                     Device = visitor.Device,
                     IpAddress = visitor.AddressIp,
                     Status = "200",
-                    Location = location.Location
+                    Location = location.Location,
+                    CreatorId = user.Id,
+                    CompanyId = companyId
                 };
                 await UnitOfWork.AddAsync(session);
                 await UnitOfWork.SaveAsync();
@@ -299,6 +302,102 @@ namespace UserManagerService.Services
                 throw new CustomException(ResponseMessages.AuthenticationFailed);
 
             return user;
+        }
+
+        public async Task<UserProfile> RegisterUserAsync(RegisterModel input)
+        {
+            Logger.LogInformation($"User is creating a user with username {input.Username}");
+            if (string.IsNullOrEmpty(input.Username) || string.IsNullOrEmpty(input.Password) || string.IsNullOrEmpty(input.Username))
+            {
+                Logger.LogInformation("Password or username is null or empty");
+                throw new CustomException(ResponseMessages.WrongCredentials);
+            }
+
+            // TODO check if org exists
+
+            var user = await _signInManager.UserManager.FindByNameAsync(input.Username);
+            if (user != null)
+                throw new CustomException(ResponseMessages.EmailExists);
+            user = new User
+            {
+                Email = input.Email,
+                NormalizedEmail = input.Email.ToUpper(),
+                UserName = input.Username,
+                NormalizedUserName = input.Email.ToUpper(),
+                AccessFailedCount = 0,
+                EmailConfirmed = true,
+                Name = input.Name,
+                Surname = input.Surname,
+                LockoutEnabled = false
+            };
+
+            var ir = await _signInManager.UserManager.CreateAsync(user, input.Password);
+
+            if (ir.Succeeded)
+            {
+                //var createdUser = await _userRepository.GetUserByUsernameAsync(input.Username);
+                Logger.LogInformation($"Created user `{input.Username}` successfully");
+
+                if (UserContext.IsUserAdmin() && input.CompanyId != Guid.Empty)
+                {
+                    var orgUser = new CompanyUser()
+                    {
+                        CompanyId = input.CompanyId == Guid.Empty ? UserContext.CompanyId : input.CompanyId,
+                        UserId = user.Id,
+                        CreatorId = UserContext.UserId,
+                    };
+                    await UnitOfWork.AddAsync(orgUser);
+                    await UnitOfWork.SaveAsync();
+                    input.CompanyId = orgUser.CompanyId;
+                }
+
+                return new UserProfile
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Username = user.UserName,
+                    Surname = user.Surname,
+                    Email = user.Email
+                };
+            }
+            else
+            {
+                string errors = "";
+                ir.Errors.ToList().ForEach(e => { errors += $"{e.Code} {e.Description},"; });
+                Logger.LogError($"Failed to create user: {errors}");
+                throw new CustomException(ResponseMessages.FailedToCreatUser);
+            }
+        }
+
+        public async Task<AuthTokenModel> RefreshTokenAsync(RefreshTokenInput input)
+        {
+            Logger.LogInformation($"User is trying to refresh access token with refresh token : {input.RefreshToken}");
+
+            var cachedToken = _authHelper.GetCachedRefreshTokenWithRequestIpValidation(input.RefreshToken);
+            if (cachedToken is null)
+                throw new CustomException(ResponseMessages.InvalidRefreshToken);
+
+            if (!_authHelper.RevokeCachedRefreshToken(input.RefreshToken))
+                throw new CustomException(ResponseMessages.RefreshTokenFailed);
+
+            //var user = await _userRepository.GetUserByIdAsync();
+
+            var user = await _signInManager.UserManager.FindByIdAsync(cachedToken.UserId.ToString());
+            if (user is null)
+                throw new CustomException(ResponseMessages.UserNotFound);
+
+            var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user); // TODO get roles with company always, Make role:companyId
+            var company = await UnitOfWork.Query<CompanyUser>(o => o.UserId == user.Id && o.CompanyId == input.CompanyId)
+                    .Include(o => o.Company).Select(o => new CompanyShortModel
+                    {
+                        Id = o.Company.Id,
+                        Name = o.Company.Name
+                    }).SingleOrDefaultAsync();
+
+            if (company is null)
+                throw new CustomException(ResponseMessages.RefreshTokenFailed);
+
+            return _authHelper.CreateSecurityToken(user.Id, user.UserName, roles, company);
         }
     }
 }

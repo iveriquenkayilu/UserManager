@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OBS.UserManagementService.Domain.Helpers;
 using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
@@ -52,13 +55,13 @@ namespace UserManagerService
             services.AddHttpContextAccessor();
             services.AddMemoryCache();
 
-            //if (Environment.IsDevelopment())
-            //    services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
-            //    {
-            //        builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-            //    }));
-            //else
+            if (Environment.IsDevelopment())
+                services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
+                {
+                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                }));
+            else
             {
                 var connectionString = Configuration.GetConnectionString("MySqlConnection");
                 services.AddDbContext<ApplicationDbContext>(options =>
@@ -72,7 +75,10 @@ namespace UserManagerService
              .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
             //services.AddRazorPages();
-            services.AddControllersWithViews().AddRazorRuntimeCompilation().AddJsonOptions(options =>
+            services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add(new AuthorizeFilter());
+            }).AddRazorRuntimeCompilation().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
@@ -138,7 +144,7 @@ namespace UserManagerService
             });
 
             // check between scoped and transcient
-            services.AddTransient<IUserContext, UserContext>(c =>
+            services.AddScoped<IUserContext, UserContext>(c =>
             {
                 //TODO Handle incorrect cases.
                 IHttpContextAccessor httpContextAccessor = c.GetService<IHttpContextAccessor>();
@@ -148,12 +154,30 @@ namespace UserManagerService
                 if (claimsPrincipal == null)
                     return new UserContext();
 
-                var userId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                var claims = ((ClaimsIdentity)claimsPrincipal.Identity).Claims;
+
+                var userId = claims
                 .Where(c => c.Type == ClaimTypes.NameIdentifier)
                 .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
 
                 if (userId == Guid.Empty)
-                    return new UserContext();
+                {
+                    //Check again from the cookie
+                    var jwt = httpContextAccessor.HttpContext.Request.Cookies["Authentication"];
+                    if(string.IsNullOrEmpty(jwt))
+                        return new UserContext();
+
+                    var handler = new JwtSecurityTokenHandler();
+                    var token = handler.ReadJwtToken(jwt);
+
+                    userId = token.Claims.Where(c => c.Type == "nameid")
+                             .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
+                    if (userId == Guid.Empty)
+                        return new UserContext();
+                    else
+                        claims = token.Claims;
+                }
+
 
                 try
                 {
@@ -164,19 +188,19 @@ namespace UserManagerService
 
                     var user = (userManager.FindByIdAsync(userId.ToString())).Result;
 
-                    var companyId = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                    var companyId = claims
                     .Where(c => c.Type == "CompanyId")
                     .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
 
-                    var companyName = ((ClaimsIdentity)claimsPrincipal.Identity).Claims
+                    var companyName = claims
                     .Where(c => c.Type == "CompanyName")
                     .Select(c => c.Value).FirstOrDefault();
 
-                    var roles = (userManager.GetRolesAsync(user).Result).ToList();
+                    var roles = new List<string>(); // (userManager.GetRolesAsync(user).Result).ToList();
                     if (companyId != Guid.Empty || userId != Guid.Empty)
                     {
                         var roleService = c.GetRequiredService<SimpleRoleService>();
-                        var r = roleService.GetUserRolesAsync(userId, companyId).Result;
+                        roles = roleService.GetUserRolesAsync(userId, companyId).Result;
                     }
 
                     return new UserContext(userId, user.UserName, roles, companyId, companyName);

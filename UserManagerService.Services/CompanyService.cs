@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -7,10 +8,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
+using UserManagerService.Repository;
 using UserManagerService.Services.Interfaces;
+using UserManagerService.Shared.Constants;
 using UserManagerService.Shared.Exceptions;
 using UserManagerService.Shared.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
+using UserManagerService.Shared.Models;
 using UserManagerService.Shared.Models.Company;
 using UserManagerService.Shared.Models.User;
 
@@ -18,17 +22,35 @@ namespace UserManagerService.Services
 {
 	public class CompanyService : BaseService, ICompanyService
 	{
-		public CompanyService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApiService> logger) : base(userContext, unitOfWork, mapper, logger)
+        public CompanyService(IUserContext userContext, IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApiService> logger) : base(userContext, unitOfWork, mapper, logger)
 		{
 		}
 
-		public async Task<List<CompanyModel>> GetCompaniesAsync()
+		public async Task<List<UserModel>> GetCompanyUsersAsync()
+		{
+            return await UnitOfWork.Query<CompanyUser>(u => u.CompanyId == UserContext.CompanyId).Include(o => o.User)
+              .Select(u => new UserModel
+              {
+                  Id = u.User.Id,
+                  CreatedAt = u.User.CreatedAt,
+                  IsConnected = u.User.IsConnected,
+                  Name = u.User.Name,
+                  Surname = u.User.Surname,
+                  UpdatedAt = u.User.UpdatedAt,
+                  Username = u.User.UserName
+              }).ToListAsync();
+        }
+
+		public async Task<List<CompanyWithUsersModel>> GetCompaniesWithUsers()
 		{
 			var companies = await UnitOfWork.Query<Company>()
-				.Select(c => new CompanyModel
+				.Select(c => new CompanyWithUsersModel
 				{
 					Id = c.Id,
 					Name = c.Name,
+					Type = c.Type,
+					Description = c.Description,
+					UpdatedAt = c.UpdatedAt,
 					CreatedAt = c.CreatedAt,
 					Users = c.CompanyUsers.Select(u => new UserModel
 					{
@@ -41,6 +63,52 @@ namespace UserManagerService.Services
 					}).ToList()
 				}).ToListAsync();
 			return companies;
+		}
+
+		public async Task<List<CompanyModel>> GetCompaniesAsync()
+		{
+			var companies = await UnitOfWork.Query<Company>()
+				.Select(c => new CompanyModel
+				{
+					Id = c.Id,
+					Name = c.Name,
+					Type = c.Type,
+					Description = c.Description,
+					UpdatedAt = c.UpdatedAt,
+					CreatedAt = c.CreatedAt
+				}).ToListAsync();
+			return companies;
+		}
+
+        public async Task<List<CompanyModel>> GetMyCompaniesAsync()
+        {
+            Logger.LogInformation($"User {UserContext.UserId} is getting their companies");
+
+            var companies = await UnitOfWork.Query<CompanyUser>(c=> c.UserId == UserContext.UserId)
+				.Include(c=>c.Company)
+                .Select(c => new CompanyModel
+                {
+                    Id = c.Company.Id,
+                    Name = c.Company.Name,
+                    Type = c.Company.Type,
+                    Description = c.Company.Description,
+                    UpdatedAt = c.Company.UpdatedAt,
+                    CreatedAt = c.Company.CreatedAt
+                }).ToListAsync();
+            return companies;
+        }
+
+        public async Task<List<CompanyShortModel>> GetUserCompaniesAsync(Guid userId)
+		{
+			Logger.LogInformation($"User {userId} is getting their companies");
+
+			return await UnitOfWork.Query<CompanyUser>(c => c.UserId == userId)
+				  .Include(o => o.Company)
+				  .Select(c => new CompanyShortModel
+                  {
+					  Id = c.CompanyId,
+					  Name = c.Company.Name
+				  }).ToListAsync();
 		}
 
 		public async Task<CompanyModel> AddCompanyAsync(CompanyInputModel input)
@@ -79,20 +147,6 @@ namespace UserManagerService.Services
 			await UnitOfWork.SoftDeleteEntityAsync<Company>(id, UserContext.UserId);
 		}
 
-
-		public async Task<List<CompanyShortModel>> GetCompaniesAsync(Guid userId)
-		{
-			Logger.LogInformation($"User {userId} is getting their companies");
-
-			return await UnitOfWork.Query<CompanyUser>(c => c.UserId == userId)
-				  .Include(o => o.Company)
-				  .Select(c => new CompanyShortModel
-				  {
-					  Id = c.CompanyId,
-					  Name = c.Company.Name
-				  }).ToListAsync();
-		}
-
 		public async Task<CompanyUserModel> AddUserAsync(CompanyUserInputModel input)
 		{
 			Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to add user {input.UserId} to company {input.CompanyId}");
@@ -120,5 +174,5 @@ namespace UserManagerService.Services
 			UnitOfWork.Delete(companyUser);
 			await UnitOfWork.SaveAsync();
 		}
-	}
+    }
 }

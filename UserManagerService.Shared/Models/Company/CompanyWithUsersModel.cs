@@ -5,7 +5,7 @@ using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Shared.Models.Company
 {
-    public class CompanyModel
+    public class CompanyWithUsersModel
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -13,5 +13,6 @@ namespace UserManagerService.Shared.Models.Company
         public CompanyTypeOption Type { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public List<UserModel> Users { get; set; }
     }
 }

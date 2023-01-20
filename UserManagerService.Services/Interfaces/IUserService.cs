@@ -25,8 +25,10 @@ namespace UserManagerService.Services.Interfaces
 		Task<UserModel> UpdateUserAsync(Guid id, UserInputModel input);
 		Task<List<UserModel>> GetUsersAsync();
 		Task<LoginOutputModel> GetAuthTokenAsync(LoginToCompanyInputModel input);
-		Task<MyProfile> GetMyProfileAsync(Guid Id);
+		Task<MyProfile> GetMyProfileAsync();
 		Task<AccessTokenModel> GetAuthTokenAsync(LoginInputModel input);
         Task<List<LoginSessionModel>> GetLoginSessionsAsync(LoginSessionInputModel input);
+        Task<UserProfile> RegisterUserAsync(RegisterModel input);
+        Task<AuthTokenModel> RefreshTokenAsync(RefreshTokenInput input);
     }
 }

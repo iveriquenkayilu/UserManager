@@ -66,7 +66,7 @@
 
     $scope.getCompaniesCallBack = function (result) {
         if (result.status == 200 && !result.data.error &&  result.data.data.length > 0)
-            $scope.Companies = result.data.data;
+            $scope.companies = result.data.data;
     };
 
     $scope.getName = function (id, data) {
@@ -74,7 +74,7 @@
         return item ? item.name : id;
     }
     $scope.getCompany = function (id) {
-        var item = $scope.Companies.find(i => i.id == id);
+        var item = $scope.companies.find(i => i.id == id);
         return item;
     }
 
@@ -143,23 +143,25 @@
                 $scope.Companies.push(result.data.data);
             }
             else if ($scope.actionType == 3) {
-                var item = $scope.getItem($scope.actionId, $scope.Companies);
+                var item = $scope.getItem($scope.actionId, $scope.companies);
                 var data = result.data.data
                 /*TODO fill data*/
                 item.name = data.name;
+                item.description = data.description;
+                item.type = data.type;
                 item.createdAt = data.createdAt;
                 item.id = data.id;
                 item.updatedAt = data.updatedAt;
             }
             else if ($scope.actionType == 4) {
-                var item = $scope.getItem($scope.actionId, $scope.Companies);
-                $scope.deleteArrayItem($scope.Companies, item);
+                var item = $scope.getItem($scope.actionId, $scope.companies);
+                $scope.deleteArrayItem($scope.companies, item);
             }
             else {
 
             }
             alert2("success", result.data.message, 5000, null, 'top-right');
-            $('#CompaniesModal').modal('hide');
+            $('#companiesModal').modal('hide');
         }
     };
 
@@ -168,7 +170,7 @@
         array.splice(index, 1);
     };
     $scope.edit = function (id) {
-        var item = $scope.getItem(id, $scope.Companies);
+        var item = $scope.getItem(id, $scope.companies);
         if (item) {
             // Assign
             var model = angular.copy(item);
@@ -176,7 +178,7 @@
             $scope.requestInput = model;
             $scope.isEdit = true;
             $scope.actionId = id;
-            $('#CompaniesModal').modal('show');
+            $('#companiesModal').modal('show');
         }
         else {
             alert2("error", "Item not found");

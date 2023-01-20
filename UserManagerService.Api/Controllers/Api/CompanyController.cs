@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Constants;
-using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Models;
 using UserManagerService.Shared.Models.Company;
 
@@ -20,16 +19,22 @@ namespace UserManagerService.Api.Controllers
     public class CompanyController : BaseController
     {
         private readonly ICompanyService _companyService;
-        public CompanyController(IUserContext userContext, ILogger<ServiceController> logger, ICompanyService companyService) : base(userContext, logger)
+        public CompanyController(ILogger<ServiceController> logger, ICompanyService companyService) : base(logger)
         {
             _companyService = companyService;
         }
 
-        [Authorize(Roles = RoleConstants.ADMIN)]
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<IActionResult> Get()
         {
             var companies = await _companyService.GetCompaniesAsync();
+            return Ok(ResponseModel.Success(ResponseMessages.CompaniesFetched, companies));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMyCompanies()
+        {
+            var companies = await _companyService.GetMyCompaniesAsync();
             return Ok(ResponseModel.Success(ResponseMessages.CompaniesFetched, companies));
         }
 

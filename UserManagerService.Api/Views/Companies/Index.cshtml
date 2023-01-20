@@ -1,9 +1,12 @@
-﻿
+﻿@using UserManagerService.Entities.Datatypes;
 @{
     ViewData["Title"] = "Companies";
     ViewData["Section"] = "User Management";
 }
 
+@section Scripts{
+    <script src="~/js/companies.js" asp-append-version="true" type="text/javascript"></script>
+}
 <h5>Companies</h5>
 
 <!--begin::Card-->
@@ -61,14 +64,14 @@
                             </div>
                             <div class="form-group col-md-4">
                                 <label>Type </label>
-                                <select class="form-control" ng-model="requestInput.typeId">
-                                    <option value="" ng-repeat="u in companis track by $index"></option>
+                                <select class="form-control" ng-model="requestInput.type">
+                                    <option value="@CompanyTypeOption.LLC"> @CompanyTypeOption.LLC.ToString() </option>
                                 </select>
                             </div>
-                            <div class="form-group col-md-4">
+                         @*   <div class="form-group col-md-4">
                                 <label>Username </label>
                                 <input class="form-control" placeholder="Username" type="text" ng-model="requestInput.username" />
-                            </div>
+                            </div>*@
 
                         </div>
 

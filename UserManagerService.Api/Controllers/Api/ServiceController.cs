@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Models.Service;
-using System.Threading.Tasks;
 
 namespace UserManagerService.Api.Controllers
 {
@@ -12,7 +12,7 @@ namespace UserManagerService.Api.Controllers
     public class ServiceController : BaseController
     {
         private readonly IApiService _apiService;
-        public ServiceController(IUserContext userContext, ILogger<ServiceController> logger, IApiService apiService) : base(userContext, logger)
+        public ServiceController(ILogger<ServiceController> logger, IApiService apiService) : base(logger)
         {
             _apiService = apiService;
         }

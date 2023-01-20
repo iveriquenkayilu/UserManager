@@ -5,7 +5,6 @@ using System;
 using System.Threading.Tasks;
 using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Constants;
-using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Models;
 using UserManagerService.Shared.Models.Roles;
 
@@ -17,7 +16,7 @@ namespace UserManagerService.Api.Controllers
     public class RoleController : BaseController
     {
         private readonly IRoleService _roleService;
-        public RoleController(IUserContext userContext, ILogger<RoleController> logger, IRoleService roleService) : base(userContext, logger)
+        public RoleController(ILogger<RoleController> logger, IRoleService roleService) : base(logger)
         {
             _roleService = roleService;
         }

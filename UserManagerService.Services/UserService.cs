@@ -17,6 +17,7 @@ using UserManagerService.Shared.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Interfaces.Shared;
 using UserManagerService.Shared.Models.Company;
+using UserManagerService.Shared.Models.Search;
 using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Services
@@ -31,6 +32,32 @@ namespace UserManagerService.Services
             _companyService = companyService;
             _authHelper = authHelper;
             _signInManager = signInManager;
+        }
+
+        public async Task<List<SearchResultModel>> SearchUsers(string key)
+        {
+            var users = await UnitOfWork.Query<User>(c => c.Name.ToLower().Contains(key.ToLower())
+            || c.Surname.ToLower().Contains(key.ToLower()))
+                .Select(c => new SearchResultModel
+                {
+                    Id = c.Id,
+                    Name = c.Name + " " + c.Surname,
+                    Image = c.Picture
+                }).ToListAsync();
+            var userIds = users.Select(c => c.Id).ToList();
+            Expression<Func<User, bool>> predicate = userIds.Count > 0 ? c => !userIds.Contains(c.Id) : c => true;
+            var usersByUsername = await UnitOfWork.Query<User>(c => c.UserName.ToLower().Contains(key.ToLower()))
+                        .Where(predicate)
+                        .Select(c => new SearchResultModel
+                        {
+                            Id = c.Id,
+                            Name = c.Name + " " + c.Surname,
+                            Image = c.Picture
+                        }).ToListAsync();
+            if (usersByUsername.Count > 0)
+                users.AddRange(usersByUsername);
+
+            return users;
         }
 
         public async Task<List<UserProfile>> GetUserProfilesByIdsAsync(List<Guid> ids)

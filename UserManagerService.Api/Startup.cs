@@ -193,6 +193,9 @@ namespace UserManagerService
 
                     var user = (userManager.FindByIdAsync(userId.ToString())).Result;
 
+                    if (user == null)
+                        return new UserContext();
+
                     var companyId = claims
                     .Where(c => c.Type == "CompanyId")
                     .Select(c => Guid.Parse(c.Value)).FirstOrDefault();

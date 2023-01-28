@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
@@ -15,6 +16,7 @@ using UserManagerService.Shared.Interfaces.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Models.Company;
 using UserManagerService.Shared.Models.Helpers;
+using UserManagerService.Shared.Models.Search;
 using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Services
@@ -66,6 +68,50 @@ namespace UserManagerService.Services
             return companies;
         }
 
+        public async Task<List<SearchResultModel>> SearchCompanies(string key)
+        {
+            var companies = await UnitOfWork.Query<Company>(c => c.Name.ToLower().Contains(key.ToLower()))
+                .Select(c => new SearchResultModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    Title = c.Type.ToString(),
+                    Image = c.Logo
+                }).ToListAsync();
+            var companyIds = companies.Select(c => c.Id).ToList();
+
+            Expression<Func<Company, bool>> predicate = companyIds.Count > 0 ? c => !companyIds.Contains(c.Id) : c => true;
+            var companiesByDescription = await UnitOfWork.Query<Company>(c => c.Description.ToLower().Contains(key.ToLower()))
+                .Where(predicate)
+                .Select(c => new SearchResultModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    Title = c.Type.ToString(),
+                    Image = c.Logo
+                }).ToListAsync();
+            if (companiesByDescription.Count > 0)
+                companies.AddRange(companiesByDescription);
+
+            //companyIds = companies.Select(c => c.Id).ToList();
+            //var companiesByType = await UnitOfWork.Query<Company>(c => c.Type.Contains(key.ToLower()))
+            //   .Where(predicate)
+            //    .Select(c => new SearchResultModel
+            //    {
+            //        Id = c.Id,
+            //        Name = c.Name,
+            //        Description = c.Description,
+            //        Type = c.Type.ToString(),
+            //        Image = c.Logo
+            //    }).ToListAsync();
+            //if (companiesByType.Count > 0)
+            //    companies.AddRange(companiesByType);
+
+            return companies;
+        }
+
         public async Task<List<CompanyModel>> GetCompaniesAsync()
         {
             var companies = await UnitOfWork.Query<Company>()
@@ -103,10 +149,10 @@ namespace UserManagerService.Services
         {
             Logger.LogInformation($"User {UserContext.UserId} is getting their companies");
 
-            var createdCompanies= await GetCreatedCompaniesAsync();
-            var createdCompaniesIds= createdCompanies.Select(c => c.Id).ToList();
+            var createdCompanies = await GetCreatedCompaniesAsync();
+            var createdCompaniesIds = createdCompanies.Select(c => c.Id).ToList();
             var companies = await UnitOfWork.Query<CompanyUser>(c => c.UserId == UserContext.UserId)
-                .Where(c=>!createdCompaniesIds.Contains(c.CompanyId))
+                .Where(c => !createdCompaniesIds.Contains(c.CompanyId))
                 .Include(c => c.Company)
                 .Select(c => new CompanyModel
                 {

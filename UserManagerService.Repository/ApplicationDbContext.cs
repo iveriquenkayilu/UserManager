@@ -29,9 +29,18 @@ namespace UserManagerService.Repository
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<ServiceApiKey>().HasIndex(s => s.KeyName).IsUnique();
+            builder.UseCollation("SQL_Latin1_General_CP1_CI_AI");
 
-            builder.Entity<User>(u => {
+            builder.Entity<Company>(c =>{
+                c.HasIndex(s => s.Name);
+                c.Property(p=>p.Type).HasConversion(typeof(string))
+                 .HasMaxLength(50);
+                //.HasConversion(new EnumToStringConverter<MyEnumType>());
+            });
+           
+
+            builder.Entity<User>(u =>
+            {
                 u.HasIndex(i => i.Email).IsUnique();
                 u.HasIndex(i => i.NormalizedEmail).IsUnique();
             });

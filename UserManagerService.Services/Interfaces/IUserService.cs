@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UserManagerService.Entities;
+using UserManagerService.Shared.Models.Search;
 using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Services.Interfaces
@@ -30,5 +31,6 @@ namespace UserManagerService.Services.Interfaces
         Task<List<LoginSessionModel>> GetLoginSessionsAsync(LoginSessionInputModel input);
         Task<UserProfile> RegisterUserAsync(RegisterModel input);
         Task<AuthTokenModel> RefreshTokenAsync(RefreshTokenInput input);
+        Task<List<SearchResultModel>> SearchUsers(string key);
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UserManagerService.Shared.Models.Company;
+using UserManagerService.Shared.Models.Search;
 using UserManagerService.Shared.Models.User;
 
 namespace UserManagerService.Services.Interfaces
@@ -17,6 +18,7 @@ namespace UserManagerService.Services.Interfaces
         Task<List<CompanyModel>> GetCreatedCompaniesAsync();
         Task<List<CompanyModel>> GetMyCompaniesAsync();
         Task<List<CompanyShortModel>> GetUserCompaniesAsync(Guid userId);
+        Task<List<SearchResultModel>> SearchCompanies(string key);
         Task<CompanyModel> UpdateCompanyAsync(Guid id, CompanyInputModel input);
 	}
 }

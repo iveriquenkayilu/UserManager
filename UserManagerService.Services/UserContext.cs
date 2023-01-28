@@ -15,6 +15,8 @@ namespace UserManagerService.Services
         public Guid CompanyId { get; set; }
         public string CompanyName { get; set; }
 
+        public string JWTToken { get; set; }
+
         public UserContext()
         {
             //Roles = new List<string>();
@@ -34,13 +36,14 @@ namespace UserManagerService.Services
             Roles = roles?.Select(r => r.ToUpper()).ToList();
         }
 
-        public UserContext(Guid userId, string username, List<string> roles, Guid companyId, string companyName)
+        public UserContext(Guid userId, string username, List<string> roles, Guid companyId, string companyName, string jwtToken)
         {
             UserId = userId;
             Username = username;
             Roles = roles?.Select(r => r.ToUpper()).ToList();
             CompanyId = companyId;
             CompanyName = companyName;
+            JWTToken = jwtToken;
         }
 
         public bool IsUserAdmin()

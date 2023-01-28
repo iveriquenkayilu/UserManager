@@ -5,16 +5,26 @@
 }
 
 @section Scripts{
+    <script src="~/lib/three.js/three.min.js"></script>
+ 
+    <script src="https://github.com/mrdoob/three.js/blob/gltf/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="~/js/maps.js" type="text/javascript" asp-append-version="true"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4wi-PHmb9vblmIPPrwQn_Qp6jAdDnesQ&v=beta&callback=initMap" type="text/javascript" async defer></script>
+
     <script src="~/js/companies.js" asp-append-version="true" type="text/javascript"></script>
 }
-<h5>Companies</h5>
 
 <!--begin::Card-->
 <div class="card" ng-controller="companies" ng-init="init()" ng-cloak>
 
     <!--begin::Card body-->
     <div class="card-body  mt-6 pt-0">
-
+        <div class="row">
+            <div class="col-md-10"> <h5>Companies</h5> </div>
+            <div class="col-md-2">
+                <a href="javascript:;" ng-click="add()" class="btn btn-secondary mb-4">Add Company </a>
+            </div>
+        </div>
         <table class="table table-bordered table-striped table-hover table-checkable mx-auto align-middle table-row-dashed fs-6 gy-5" datatable="ng" dt-options="dtOptions" id="kt_table_companies" ng-cloak>
             <thead>
                 <tr class="text-center">
@@ -54,18 +64,19 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="post" class="mt-2" id="add_request_form" enctype="multipart/form-data">
+                    <form method="post" class="mt-2" id="add_request_form" >
+                       @* enctype="multipart/form-data"*@
                         @*<label>Add Test Form </label>*@
 
                         <div class="row">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-6">
                                 <label>Name </label>
                                 <input class="form-control" name="Name" placeholder="Name" type="text" ng-model="requestInput.name" />
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-6">
                                 <label>Type </label>
                                 <select class="form-control" ng-model="requestInput.type">
-                                    <option value="@CompanyTypeOption.LLC"> @CompanyTypeOption.LLC.ToString() </option>
+                                    <option value="@((int)CompanyTypeOption.LLC)" selected> @CompanyTypeOption.LLC.ToString() </option>
                                 </select>
                             </div>
                          @*   <div class="form-group col-md-4">
@@ -75,20 +86,48 @@
 
                         </div>
 
-                        <div class="row">
-                            <div class="form-group col-md-4">
+                        <div class="row mt-2">
+                            <div class="form-group col-md-6">
                                 <label>Description </label>
                                 <textarea class="form-control" placeholder="Description" ng-model="requestInput.description">
                                 </textarea>
                             </div>
 
+                            <div class="form-group col-md-6">
+                                <label>Logo </label>
+                                <input class="form-control" name="Logo" placeholder="Logo" type="file" id="logo"/>
+
+                            </div>
+
                         </div>
+
+                        <div class="row mt-2">
+                            <label> Selected Location</label>
+                            <div class="form-group col-md-4">
+                                <label>Name</label>
+                                <input class="form-control"  name="Name" placeholder="Name" type="text" id="location_name" @* ng-model="requestInput.logo"*@ />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Description</label>
+                                <input class="form-control" name="Description" placeholder="Description" type="text" id="location_description" @* ng-model="requestInput.logo"*@ />
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label>Latitude</label>
+                                <input class="form-control" disabled name="Latitude" placeholder="Latitude" type="number" id="latitude" @* ng-model="requestInput.logo"*@ />
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label>Longitude</label>
+                                <input class="form-control" disabled name="Longitude" placeholder="Longitude" type="number" id="longitude" @* ng-model="requestInput.logo"*@ />
+                            </div>
+                           
+                        </div>
+                        <div id="map" class="map row mt-2" style="width:auto; height: 35vh;min-height:200px; position: relative; overflow: hidden;"></div>
 
                     </form>
                 </div>
                 <div class="modal-footer justify-content-between">
                     @*<button type="button" ng-click="addProvider()" class="btn btn-secondary btn_modal"> Submit </button>*@
-                    <button type="button" ng-click="isEdit?action(3): action(1)" class="btn btn-secondary btn_modal"> Submit </button>
+                    <button type="button" ng-click="isEdit?action(3): addCompany()" class="btn btn-secondary btn_modal"> Submit </button>
                     <button type="button" class="btn btn-secondary btn_modal" data-bs-dismiss="modal" data-dismiss="modal">Close</button>
                 </div>
             </div>

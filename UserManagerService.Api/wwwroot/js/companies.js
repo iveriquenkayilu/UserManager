@@ -6,7 +6,7 @@
 
         $scope.companies = [];
         $scope.dateFormat = 'dd/MM/yyyy hh:mm:ss';
-        $scope.requestInput = { organizationId: 0 };
+        $scope.requestInput = { type: 1 };
         $scope.dtOptions2 = { /*paging: false,*/ searching: true, pageLength: 7 };
         $scope.dtOptions = DTOptionsBuilder.newOptions()
             .withButtons([
@@ -22,18 +22,69 @@
         $scope.getCompanies();
     };
 
+    //$('#login_submit').click(async function () {
+    //    var bodyData = {
+    //        Username: $('#Username').val(),
+    //        Password: $('#Password').val()
+    //    };
+    //    var jsonStringData = JSON.stringify(bodyData);
+    //    var url = "/api/auth/login";
+
+    //    $.ajax({
+    //        method: "POST",
+    //        url: domain + url,
+    //        headers: { 'Content-Type': 'application/json;charset=utf-8' },
+    //        data: jsonStringData,
+    //        success: function (data, status, request) {
+    //            //var headers = request.getAllResponseHeaders(); 
+    //            data.data.expiresAt = moment(Date.now()).add(data.data.duration, 'm').toDate();
+    //            localStorage.setItem('Auth', JSON.stringify(data.data));
+    //            setCookie('Authentication', data.data.accessToken, 1);
+    //            alert2('success', `Logged in successfully`);
+    //            setTimeout(window.location.href = "/home", 3000)
+    //            //window.location.href = "/home";
+    //        },
+    //        error: function (error) {
+    //            // sweet alert
+    //            alert2('error', `Failed to login`);
+    //        }
+    //    });
+    //});
+
     $scope.addCompany = function () {
         var model = angular.copy($scope.requestInput);
+
+        //var myFile = $('#logo').prop('files');
+        var fileToUpload = $('#logo').prop('files')[0];
         debugger;
-        if (model.password != model.repeatedPassword) {
-            alert2("error", "Password does not match repeated password");
-            return;
-        }
+        //if (model.password != model.repeatedPassword) {
+        //    alert2("error", "Password does not match repeated password");
+        //    return;
+        //}
+        var location = {
+            name: $('#location_name').val(),
+            description: $('#location_description').val(),
+            latitude: $('#latitude').val(),
+            longitude: $('longitude').val()
+        };
+
+        var formData = new FormData();
+        formData.append('name', model.name);
+        formData.append('description', model.description);
+        formData.append('type', model.type);
+        formData.append('logo', fileToUpload);
+        formData.append('location.name', location.name);
+        formData.append('location.description', location.description);
+        formData.append('location.latitude', location.latitude);
+        formData.append('location.longitude', location.longitude);
 
         var requestModel = {
-            method: "POST", url: domain + '/api/companies',
+            method: "POST", url: '/api/companies',
+            contentType: undefined,
+            //contentType:'multipart/form-data',//multipart/form-data
+            //contentType: "application/x-www-form-urlencoded",
             errorMessage: "Failed to send request",
-            model: model,
+            model:formData,
             successCallBack: $scope.addCompanyCallBack,
             //errorCallBack: $scope.addRequestErrorCallBack
         };
@@ -41,7 +92,7 @@
     }
 
     $scope.addCompanyCallBack = function (result) {
-        debugger;
+        
         if (result.data.error) {
             alert2("error", result.data.message);
         }

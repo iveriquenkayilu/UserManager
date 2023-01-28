@@ -264,9 +264,11 @@ app.factory('httpRequest', function ($http) {
                 url: input.url,
                 data: input.model == null ? {} : input.model,
                 headers: {
-                    contentType: input.contentType == null ? "application/json;charset=UTF-8" : input.contentType,
-                    Authorization: 'Bearer ' + auth.accessToken
-                }
+                    //contentType: input.contentType == null ? "application/json;charset=UTF-8" : input.contentType,
+                    "Content-Type": input.contentType === null ? "application/json;charset=UTF-8" : input.contentType
+                    //Authorization: 'Bearer ' + auth.accessToken
+                },
+                //transformRequest: angular.identity,
             });
         },
         refreshToken: function (input) {

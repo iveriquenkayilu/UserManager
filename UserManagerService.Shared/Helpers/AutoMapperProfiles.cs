@@ -12,7 +12,7 @@ namespace UserManagerService.Shared.Helpers
         {
             CreateMap<User, UserModel>();
             CreateMap<CompanyUser, CompanyUserModel>().ReverseMap();
-            CreateMap<Company, CompanyInputModel>();
+            CreateMap<CompanyInputModel, Company>();
             CreateMap<CompanyModel, Company>().ReverseMap();
 
             CreateMap<RoleInputModel, Role>();
@@ -21,7 +21,7 @@ namespace UserManagerService.Shared.Helpers
             CreateMap<UserRoleModel, UserRoleModel>();
 
             CreateMap<UserProfile, MyProfile>();
-            CreateMap<LoginToCompanyInputModel, LoginInputModel>();
+            CreateMap<LoginInputModel, LoginToCompanyInputModel>();
         }
     }
 }

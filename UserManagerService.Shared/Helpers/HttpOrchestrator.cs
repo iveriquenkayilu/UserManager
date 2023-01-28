@@ -1,9 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UserManagerService.Shared.Interfaces.Helpers;
 
@@ -88,5 +91,63 @@ namespace UserManagerService.Shared.Helpers
 
             return response;
         }
+
+
+        public async Task<HttpResponseMessage> SendFormDataAsync<TInput>(HttpMethod method, string url, TInput model, List<IFormFile> data, Dictionary<string, string> header)
+        {
+            _logger.LogInformation($"Creating new request to url: {url}.");
+            var request = new HttpRequestMessage(method, url);
+
+            if (header is not null)
+            {
+                _logger.LogInformation($"Adding request header(s) : {header}.");
+
+                foreach (var element in header)
+                    request.Headers.Add(element.Key, element.Value);
+            }
+
+            if (model != null)
+            {
+                var content = JsonConvert.SerializeObject(model);
+
+                // _logger.LogInformation($"Setting request body to : {content}.");
+                request.Content = new StringContent(content, Encoding.UTF8, "application/json");
+            }
+            var form = new MultipartFormDataContent();
+
+            data.ForEach(d => { 
+            
+                var content =new MemoryStream();
+                d.CopyToAsync(content).Wait();
+
+                form.Add(new StreamContent(content), d.Name, d.FileName);
+            });
+
+            //ByteArrayContent byteContent = new ByteArrayContent(fileData);
+
+            //byteContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+
+            //form.Add(byteContent, "file", Path.GetFileName(filePath));
+
+            HttpResponseMessage response;
+            try
+            {
+                _logger.LogInformation($"Sending request: {request} to url: {url}.");
+                response = await _httpClient.PostAsync(url,form);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "There was an issue when sending the http request.");
+                throw;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError($"Http response failed with status code : {response.StatusCode}.");
+            }
+
+            return response;
+        }
+
     }
 }

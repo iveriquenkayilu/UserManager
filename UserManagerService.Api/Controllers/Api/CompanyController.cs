@@ -39,9 +39,9 @@ namespace UserManagerService.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] CompanyInputModel input, [FromForm] List<IFormFile> Files)
+        public async Task<IActionResult> Add([FromForm] CompanyInputModel input)
         {
-            var receivedFiles = HttpContext.Request.Form.Files.ToList();
+            //var receivedFiles = HttpContext.Request.Form.Files.ToList();
             var model = await _companyService.AddCompanyAsync(input);
             return CustomResponse.Success("Company created successfully", model);
         }

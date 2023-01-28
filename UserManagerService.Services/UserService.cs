@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Threading.Tasks;
 using UserManagerService.Entities;
 using UserManagerService.Interfaces.Repositories;
@@ -147,13 +148,13 @@ namespace UserManagerService.Services
 
         public async Task<AccessTokenModel> GetAuthTokenAsync(LoginInputModel input) //zero company
         {
-            var user = await LoginAsync(input, Guid.Empty);
+            var user = await LoginAsync(Mapper.Map<LoginToCompanyInputModel>(input));
             return _authHelper.GetAccessToken(user.Id, user.UserName, null, null);
         }
 
         public async Task<LoginOutputModel> GetAuthTokenAsync(LoginToCompanyInputModel input) // 1 or multiple companies
         {
-            var user = await LoginAsync(Mapper.Map<LoginInputModel>(input), input.CompanyId ?? Guid.Empty);
+            var user = await LoginAsync(input);
 
             var companies = await _companyService.GetUserCompaniesAsync(user.Id);
 
@@ -162,7 +163,7 @@ namespace UserManagerService.Services
                 if (input.CompanyId != null)
                 {
                     Logger.LogInformation($"User {user.Id} does not belong to a company {input.CompanyId}");
-                    throw new CustomException(ResponseMessages.AuthenticationFailed);
+                    await AddLoginSessionAndThrowException(user.Id, input.CompanyId, ResponseMessages.AuthenticationFailed);
                 }
 
                 return new LoginOutputModel
@@ -171,11 +172,10 @@ namespace UserManagerService.Services
                 };
             }
 
-
             if (companies.Count == 1)
             {
                 if (input.CompanyId != null && !companies.Any(c => c.Id == input.CompanyId))
-                    throw new CustomException(ResponseMessages.AuthenticationFailed);
+                    await AddLoginSessionAndThrowException(user.Id, input.CompanyId, ResponseMessages.AuthenticationFailed);
 
                 var roles = (List<string>)await _signInManager.UserManager.GetRolesAsync(user);
                 var tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), companies.First());
@@ -266,7 +266,7 @@ namespace UserManagerService.Services
             return visitor.Id;
         }
 
-        private async Task<User> LoginAsync(LoginInputModel input, Guid companyId) // Can use the other model that has companyId, and remove companyId as parm
+        private async Task<User> LoginAsync(LoginToCompanyInputModel input) // Can use the other model that has companyId, and remove companyId as parm
         {
             Logger.LogInformation($"User {input.Username} {input.Email} is getting the token");
             if ((string.IsNullOrEmpty(input.Username) && string.IsNullOrEmpty(input.Email)) || string.IsNullOrEmpty(input.Password))
@@ -276,32 +276,45 @@ namespace UserManagerService.Services
                 await _signInManager.UserManager.FindByNameAsync(input.Username) :
                   await _signInManager.UserManager.FindByEmailAsync(input.Email);
             if (user is null)
-                throw new CustomException(ResponseMessages.WrongCredentials);
+            {
+                await AddLoginSessionAndThrowException(user.Id, input.CompanyId, ResponseMessages.WrongCredentials);
+            }
 
             var signedIn = await _signInManager.PasswordSignInAsync(user, input.Password, true, false);
             if (signedIn.Succeeded)
             {
                 await _signInManager.SignOutAsync(); // remove the cookie
-
-                var visitor = _authHelper.GetVisitorInfo();
-                var location = await _authHelper.GetIpAddressLocation(visitor.AddressIp);
-
-                var session = new LoginSession
-                {
-                    Device = visitor.Device,
-                    IpAddress = visitor.AddressIp,
-                    Status = "200",
-                    Location = location.Location,
-                    CreatorId = user.Id,
-                    CompanyId = companyId
-                };
-                await UnitOfWork.AddAsync(session);
-                await UnitOfWork.SaveAsync();
+                await AddLoginSessionAsync(user.Id, input.CompanyId ?? Guid.Empty, HttpStatusCode.OK);
             }
             else
-                throw new CustomException(ResponseMessages.AuthenticationFailed);
+            {
+                await AddLoginSessionAndThrowException(user.Id, input.CompanyId, ResponseMessages.AuthenticationFailed);
+            }
 
             return user;
+        }
+        private async Task AddLoginSessionAndThrowException(Guid userId, Guid? companyId, string message)
+        {
+            await AddLoginSessionAsync(userId, companyId ?? Guid.Empty, HttpStatusCode.BadRequest);
+            throw new CustomException(message);
+        }
+
+        private async Task AddLoginSessionAsync(Guid userId, Guid companyId, HttpStatusCode status)
+        {
+            var visitor = _authHelper.GetVisitorInfo();
+            var location = await _authHelper.GetIpAddressLocation(visitor.AddressIp);
+
+            var session = new LoginSession
+            {
+                Device = visitor.Device,
+                IpAddress = visitor.AddressIp,
+                Status = ((int)status).ToString(),
+                Location = location.Location,
+                CreatorId = userId,
+                CompanyId = companyId
+            };
+            await UnitOfWork.AddAsync(session);
+            await UnitOfWork.SaveAsync();
         }
 
         public async Task<UserProfile> RegisterUserAsync(RegisterModel input)

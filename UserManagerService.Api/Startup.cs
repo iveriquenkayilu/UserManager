@@ -102,6 +102,7 @@ namespace UserManagerService
             services.AddScoped<IApiService, ApiService>();
 
             services.AddSingleton<IHttpOrchestrator, HttpOrchestrator>();
+            services.AddScoped<IFileManagerHelper, FileManagerHelper>();
 
             // registers AutoMapper
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
@@ -149,6 +150,7 @@ namespace UserManagerService
                 //TODO Handle incorrect cases.
                 IHttpContextAccessor httpContextAccessor = c.GetService<IHttpContextAccessor>();
 
+
                 ClaimsPrincipal claimsPrincipal = httpContextAccessor.HttpContext?.User;
 
                 if (claimsPrincipal == null)
@@ -160,11 +162,13 @@ namespace UserManagerService
                 .Where(c => c.Type == ClaimTypes.NameIdentifier)
                 .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
 
+                var jwt = httpContextAccessor.HttpContext.Request.Cookies["Authentication"];
+
                 if (userId == Guid.Empty)
                 {
                     //Check again from the cookie
-                    var jwt = httpContextAccessor.HttpContext.Request.Cookies["Authentication"];
-                    if(string.IsNullOrEmpty(jwt))
+
+                    if (string.IsNullOrEmpty(jwt))
                         return new UserContext();
 
                     var handler = new JwtSecurityTokenHandler();
@@ -175,9 +179,10 @@ namespace UserManagerService
                     if (userId == Guid.Empty)
                         return new UserContext();
                     else
+                    {
                         claims = token.Claims;
+                    }
                 }
-
 
                 try
                 {
@@ -202,8 +207,8 @@ namespace UserManagerService
                         var roleService = c.GetRequiredService<SimpleRoleService>();
                         roles = roleService.GetUserRolesAsync(userId, companyId).Result;
                     }
-
-                    return new UserContext(userId, user.UserName, roles, companyId, companyName);
+                    var jtwFromHeaders = !string.IsNullOrEmpty(jwt) ? jwt : httpContextAccessor.HttpContext.Request.Headers["Authentication"].FirstOrDefault();
+                    return new UserContext(userId, user.UserName, roles, companyId, companyName, jtwFromHeaders);
                 }
                 catch (Exception e)
                 {

@@ -29,7 +29,7 @@ namespace UserManagerService.Repository
         {
             base.OnModelCreating(builder);
 
-            builder.UseCollation("SQL_Latin1_General_CP1_CI_AI");
+            //builder.UseCollation("SQL_Latin1_General_CP1_CI_AI"); // for MSSQL
 
             builder.Entity<Company>(c =>{
                 c.HasIndex(s => s.Name);

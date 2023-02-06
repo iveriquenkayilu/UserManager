@@ -8,7 +8,7 @@ namespace UserManagerService.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public CompanyTypeOption Type { get; set; }
-        public string Logo { get; set; }
+        public byte[] Logo { get; set; }
         public List<CompanyUser> CompanyUsers { get; set; }
     }
 }

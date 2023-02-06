@@ -65,7 +65,7 @@
             name: $('#location_name').val(),
             description: $('#location_description').val(),
             latitude: $('#latitude').val(),
-            longitude: $('longitude').val()
+            longitude: $('#longitude').val()
         };
 
         var formData = new FormData();

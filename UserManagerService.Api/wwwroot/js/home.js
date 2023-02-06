@@ -16,7 +16,7 @@
                     exportData: { decodeEntities: false }
                 }])
             .withDOM("Bfrtip") //.withOption("ordering", false)
-            .withOption("pageLength", 5).withOption('order', [0, 'desc']);  //'<"top"Blf>tipr'
+            .withOption("pageLength", 5).withOption('order', [4, 'desc']);  //'<"top"Blf>tipr'
         $scope.sessions = [];
         $scope.getLoginSesssions();
     };

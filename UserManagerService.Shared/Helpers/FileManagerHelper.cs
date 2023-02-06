@@ -4,9 +4,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using UserManagerService.Shared.Extensions;
 using UserManagerService.Shared.Interfaces.Helpers;
@@ -34,16 +32,15 @@ namespace UserManagerService.Shared.Helpers
             _logger = logger;
         }
 
-        public async Task<List<UploadedFileModel>> UploadFilesAsync(UploadFileInputModel input)
+        public async Task<List<UploadedFileModel>> UploadFileAsync(UploadSingleFileModel input)
         {
-            var url = _webProtocolSettings.FileServiceUrl + "/api/files";
+            var url = _webProtocolSettings.FileServiceUrl + "/api/v2/files";
             var header = new Dictionary<string, string> { { "Authorization", _userContext.JWTToken } };
             var users = new List<UploadedFileModel>();
             try
             {
-                var payload = new { /*FolderId=null,*/ AccessLevel = input.AccessLevel };
-                var result = await PostFilesAsync(url, new UploadMultipleFilesModel { Key = "Files", Files = input.Files }, payload);
-                //await _httpOrchestrator.SendRequestAsync<UploadFileInputModel>(HttpMethod.Post, url, input, header);
+                var form = new Dictionary<string, string> { { "AccessLevel", input.AccessLevel } };
+                var result = await PostFileAsync(url, input.File, form);
                 var data = JsonConvert.DeserializeObject<ResponseModel<List<UploadedFileModel>>>(result);
                 users = data.Data;
             }
@@ -58,6 +55,58 @@ namespace UserManagerService.Shared.Helpers
             };
 
             return users;
+        }
+
+        //public async Task<List<UploadedFileModel>> UploadFileAsync(UploadFileInputModel input)
+        //{
+        //    var url = _webProtocolSettings.FileServiceUrl + "/api/v2/files";
+        //    var header = new Dictionary<string, string> { { "Authorization", _userContext.JWTToken } };
+        //    var users = new List<UploadedFileModel>();
+        //    try
+        //    {
+        //        var payload = new { /*FolderId=null,*/ AccessLevel = input.AccessLevel };
+        //        var result = await PostFileAsync(url, input.Files[0], payload);
+        //        var data = JsonConvert.DeserializeObject<ResponseModel<List<UploadedFileModel>>>(result);
+        //        users = data.Data;
+        //    }
+        //    catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+        //    {
+        //        // Handle timeout.
+        //        Console.WriteLine("Timed out: " + ex.Message);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        _logger.LogInformation("Error occured: " + e.Message, e);
+        //    };
+
+        //    return users;
+        //}
+
+        private async Task<string> PostFileAsync(string url, IFormFile file, Dictionary<string, string> data = null)
+        {
+            using (var multipartFormContent = new MultipartFormDataContent())
+            {
+                //Load the file and set the file's Content-Type header
+                //fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+
+                multipartFormContent.Add(await file.GetStreamContent(), "File", file.FileName);
+
+                if (data is not null)
+                {
+                    foreach (var item in data)
+                    {
+                        multipartFormContent.Add(new StringContent(item.Value), item.Key);
+                    }
+                }
+                //var payload = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");  // key
+                //multipartFormContent.Add(payload);
+
+                var httpClient = new HttpClient();
+                //Send it
+                var response = await httpClient.PostAsync(url, multipartFormContent);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
+            }
         }
 
         private async Task<string> PostFilesAsync<T>(string url, UploadMultipleFilesModel files, T data)
@@ -92,7 +141,7 @@ namespace UserManagerService.Shared.Helpers
             }
         }
 
-     
+
 
         //public static string FillUserNameById(Guid userId, List<UserProfileModel> userProfiles)
         //{

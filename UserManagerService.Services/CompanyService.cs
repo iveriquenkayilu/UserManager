@@ -14,6 +14,7 @@ using UserManagerService.Shared.Helpers;
 using UserManagerService.Shared.Interfaces.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
 using UserManagerService.Shared.Models.Company;
+using UserManagerService.Shared.Models.Helpers;
 using UserManagerService.Shared.Models.Search;
 using UserManagerService.Shared.Models.User;
 
@@ -183,9 +184,10 @@ namespace UserManagerService.Services
         {
             var company = Mapper.Map<Company>(input);
             company.CreatorId = UserContext.UserId;
-            //company.Logo
+
             // upload to fileService
-            //var files = await _fileManagerHelper.UploadFilesAsync(new UploadFileInputModel { Files = new List<IFormFile> { input.Logo }, AccessLevel = "Public" });
+            var files = await _fileManagerHelper.UploadFileAsync(new UploadSingleFileModel { AccessLevel = "Public", File = input.Logo });
+            company.Logo = "url";
             await UnitOfWork.AddAsync(company);
             await UnitOfWork.SaveAsync();
             return Mapper.Map<CompanyModel>(company);

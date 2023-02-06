@@ -7,6 +7,6 @@ namespace UserManagerService.Shared.Interfaces.Helpers
     public interface IFileManagerHelper
     {
         //Task<List<UserProfileModel>> GetUserProfilesAsync(List<Guid> userIds);
-        Task<List<UploadedFileModel>> UploadFilesAsync(UploadFileInputModel input);
+        Task<List<UploadedFileModel>> UploadFileAsync(UploadSingleFileModel input);
     }
 }

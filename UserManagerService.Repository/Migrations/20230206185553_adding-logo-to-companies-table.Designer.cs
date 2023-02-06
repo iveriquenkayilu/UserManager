@@ -11,8 +11,8 @@ using UserManagerService.Repository;
 namespace UserManagerService.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230204171641_added-company-logo")]
-    partial class addedcompanylogo
+    [Migration("20230206185553_adding-logo-to-companies-table")]
+    partial class addinglogotocompaniestable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -160,8 +160,8 @@ namespace UserManagerService.Repository.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<byte[]>("Logo")
-                        .HasColumnType("longblob");
+                    b.Property<string>("Logo")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .HasColumnType("varchar(255)");

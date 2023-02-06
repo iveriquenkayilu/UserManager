@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace UserManagerService.Repository.Migrations
 {
-    public partial class addedcompanylogo : Migration
+    public partial class addinglogotocompaniestable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -33,11 +33,12 @@ namespace UserManagerService.Repository.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.AddColumn<byte[]>(
+            migrationBuilder.AddColumn<string>(
                 name: "Logo",
                 table: "Companies",
-                type: "longblob",
-                nullable: true);
+                type: "longtext",
+                nullable: true)
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Companies_Name",

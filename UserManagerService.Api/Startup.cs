@@ -55,13 +55,13 @@ namespace UserManagerService
             services.AddHttpContextAccessor();
             services.AddMemoryCache();
 
-            if (Environment.IsDevelopment())
-                services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
-                {
-                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-                }));
-            else
+            //if (Environment.IsDevelopment())
+            //    services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
+            //    {
+            //        builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            //    }));
+            //else
             {
                 var connectionString = Configuration.GetConnectionString("MySqlConnection");
                 services.AddDbContext<ApplicationDbContext>(options =>
@@ -82,6 +82,30 @@ namespace UserManagerService
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
+
+            if (Environment.IsDevelopment())
+            {
+                services.AddWebOptimizer(minifyJavaScript: false, minifyCss: false);
+            }
+            else
+            {
+                services.AddWebOptimizer(pipeline =>
+                {
+                    pipeline.MinifyCssFiles("css/**/*.css");
+                    pipeline.MinifyJsFiles("lib/**/*.js","js/*.js");
+                    pipeline.AddCssBundle("/css/bundle.css", "css/*.css");
+                    //pipeline.AddJavaScriptBundle("/js/bundle.js", "js/plus.js", "js/minus.js");
+                    pipeline.AddJavaScriptBundle("/js/bundle.js", "js/*.js");
+
+                });
+                //option =>
+                //{
+                //    option.EnableCaching = true;
+                //    option.EnableDiskCache = false;
+                //    option.EnableMemoryCache = true;
+                //    option.AllowEmptyBundle = true;
+                //});
+            }
 
             //register the initializer
             services.AddAsyncInitializer<Initializer>();
@@ -294,7 +318,7 @@ namespace UserManagerService
                 await next.Invoke();
             });
 
-            app.UseStatusCodePages(async context =>
+            app.UseStatusCodePages(async context => 
             {
                 var response = context.HttpContext.Response;
 
@@ -315,6 +339,7 @@ namespace UserManagerService
             });
             app.UseHttpsRedirection();
 
+            app.UseWebOptimizer();
             app.UseStaticFiles();
 
             app.UseRouting();

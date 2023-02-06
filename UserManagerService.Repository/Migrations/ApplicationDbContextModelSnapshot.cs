@@ -158,8 +158,8 @@ namespace UserManagerService.Repository.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<byte[]>("Logo")
-                        .HasColumnType("longblob");
+                    b.Property<string>("Logo")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .HasColumnType("varchar(255)");

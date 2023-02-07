@@ -41,6 +41,7 @@ async function initialize3DMap() {
     await initWebglOverlayView(map3D);
 };
 
+var marker=null;
 function geocodeLatLng(geocoder, map, infowindow, latLng){
   
     geocoder
@@ -49,10 +50,13 @@ function geocodeLatLng(geocoder, map, infowindow, latLng){
             if (response.results[0]) {
                 map.setZoom(20);
 
-                const marker = new google.maps.Marker({
-                    position: latLng,
-                    map: map,
-                });
+                if (!marker)
+                    marker = new google.maps.Marker({
+                        position: latLng,
+                        map: map,
+                    });
+                else
+                    marker.setPosition(latLng);
                 
                 var result = response.results[0].formatted_address;
                 infowindow.setContent(result);

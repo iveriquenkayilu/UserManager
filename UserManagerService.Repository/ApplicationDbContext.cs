@@ -19,6 +19,7 @@ namespace UserManagerService.Repository
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<ContactType> ContactTypes { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<AddressDetails> AddressDetails { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamUser> TeamUsers { get; set; }
         public DbSet<LoginSession> LoginSessions { get; set; }
@@ -31,13 +32,21 @@ namespace UserManagerService.Repository
 
             //builder.UseCollation("SQL_Latin1_General_CP1_CI_AI"); // for MSSQL
 
-            builder.Entity<Company>(c =>{
+            builder.Entity<AddressDetails>(c =>
+            {
+                c.HasOne(u => u.Address).WithMany().HasForeignKey(u => u.AddressId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+            builder.Entity<Company>(c =>
+            {
                 c.HasIndex(s => s.Name);
-                c.Property(p=>p.Type).HasConversion(typeof(string))
+                c.Property(p => p.Type).HasConversion(typeof(string))
                  .HasMaxLength(50);
                 //.HasConversion(new EnumToStringConverter<MyEnumType>());
+
+                c.HasOne(u => u.Address).WithMany().HasForeignKey(u => u.AddressId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
-           
 
             builder.Entity<User>(u =>
             {

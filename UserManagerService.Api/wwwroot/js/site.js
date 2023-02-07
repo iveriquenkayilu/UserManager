@@ -330,7 +330,7 @@ app.factory('httpRequest', function ($http) {
                 redirectToLogin();
             }
 
-            alert2('error', `Error : ${error.data["Message"]}`); error.status = 400; return error;
+            alert2('error', `Error : ${error.data["message"]}`); error.status = 400; return error;
         }
     }
 });

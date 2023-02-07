@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using UserManagerService.Shared.Exceptions;
 using UserManagerService.Shared.Extensions;
 using UserManagerService.Shared.Interfaces.Helpers;
 using UserManagerService.Shared.Interfaces.Services;
@@ -32,29 +33,30 @@ namespace UserManagerService.Shared.Helpers
             _logger = logger;
         }
 
-        public async Task<List<UploadedFileModel>> UploadFileAsync(UploadSingleFileModel input)
+        public async Task<UploadedFileModel> UploadFileAsync(UploadSingleFileModel input)
         {
             var url = _webProtocolSettings.FileServiceUrl + "/api/v2/files";
             var header = new Dictionary<string, string> { { "Authorization", _userContext.JWTToken } };
-            var users = new List<UploadedFileModel>();
+            var file = new UploadedFileModel();
             try
             {
-                var form = new Dictionary<string, string> { { "AccessLevel", input.AccessLevel } };
+                var form = new Dictionary<string, string> { { "accessLevel", input.AccessLevel } };
                 var result = await PostFileAsync(url, input.File, form);
-                var data = JsonConvert.DeserializeObject<ResponseModel<List<UploadedFileModel>>>(result);
-                users = data.Data;
+                var data = JsonConvert.DeserializeObject<ResponseModel<UploadedFileModel>>(result);
+                file = data.Data;
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
             {
-                // Handle timeout.
-                Console.WriteLine("Timed out: " + ex.Message);
+                _logger.LogError("Timed out: " + ex.Message);
+                throw new CustomException("Failed to upload file");
             }
             catch (Exception e)
             {
-                _logger.LogInformation("Error occured: " + e.Message, e);
+                _logger.LogError("Error occured: " + e.Message, e);
+                throw new CustomException("Failed to upload file");
             };
 
-            return users;
+            return file;
         }
 
         //public async Task<List<UploadedFileModel>> UploadFileAsync(UploadFileInputModel input)
@@ -89,7 +91,7 @@ namespace UserManagerService.Shared.Helpers
                 //Load the file and set the file's Content-Type header
                 //fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
 
-                multipartFormContent.Add(await file.GetStreamContent(), "File", file.FileName);
+                //multipartFormContent.Add(await file.GetStreamContent(), "File", file.FileName);
 
                 if (data is not null)
                 {

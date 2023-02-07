@@ -182,14 +182,33 @@ namespace UserManagerService.Services
 
         public async Task<CompanyModel> AddCompanyAsync(CompanyInputModel input)
         {
+            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to add company {input.Name}");
+
             var company = Mapper.Map<Company>(input);
             company.CreatorId = UserContext.UserId;
 
             // upload to fileService
-            var files = await _fileManagerHelper.UploadFileAsync(new UploadSingleFileModel { AccessLevel = "Public", File = input.Logo });
+            var file = await _fileManagerHelper.UploadFileAsync(new UploadSingleFileModel { AccessLevel = "Public", File = input.Logo });
             company.Logo = "url";
-            await UnitOfWork.AddAsync(company);
-            await UnitOfWork.SaveAsync();
+
+            var mainAddress = new Address
+            {
+                Name = input.Location.Name,
+                Description = input.Location.Description,
+                Latitude = input.Location.Latitude,
+                Longitude = input.Location.Longitude,
+            };
+
+            await UnitOfWork.ExecuteInTransactionAsync(async t =>
+            {
+                await UnitOfWork.AddAsync(mainAddress);
+                await UnitOfWork.SaveAsync();
+
+                company.AddressId = mainAddress.Id;
+                await UnitOfWork.AddAsync(company);
+                await UnitOfWork.SaveAsync();
+            });
+
             return Mapper.Map<CompanyModel>(company);
         }
 
@@ -204,9 +223,18 @@ namespace UserManagerService.Services
             if (company is null)
                 throw new CustomException($"Company {id} not found");
 
+            if (input.Logo != null)
+            {
+                var file = await _fileManagerHelper.UploadFileAsync(new UploadSingleFileModel { AccessLevel = "Public", File = input.Logo });
+                company.Logo = "url";
+            }
             //company.UpdatedBy = UserContext.UserId;
             company.UpdatedAt = DateTime.Now;
             company.Name = input.Name;
+            company.Description = input.Description;
+            company.Type = input.Type;
+            //company.
+
 
             UnitOfWork.Update(company);
             await UnitOfWork.SaveAsync();

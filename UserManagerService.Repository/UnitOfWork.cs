@@ -55,6 +55,18 @@ namespace UserManagerService.Repository
 			return entity;
 		}
 
+		public async Task<T> AddToCompanyAsync<T>(T entity) where T : class, IBaseCompanyEntity
+		{
+			entity.CreatedAt = DateTime.Now;
+			if (entity.CreatorId == Guid.Empty)
+				entity.CreatorId = _userContext.UserId;
+			if (entity.CompanyId == Guid.Empty)
+				entity.CompanyId = _userContext.CompanyId;
+
+			await _context.AddAsync(entity);
+			return entity;
+		}
+
 		public virtual void Update<T>(T entity) where T : class, IBaseEntity
 		{
 

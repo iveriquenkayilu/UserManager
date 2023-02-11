@@ -180,6 +180,18 @@ namespace UserManagerService.Services
                   }).ToListAsync();
         }
 
+        public async Task<CompanyShortModel> GetCompanyAsync(Guid id)
+        {
+            Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $" is trying to get company {id}");
+
+            return await UnitOfWork.Query<Company>(c => c.Id == id)
+                  .Select(c => new CompanyShortModel
+                  {
+                      Id = c.Id,
+                      Name = c.Name
+                  }).FirstOrDefaultAsync();
+        }
+
         public async Task<CompanyModel> AddCompanyAsync(CompanyInputModel input)
         {
             Logger.LogWithUserInfo(UserContext.UserId, UserContext.Username, $"is trying to add company {input.Name}");

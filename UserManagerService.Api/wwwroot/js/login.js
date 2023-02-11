@@ -10,7 +10,7 @@ var login = async function () {
         Password: $('#Password').val()
     };
     var jsonStringData = JSON.stringify(bodyData);
-    var url ="/api/v2/login";
+    var url = window.returnUrl? "/api/v3/login": "/api/v2/login";
 
     $.ajax({
         method: "POST",
@@ -32,8 +32,9 @@ var login = async function () {
             setCookie('Authentication', result.data.accessToken, 1);
             alert2('success', `Logged in successfully`);
 
-            if (inIframe()) {
-                setTimeout(sendDataToParent(),5000);
+            if (window.returnUrl) { //inIframe()
+                // setTimeout(sendDataToParent(),5000);
+                window.location.href = window.returnUrl;
             }
             else
             setTimeout(window.location.href = "/home", 3000)

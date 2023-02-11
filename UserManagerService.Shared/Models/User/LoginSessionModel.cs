@@ -1,4 +1,5 @@
 ﻿using System;
+using UserManagerService.Shared.Models.Helpers;
 
 namespace UserManagerService.Shared.Models.User
 {
@@ -10,5 +11,6 @@ namespace UserManagerService.Shared.Models.User
         public string Status { get; set; }
         public string Device { get; set; }
         public string IpAddress { get; set; }
+        public LatLng LatLng { get; set; }
     }
 }

@@ -183,7 +183,7 @@ namespace OBS.UserManagementService.Domain.Helpers
                 {
                     location = result;
                     location.JSON = JsonConvert.SerializeObject(result);
-                    location.Location = $"{result.city} {result.country} {result.continent}, lat: {result.latitude} lng: {result.longitude}";
+                    location.Location = $"{result.city} {result.country} {result.continent}";
                     _logger.LogInformation($"{ip} location: {location.Location}");
                 }
 

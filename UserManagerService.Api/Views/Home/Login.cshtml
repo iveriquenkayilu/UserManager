@@ -1,4 +1,4 @@
-﻿
+﻿@model UserManagerService.Models.Home.LoginViewModel
 @{
     Layout = null;
     //Basic
@@ -134,8 +134,11 @@
     <!--end::Page Custom Javascript-->
     <!--end::Javascript-->
 
-    <script src="~/js/common.js" asp-append-version="true"></script>
+     <script src="~/js/common.js" asp-append-version="true"></script>
     <script src="~/js/login.js" asp-append-version="true"></script>
+    <script>
+        var returnUrl = @Model.? ReturnUrl ? Model.? ReturnUrl : "";
+    </script>
 </body>
 <!--end::Body-->
 </html>

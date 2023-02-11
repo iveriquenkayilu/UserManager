@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using UserManagerService.Entities;
 using UserManagerService.Models;
+using UserManagerService.Models.Home;
 
 namespace UserManagerService.Controllers
 {
@@ -27,18 +28,12 @@ namespace UserManagerService.Controllers
         public IActionResult Login() => User.Identity.IsAuthenticated ? RedirectToAction(nameof(Index)) : View();
 
         [AllowAnonymous]
+        [HttpGet("/login")]
+        public IActionResult Login([FromQuery] LoginViewModel input) => View(input);
+
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Register() => View();
-
-        //public IActionResult Videos()
-        //{
-        //    var videos = new List<VideoModel> { new VideoModel { Url = "" } };
-        //    var model = new VideosViewModel
-        //    {
-        //        Videos = videos
-        //    };
-        //    return View(model);
-        //}
 
         //[HttpPost]
         //public async Task<IActionResult> Login(LoginToCompanyInputModel input)

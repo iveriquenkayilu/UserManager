@@ -36,10 +36,10 @@ namespace UserManagerService.Repository
 				_logger.LogInformation($"Hosting environment: {_environment.EnvironmentName}");
 				_logger.LogInformation("Initializing the database and applying migrations");
 
-				if (_environment.IsDevelopment()) // Inverse
-					await _dbContext.Database.EnsureCreatedAsync();
-				else
-					await _dbContext.Database.MigrateAsync();
+				//if (_environment.IsDevelopment()) // Inverse
+				//	await _dbContext.Database.EnsureCreatedAsync();
+				//else
+				await _dbContext.Database.MigrateAsync();
 
 				var companyId = await CreateDefaultCompanyAsync();
 				await AddDefaultValuesAsync(companyId);
@@ -104,10 +104,17 @@ namespace UserManagerService.Repository
 
 		private async Task<Guid> CreateDefaultCompanyAsync()
 		{
+			if (!await _dbContext.Addresses.AnyAsync())
+			{
+				var address = new Address { Name = Admin.DefaultCompany };
+				await _dbContext.AddAsync(address);
+				await _dbContext.SaveChangesAsync();
+			}
 
 			if (!await _dbContext.Companies.AnyAsync())
 			{
-				var organization = new Company { Name = Admin.DefaultCompany, Type = CompanyTypeOption.LLC };
+				var address = await _dbContext.Addresses.Where(a => a.Name == Admin.DefaultCompany).FirstOrDefaultAsync();
+				var organization = new Company { Name = Admin.DefaultCompany, Type = CompanyTypeOption.LLC, AddressId = address.Id };
 				await _dbContext.AddAsync(organization);
 				await _dbContext.SaveChangesAsync();
 			}

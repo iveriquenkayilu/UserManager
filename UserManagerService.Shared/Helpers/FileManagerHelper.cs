@@ -91,7 +91,7 @@ namespace UserManagerService.Shared.Helpers
                 //Load the file and set the file's Content-Type header
                 //fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
 
-                //multipartFormContent.Add(await file.GetStreamContent(), "File", file.FileName);
+                multipartFormContent.Add(await file.GetStreamContent(), "file", file.FileName);
 
                 if (data is not null)
                 {
@@ -113,6 +113,7 @@ namespace UserManagerService.Shared.Helpers
 
         private async Task<string> PostFilesAsync<T>(string url, UploadMultipleFilesModel files, T data)
         {
+           
             using (var multipartFormContent = new MultipartFormDataContent())
             {
                 //Load the file and set the file's Content-Type header

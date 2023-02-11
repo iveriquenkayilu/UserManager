@@ -32,6 +32,11 @@ namespace UserManagerService.Repository
 
             //builder.UseCollation("SQL_Latin1_General_CP1_CI_AI"); // for MSSQL
 
+            builder.Entity<LoginSession>(c =>
+            {
+                c.HasOne(u => u.Address).WithMany().HasForeignKey(u => u.AddressId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
             builder.Entity<AddressDetails>(c =>
             {
                 c.HasOne(u => u.Address).WithMany().HasForeignKey(u => u.AddressId)

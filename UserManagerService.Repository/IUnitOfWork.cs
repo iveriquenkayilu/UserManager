@@ -47,5 +47,6 @@ namespace UserManagerService.Interfaces.Repositories
 		Task SoftDeleteEntityAsync<T>(Guid id, Guid userId) where T : class, IBaseEntity;
 		IQueryable<T> QueryByCompanyId<T>(Expression<Func<T, bool>> expression) where T : class, IBaseCompanyEntity;
 		IQueryable<T> QueryByCompanyId<T>() where T : class, IBaseCompanyEntity;
-	}
+        Task<T> AddToCompanyAsync<T>(T entity) where T : class, IBaseCompanyEntity;
+    }
 }

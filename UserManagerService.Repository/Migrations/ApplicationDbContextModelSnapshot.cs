@@ -336,6 +336,9 @@ namespace UserManagerService.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid>("AddressId")
+                        .HasColumnType("char(36)");
+
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("char(36)");
 
@@ -354,9 +357,6 @@ namespace UserManagerService.Repository.Migrations
                     b.Property<string>("IpAddress")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Location")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Status")
                         .HasColumnType("longtext");
 
@@ -367,6 +367,8 @@ namespace UserManagerService.Repository.Migrations
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
 
                     b.ToTable("LoginSessions");
                 });
@@ -768,6 +770,17 @@ namespace UserManagerService.Repository.Migrations
                         .IsRequired();
 
                     b.Navigation("ContactType");
+                });
+
+            modelBuilder.Entity("UserManagerService.Entities.LoginSession", b =>
+                {
+                    b.HasOne("UserManagerService.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Address");
                 });
 
             modelBuilder.Entity("UserManagerService.Entities.TeamUser", b =>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UserManagerService.Shared.Models.Company;
 
 namespace UserManagerService.Shared.Models.User
@@ -7,5 +8,6 @@ namespace UserManagerService.Shared.Models.User
 	{
 		public List<CompanyShortModel> Companies { get; set; }
 		public AuthTokenModel AuthTokens { get; set; }
+		public Guid ReturnTokenId { get; set; }
 	}
 }

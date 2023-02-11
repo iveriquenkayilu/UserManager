@@ -10,6 +10,9 @@ namespace UserManagerService.Shared.Models.Company
         public string Description { get; set; }
         public CompanyTypeOption Type { get; set; }
         public IFormFile Logo { get; set; }
+        // This is not working for now, don't waste time on it 
+        // Upload from FE then send the url
+        //public string Url { get; set; }
         public ShortLocationModel Location { get; set; }
     }
 }

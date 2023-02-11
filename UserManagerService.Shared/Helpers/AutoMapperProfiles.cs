@@ -22,6 +22,7 @@ namespace UserManagerService.Shared.Helpers
 
             CreateMap<UserProfile, MyProfile>();
             CreateMap<LoginInputModel, LoginToCompanyInputModel>();
+            CreateMap<User, LoginOutputWithSession>();
         }
     }
 }

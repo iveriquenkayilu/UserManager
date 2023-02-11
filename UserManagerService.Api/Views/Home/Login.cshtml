@@ -2,6 +2,7 @@
 @{
     Layout = null;
     //Basic
+    var returnUrl = Model?.ReturnUrl??"";
 }
 
 <!DOCTYPE html>
@@ -133,12 +134,12 @@
     @*<script src="assets/js/custom/authentication/sign-in/general.js"></script>*@
     <!--end::Page Custom Javascript-->
     <!--end::Javascript-->
-
+    <script asp-append-version="true">
+        var returnUrl = '@returnUrl';
+    </script>
      <script src="~/js/common.js" asp-append-version="true"></script>
     <script src="~/js/login.js" asp-append-version="true"></script>
-    <script>
-        var returnUrl = @Model.? ReturnUrl ? Model.? ReturnUrl : "";
-    </script>
+    
 </body>
 <!--end::Body-->
 </html>

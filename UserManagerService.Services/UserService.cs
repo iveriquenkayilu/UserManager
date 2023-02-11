@@ -198,7 +198,8 @@ namespace UserManagerService.Services
             {
                 Name = "RedirectToken",
                 Value = JsonConvert.SerializeObject(token),
-                ExpiredAt = DateTime.Now.AddMinutes(1)
+                ExpiredAt = DateTime.Now.AddMinutes(1),
+                UserId = user.Id
             };
             await UnitOfWork.AddToCompanyAsync(userToken);
             await UnitOfWork.SaveAsync();
@@ -207,7 +208,7 @@ namespace UserManagerService.Services
             {
                 TokenId = userToken.Id,
                 UserId = userToken.UserId,
-                CompanyId = input.CompanyId ?? Guid.Empty
+                CompanyId = input.CompanyId
             };
         }
 
@@ -231,7 +232,7 @@ namespace UserManagerService.Services
         public async Task<AuthTokenModel> GetAuthTokenWithSessionIdAsync(LoginInputWithSession input)
         {
             Logger.LogInformation($"User {input.UserId} is getting the token with session {input.SessionId}");
-            if (input.UserId == Guid.Empty || input.SessionId == Guid.Empty || input.CompanyId == Guid.Empty)
+            if (input.UserId == Guid.Empty || input.SessionId == Guid.Empty)
                 throw new CustomException(ResponseMessages.InvalidInput);
 
             var session = await UnitOfWork.Query<LoginSession>(l => l.Id == input.SessionId).FirstOrDefaultAsync();
@@ -244,21 +245,26 @@ namespace UserManagerService.Services
             if (session.IpAddress != visitor.AddressIp)
                 throw new CustomException("Invalid session");
 
-
             var user = await _signInManager.UserManager.FindByIdAsync(input.UserId.ToString());
 
-            await CheckIfUserBelongsToCompanyAsync(user.Id, input.CompanyId);
+            if (input.CompanyId == null)
+            {
+                return _authHelper.CreateSecurityToken(user.Id, user.UserName, null, null);
+            }
+            var companyId = input.CompanyId ?? Guid.Empty;
+            await CheckIfUserBelongsToCompanyAsync(user.Id, companyId);
 
-            var roles = await _simpleRoleService.GetUserRolesAsync(user.Id, input.CompanyId);
-            var company = await _companyService.GetCompanyAsync(input.CompanyId);
+            var roles = await _simpleRoleService.GetUserRolesAsync(user.Id, companyId);
+            var company = await _companyService.GetCompanyAsync(companyId);
             var tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company);
             return tokens;
         }
 
         private async Task CheckIfUserBelongsToCompanyAsync(Guid userId, Guid companyId)
         {
-            if (!await UnitOfWork.AnyAsync<CompanyUser>(c => c.CompanyId == companyId && c.UserId == userId))
-                throw new CustomException("User does not belong to company");
+            if (companyId != Guid.Empty)
+                if (!await UnitOfWork.AnyAsync<CompanyUser>(c => c.CompanyId == companyId && c.UserId == userId))
+                    throw new CustomException("User does not belong to company");
         }
         public async Task<LoginOutputModel> GetAuthTokenAsync(LoginToCompanyInputModel input) // 1 or multiple companies
         {
@@ -423,15 +429,23 @@ namespace UserManagerService.Services
             {
                 Latitude = location.latitude,
                 Longitude = location.longitude,
-                Name = "Login Location",
-                Description = location.Location
+                Name = Names.LoginLocation,
+                Description = location.Location,
+                CreatorId = userId
             };
 
             Guid sessionId = new();
+            var addressExist = await UnitOfWork.Query<Address>(a => a.Name == Names.LoginLocation && a.CreatorId == userId && a.Latitude == location.latitude && a.Longitude == location.longitude).FirstOrDefaultAsync();
             await UnitOfWork.ExecuteInTransactionAsync(async trans =>
             {
-                await UnitOfWork.AddAsync(address);
-                await UnitOfWork.SaveAsync();
+                if (addressExist == null)
+                {
+                    await UnitOfWork.AddAsync(address);
+                    await UnitOfWork.SaveAsync();
+                }
+                else
+                    address.Id = addressExist.Id;
+
                 var session = new LoginSession
                 {
                     Device = visitor.Device,
@@ -443,6 +457,7 @@ namespace UserManagerService.Services
                 };
                 await UnitOfWork.AddAsync(session);
                 await UnitOfWork.SaveAsync();
+                sessionId = session.Id;
             });
 
             return sessionId;

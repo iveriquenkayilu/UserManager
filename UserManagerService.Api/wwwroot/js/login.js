@@ -10,7 +10,9 @@ var login = async function () {
         Password: $('#Password').val()
     };
     var jsonStringData = JSON.stringify(bodyData);
-    var url = window.returnUrl? "/api/v3/login": "/api/v2/login";
+    var url = window.returnUrl ?
+        `/api/v3/login?returnUrl=${window.returnUrl}`:
+        "/api/v2/login";
 
     $.ajax({
         method: "POST",
@@ -34,7 +36,10 @@ var login = async function () {
 
             if (window.returnUrl) { //inIframe()
                 // setTimeout(sendDataToParent(),5000);
-                window.location.href = window.returnUrl;
+                window.location.href = window.returnUrl
+                    + `?tokenId=${result.data.tokenId}`
+                    + `&userId=${result.data.userId}`
+                    + `&companyId=${result.data.companyId}`;
             }
             else
             setTimeout(window.location.href = "/home", 3000)

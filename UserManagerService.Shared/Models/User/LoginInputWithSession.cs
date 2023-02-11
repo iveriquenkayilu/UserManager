@@ -6,6 +6,6 @@ namespace UserManagerService.Shared.Models.User
     {
         public Guid SessionId { get; set; }
         public Guid UserId { get; set; }
-        public Guid CompanyId { get; set; }
+        public Guid? CompanyId { get; set; }
     }
 }

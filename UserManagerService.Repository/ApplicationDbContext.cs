@@ -61,7 +61,7 @@ namespace UserManagerService.Repository
 
             builder.Entity<UserRole>(ur =>
             {
-                ur.Ignore(u => u.Id);
+               ur.HasKey(u => u.Id);
 
                 ur.HasOne(r => r.User)
                 .WithMany()
@@ -75,10 +75,10 @@ namespace UserManagerService.Repository
 
             builder.Entity<UserToken>(uk =>
             {
-                uk.Ignore(u => u.Id)
-                .Ignore(u => u.LoginProvider).Ignore(u => u.Name);
+                uk.HasKey(u => u.Id);
+                uk.Ignore(u => u.LoginProvider);
 
-                uk.HasKey(u => new { u.UserId, u.Value });
+                uk.HasIndex(u => new { u.UserId, u.Value }).IsUnique();
 
                 uk.HasOne(u => u.User).WithMany().HasForeignKey(u => u.UserId);
             });

@@ -92,7 +92,7 @@ namespace UserManagerService
                 services.AddWebOptimizer(pipeline =>
                 {
                     pipeline.MinifyCssFiles("css/**/*.css");
-                    pipeline.MinifyJsFiles("lib/**/*.js","js/*.js");
+                    pipeline.MinifyJsFiles("lib/**/*.js", "js/*.js");
                     pipeline.AddCssBundle("/css/bundle.css", "css/*.css");
                     //pipeline.AddJavaScriptBundle("/js/bundle.js", "js/plus.js", "js/minus.js");
                     pipeline.AddJavaScriptBundle("/js/bundle.js", "js/*.js");
@@ -196,16 +196,25 @@ namespace UserManagerService
                         return new UserContext();
 
                     var handler = new JwtSecurityTokenHandler();
-                    var token = handler.ReadJwtToken(jwt);
 
-                    userId = token.Claims.Where(c => c.Type == "nameid")
-                             .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
-                    if (userId == Guid.Empty)
-                        return new UserContext();
-                    else
+                    try
                     {
-                        claims = token.Claims;
+                        var token = handler.ReadJwtToken(jwt);
+
+                        userId = token.Claims.Where(c => c.Type == "nameid")
+                                 .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
+                        if (userId == Guid.Empty)
+                            return new UserContext();
+                        else
+                        {
+                            claims = token.Claims;
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        Logger.LogInformation($"Error occured, {e.Message}", e);
+                    }
+
                 }
 
                 try
@@ -318,7 +327,7 @@ namespace UserManagerService
                 await next.Invoke();
             });
 
-            app.UseStatusCodePages(async context => 
+            app.UseStatusCodePages(async context =>
             {
                 var response = context.HttpContext.Response;
 

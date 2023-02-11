@@ -11,7 +11,7 @@ using UserManagerService.Repository;
 namespace UserManagerService.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230211131756_initial")]
+    [Migration("20230211150905_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -586,10 +586,8 @@ namespace UserManagerService.Repository.Migrations
 
             modelBuilder.Entity("UserManagerService.Entities.UserRole", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("RoleId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("CompanyId")
@@ -604,23 +602,29 @@ namespace UserManagerService.Repository.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("char(36)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("UserId", "RoleId");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("UserManagerService.Entities.UserToken", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("varchar(255)");
 
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("char(36)");
@@ -637,10 +641,22 @@ namespace UserManagerService.Repository.Migrations
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("UserId", "Value");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Value")
+                        .IsUnique();
 
                     b.ToTable("AspNetUserTokens", (string)null);
                 });

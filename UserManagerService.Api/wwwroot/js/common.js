@@ -99,15 +99,14 @@ var sendDataToParent = function () { // Tell parent app if you are logged in
     var data = getTokensFromLocalStorage();
 
     var isLoggedIn = isUserLoggedIn();
-
-        debugger;
+    if (!isLoggedIn) {
         const message = JSON.stringify({
             message: 'Data from user management',
             date: Date.now(),
             data: { isUserLoggedIn: isLoggedIn }
         });
         window.parent.postMessage(message, '*');
-    
+    }
 };
 
 window.addEventListener('message', function (e) {

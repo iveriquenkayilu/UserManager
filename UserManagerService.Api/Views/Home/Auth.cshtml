@@ -1,0 +1,15 @@
+﻿@model AuthInputModel;
+@{
+    ViewData["Title"] = "Auth";
+    ViewData["Section"] = "UserManage";
+    var returnUrl = Model.ReturnUrl;
+}
+@section Scripts{
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+    <script>
+        var returnUrl = '@returnUrl';
+        getAuth('@Model.SessionId', '@Model.UserId', '@Model.CompanyId');
+    </script>
+}
+
+<h5>Auth</h5>

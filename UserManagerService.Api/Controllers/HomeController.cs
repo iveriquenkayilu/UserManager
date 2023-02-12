@@ -9,7 +9,6 @@ using UserManagerService.Models.Home;
 
 namespace UserManagerService.Controllers
 {
-    [Authorize]
     public class HomeController : Controller
     {
         private readonly SignInManager<User> _signInManager;
@@ -21,33 +20,28 @@ namespace UserManagerService.Controllers
             _signInManager = signInManager;
         }
 
+        [Authorize]
         public IActionResult Index() => View();
 
-        [AllowAnonymous]
+        [HttpGet("/signIn")]
+        [HttpGet("/login")] //comment this
+        [HttpGet("/auth")]
+        public IActionResult Auth([FromQuery] AuthInputModel input)
+        {
+            return View(input);
+        }
+
+     
         [HttpGet]
         public IActionResult Login() => User.Identity.IsAuthenticated ? RedirectToAction(nameof(Index)) : View();
 
-        [AllowAnonymous]
+   
         [HttpGet("/login")]
         public IActionResult Login([FromQuery] LoginViewModel input) => View(input);
 
-        [AllowAnonymous]
+        
         [HttpGet]
         public IActionResult Register() => View();
-
-        //[HttpPost]
-        //public async Task<IActionResult> Login(LoginToCompanyInputModel input)
-        //{
-        //    if (input == null) return View();
-        //    if (string.IsNullOrEmpty(input.Username)) return View();
-        //    if (string.IsNullOrEmpty(input.Password)) return View();
-
-        //    var result = await _signInManager.PasswordSignInAsync(input.Username, input.Password, true, false);
-        //    if (result.Succeeded)
-        //        return RedirectToAction(nameof(Index));
-        //    else
-        //        return View();
-        //}
 
         [HttpPost]
         public async Task<IActionResult> Logout()

@@ -113,6 +113,8 @@ var sendDataToParent = function () { // Tell parent app if you are logged in
         });
         window.parent.postMessage(message, '*');
     }
+    else
+        location.href = "/home";
 };
 
 window.addEventListener('message', function (e) {

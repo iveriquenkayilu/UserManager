@@ -138,8 +138,8 @@ window.addEventListener('message', function (e) {
                 loginWithSession(auth.sessionId, auth.userId, auth.companyId);
             }
             else {//either you use token 
-                localStorage.setItem('Auth', JSON.stringify(data));
-                setCookie('Authentication', data.accessToken, 1);
+                localStorage.setItem('Auth', JSON.stringify(auth));
+                setCookie('Authentication', auth.accessToken, 1);
                 window.location.reload();
             }
             

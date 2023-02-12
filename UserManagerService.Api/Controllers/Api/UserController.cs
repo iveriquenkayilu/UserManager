@@ -71,7 +71,7 @@ namespace UserManagerService.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("/api/v3/login")] // Company Login
-        public async Task<IActionResult> Login([FromBody] LoginToCompanyInputModel input, string returnUrl)
+        public async Task<IActionResult> LoginToRedirect([FromBody] LoginToCompanyInputModel input, string returnUrl)
         {
             var output = await _userService.GetAuthTokenWithRedirectAsync(input, returnUrl);
 

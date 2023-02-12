@@ -257,6 +257,7 @@ namespace UserManagerService.Services
             var roles = await _simpleRoleService.GetUserRolesAsync(user.Id, companyId);
             var company = await _companyService.GetCompanyAsync(companyId);
             var tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company);
+            tokens.SessionId = session.Id;
             return tokens;
         }
 

@@ -92,7 +92,7 @@ namespace UserManagerService
                 services.AddWebOptimizer(pipeline =>
                 {
                     pipeline.MinifyCssFiles("css/**/*.css");
-                    pipeline.MinifyJsFiles("lib/**/*.js", "js/*.js");
+                    pipeline.MinifyJsFiles("js/*.js"); //"lib/**/*.js", 
                     pipeline.AddCssBundle("/css/bundle.css", "css/*.css");
                     //pipeline.AddJavaScriptBundle("/js/bundle.js", "js/plus.js", "js/minus.js");
                     pipeline.AddJavaScriptBundle("/js/bundle.js", "js/*.js");

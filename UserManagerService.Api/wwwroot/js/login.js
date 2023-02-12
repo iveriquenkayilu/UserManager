@@ -34,10 +34,9 @@ var login = async function () {
             setCookie('Authentication', result.data.accessToken, 1);
             alert2('success', `Logged in successfully`);
 
-            if (window.returnUrl) { //inIframe()
-                // setTimeout(sendDataToParent(),5000);
+            if (window.returnUrl) {
                 window.location.href = window.returnUrl
-                    + `?tokenId=${result.data.tokenId}`
+                    + `?sessionId=${result.data.sessionId}`
                     + `&userId=${result.data.userId}`
                     + `&companyId=${result.data.companyId}`;
             }

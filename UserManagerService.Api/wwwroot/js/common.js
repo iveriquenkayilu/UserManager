@@ -4,9 +4,9 @@ const domainUsers = "https://users.rainycorp.net";
 //angular.element($0).scope().request
 
 $(document).ready(function () {
-    if (inIframe()) {
-        sendDataToParent();
-    }
+    //if (inIframe()) {
+    //    sendDataToParent();
+    //}
 });
 
 var alert2 = function (type, message, timer = null, link = null, position = null) {

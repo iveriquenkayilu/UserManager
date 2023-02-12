@@ -241,11 +241,15 @@ namespace UserManagerService.Services
                 throw new CustomException("Session does not belong to user");
             var visitor = _authHelper.GetVisitorInfo();
             if (session.CompanyId != input.CompanyId)
-                throw new CustomException("Invalid session, wrong company Id");
+            {
+                if (input.CompanyId != null || session.CompanyId != Guid.Empty)
+                    throw new CustomException("Invalid session, wrong company Id");
+            }
+
             if (session.Device != visitor.Device)
                 throw new CustomException("Invalid session, wrong device");
             if (session.IpAddress != visitor.AddressIp)
-                throw new CustomException("Invalid session, wrong ip address");       
+                throw new CustomException("Invalid session, wrong ip address");
 
             var user = await _signInManager.UserManager.FindByIdAsync(input.UserId.ToString());
 

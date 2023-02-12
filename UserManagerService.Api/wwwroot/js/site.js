@@ -5,6 +5,7 @@ var languages = [
     { lang: "German", flag: "assets/media/flags/germany.svg", symbol: "de" },
     { lang: "Spanish", flag: "assets/media/flags/spain.svg", symbol: "es" },
 ];
+
 $(document).ready(function () {
 
     //var redirectTo = localStorage.getItem("RedirectTo")

@@ -82,18 +82,32 @@ var getTokensFromLocalStorage = function () {
     const auth = localStorage.getItem('Auth');
     return JSON.parse(auth);
 }
+function isUserLoggedIn() {
+    const auth = getTokensFromLocalStorage();
+    // if auth exists and not exipr
+    debugger;
+    if (auth == null || auth == undefined)
+        return false;
+    if (auth?.accessToken == null || auth?.accessToken == undefined)
+        return false;
+    //if (auth.expires)
+    // check expiration here
+    return true;
+}
 
-var sendDataToParent = function () {
+var sendDataToParent = function () { // Tell parent app if you are logged in
     var data = getTokensFromLocalStorage();
-    if (data) {
+
+    var isLoggedIn = isUserLoggedIn();
+
         debugger;
         const message = JSON.stringify({
             message: 'Data from user management',
             date: Date.now(),
-            data: data
+            data: { isUserLoggedIn: isLoggedIn }
         });
         window.parent.postMessage(message, '*');
-    }
+    
 };
 
 window.addEventListener('message', function (e) {
@@ -107,16 +121,61 @@ window.addEventListener('message', function (e) {
         //$('#topbar').css('display', 'none');
 
         if (e.data) {
-            console.log("User management received data");
+            debugger;
+     
             const data = JSON.parse(e.data);
-            localStorage.setItem('Auth', JSON.stringify(data));
-            setCookie('Authentication', data.accessToken, 1);
-            window.location.reload();
+            console.log("User management received data", data.message);
+            //or you login 
+            var auth = data.data;
+            if (auth.accessToken == null || auth.accessToken == undefined) {
+                loginWithSession(auth.sessionId, auth.userId, auth.companyId);
+            }
+            else {//either you use token 
+                localStorage.setItem('Auth', JSON.stringify(data));
+                setCookie('Authentication', data.accessToken, 1);
+                window.location.reload();
+            }
+            
         }
-        if (e.data == null)
-            sendDataToParent();
     }
 });
+
+var loginWithSession = function (sessionId, userId,companyId) {
+    var bodyData = {
+        sessionId, userId, companyId
+    };
+    var jsonStringData = JSON.stringify(bodyData);
+    var url ="/api/v4/login";
+
+    $.ajax({
+        method: "POST",
+        url,
+        headers: { 'Content-Type': 'application/json;charset=utf-8' },
+        data: jsonStringData,
+        success: function (result, status, request) {
+            //var headers = request.getAllResponseHeaders(); 
+            if (result.error || result.responseCode == 500) {
+                alert2('error', result.message);
+                submitButton.removeAttribute('data-kt-indicator');
+                // Enable button
+                submitButton.disabled = false;
+                return;
+            }
+
+            result.data.expiresAt = moment(Date.now()).add(result.data.duration, 'm').toDate();
+            localStorage.setItem('Auth', JSON.stringify(result.data));
+            setCookie('Authentication', result.data.accessToken, 1);
+            alert2('success', `Logged in successfully`);
+
+            setTimeout(window.location.href = "/home", 3000);
+        },
+        error: function (error) {
+            // sweet alert
+            alert2('error', `Failed to login`);
+        }
+    });
+};
+
 
 //function setCookie(cookieName, cookieValue, daysToExpire) {
 //    let expirationDate = new Date();

@@ -24,17 +24,14 @@ namespace UserManagerService.Controllers
         public IActionResult Index() => View();
 
         [HttpGet("/signIn")]
-        [HttpGet("/login")] //comment this
         [HttpGet("/auth")]
         public IActionResult Auth([FromQuery] AuthInputModel input)
         {
             return View(input);
         }
-
      
         [HttpGet]
         public IActionResult Login() => User.Identity.IsAuthenticated ? RedirectToAction(nameof(Index)) : View();
-
    
         [HttpGet("/login")]
         public IActionResult Login([FromQuery] LoginViewModel input) => View(input);

@@ -242,7 +242,7 @@ namespace UserManagerService.Services
             var visitor = _authHelper.GetVisitorInfo();
             if (session.CompanyId != input.CompanyId)
             {
-                if (input.CompanyId != null || session.CompanyId != Guid.Empty)
+                if (input.CompanyId != null &&session.CompanyId != Guid.Empty)
                     throw new CustomException("Invalid session, wrong company Id");
             }
 

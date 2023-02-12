@@ -48,17 +48,6 @@ namespace UserManagerService.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("/api/v5/login")] //After redirect
-        public async Task<IActionResult> LoginWithToken([FromBody] LoginWithRedirectOutputTokenModel input)
-        {
-            var output = await _userService.GetAuthTokenByTokenIdAsync(input);
-            var result = (string.IsNullOrEmpty(output.AccessToken))
-                    ? ResponseModel.Fail(ResponseMessages.AuthenticationFailed)
-                    : ResponseModel.Success(ResponseMessages.UserAuthenticated, output);
-            return Ok(result);
-        }
-
-        [AllowAnonymous]
         [HttpPost("/api/v4/login")]
         public async Task<IActionResult> LoginWithSession([FromBody] LoginInputWithSession input)
         {
@@ -70,12 +59,12 @@ namespace UserManagerService.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("/api/v3/login")] // Company Login
+        [HttpPost("/api/v3/login")] // Get SessionId to redirect
         public async Task<IActionResult> LoginToRedirect([FromBody] LoginToCompanyInputModel input, string returnUrl)
         {
-            var output = await _userService.GetAuthTokenWithRedirectAsync(input, returnUrl);
+            var output = await _userService.GetAuthSessionToRedirectAsync(input, returnUrl);
 
-            if (output.TokenId == Guid.Empty)
+            if (output.SessionId == Guid.Empty)
                 return CustomResponse.Fail(ResponseMessages.AuthenticationFailed);
             else
                 return CustomResponse.Success(ResponseMessages.UserAuthenticated, output);

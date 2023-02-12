@@ -183,50 +183,17 @@ namespace UserManagerService.Services
             return _authHelper.GetAccessToken(user.Id, user.Username, null, null);
         }
 
-        public async Task<LoginWithRedirectOutputTokenModel> GetAuthTokenWithRedirectAsync(LoginToCompanyInputModel input, string redirectUrl)
+        public async Task<LoginWithRedirectOutputTokenModel> GetAuthSessionToRedirectAsync(LoginToCompanyInputModel input, string redirectUrl)
         {
             var user = await LoginAsync(input);
             await CheckIfUserBelongsToCompanyAsync(user.Id, input.CompanyId ?? Guid.Empty);
 
-            var token = new LoginWithRedirectTokenModel
-            {
-                SessionId = user.SessionId,
-                ReturnUrl = redirectUrl
-            };
-
-            var userToken = new UserToken
-            {
-                Name = "RedirectToken",
-                Value = JsonConvert.SerializeObject(token),
-                ExpiredAt = DateTime.Now.AddMinutes(1),
-                UserId = user.Id
-            };
-            await UnitOfWork.AddToCompanyAsync(userToken);
-            await UnitOfWork.SaveAsync();
-
             return new LoginWithRedirectOutputTokenModel
             {
-                TokenId = userToken.Id,
-                UserId = userToken.UserId,
+                SessionId = user.SessionId,
+                UserId = user.Id,
                 CompanyId = input.CompanyId
             };
-        }
-
-        public async Task<AuthTokenModel> GetAuthTokenByTokenIdAsync(LoginWithRedirectOutputTokenModel input)
-        {
-            var token = await UnitOfWork.Query<UserToken>(u => u.Id == input.TokenId).FirstOrDefaultAsync();
-            if (token is null)
-                throw new CustomException("Failed to get token");
-
-            var tokenValue = JsonConvert.DeserializeObject<LoginWithRedirectTokenModel>(token.Value);
-            // maybe the origin of Request
-
-            return await GetAuthTokenWithSessionIdAsync(new LoginInputWithSession
-            {
-                SessionId = tokenValue.SessionId,
-                UserId = token.UserId,
-                CompanyId = token.CompanyId
-            });
         }
 
         public async Task<AuthTokenModel> GetAuthTokenWithSessionIdAsync(LoginInputWithSession input)

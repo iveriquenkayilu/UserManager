@@ -32,8 +32,7 @@ namespace UserManagerService.Services.Interfaces
 		Task<UserProfile> RegisterUserAsync(RegisterModel input);
 		Task<AuthTokenModel> RefreshTokenAsync(RefreshTokenInput input);
 		Task<List<SearchResultModel>> SearchUsers(string key);
-		Task<LoginWithRedirectOutputTokenModel> GetAuthTokenWithRedirectAsync(LoginToCompanyInputModel input, string redirectUrl);
+		Task<LoginWithRedirectOutputTokenModel> GetAuthSessionToRedirectAsync(LoginToCompanyInputModel input, string redirectUrl);
 		Task<AuthTokenModel> GetAuthTokenWithSessionIdAsync(LoginInputWithSession input);
-        Task<AuthTokenModel> GetAuthTokenByTokenIdAsync(LoginWithRedirectOutputTokenModel input);
     }
 }

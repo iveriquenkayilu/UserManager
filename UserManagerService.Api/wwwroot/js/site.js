@@ -16,9 +16,7 @@ $(document).ready(function () {
     //    }
     //}
    
-    if (inIframe()) {
-        sendDataToParent();
-    }
+
     getProfileFromLocalStorage();
     var symbol = localStorage.getItem('lang');
     if (!symbol)

@@ -3,6 +3,12 @@ const domainUsers = "https://users.rainycorp.net";
 //"https://localhost:44332";
 //angular.element($0).scope().request
 
+$(document).ready(function () {
+    if (inIframe()) {
+        sendDataToParent();
+    }
+});
+
 var alert2 = function (type, message, timer = null, link = null, position = null) {
 
     var messages = "";

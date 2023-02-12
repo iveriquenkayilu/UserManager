@@ -83,21 +83,19 @@ namespace UserManagerService
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
-            if (Environment.IsDevelopment())
-            {
+            //if (Environment.IsDevelopment())
                 services.AddWebOptimizer(minifyJavaScript: false, minifyCss: false);
-            }
-            else
-            {
-                services.AddWebOptimizer(pipeline =>
-                {
-                    pipeline.MinifyCssFiles("css/**/*.css");
-                    pipeline.MinifyJsFiles("js/*.js"); //"lib/**/*.js", 
+            
+            //else{
+                //services.AddWebOptimizer(pipeline =>{
+                    //pipeline.MinifyJsFiles("lib/**/*.js");
+                    //pipeline.MinifyCssFiles("css/**/*.css");
+                    //pipeline.MinifyJsFiles("js/*.js"); 
                     //pipeline.AddCssBundle("/css/bundle.css", "css/*.css");
                     //pipeline.AddJavaScriptBundle("/js/bundle.js", "js/plus.js", "js/minus.js");
                     //pipeline.AddJavaScriptBundle("/js/bundle.js", "js/*.js");
 
-                });
+                //});
                 //option =>
                 //{
                 //    option.EnableCaching = true;
@@ -105,7 +103,7 @@ namespace UserManagerService
                 //    option.EnableMemoryCache = true;
                 //    option.AllowEmptyBundle = true;
                 //});
-            }
+            //}
 
             //register the initializer
             services.AddAsyncInitializer<Initializer>();

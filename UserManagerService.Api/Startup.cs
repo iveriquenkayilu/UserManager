@@ -186,7 +186,8 @@ namespace UserManagerService
                 .Where(c => c.Type == ClaimTypes.NameIdentifier)
                 .Select(c => Guid.Parse(c.Value)).FirstOrDefault();
 
-                var jwt = httpContextAccessor.HttpContext.Request.Cookies["Authentication"];
+                var jwt = httpContextAccessor.HttpContext.Request.Cookies["Authentication"] ??
+                httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
                 if (userId == Guid.Empty)
                 {

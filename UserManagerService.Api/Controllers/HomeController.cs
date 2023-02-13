@@ -9,6 +9,7 @@ using UserManagerService.Models.Home;
 
 namespace UserManagerService.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly SignInManager<User> _signInManager;
@@ -19,24 +20,26 @@ namespace UserManagerService.Controllers
             _logger = logger;
             _signInManager = signInManager;
         }
-
-        [Authorize]
+    
         public IActionResult Index() => View();
 
+        [AllowAnonymous]
         [HttpGet("/signIn")]
         [HttpGet("/auth")]
         public IActionResult Auth([FromQuery] AuthInputModel input)
         {
             return View(input);
         }
-     
+        
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Login() => User.Identity.IsAuthenticated ? RedirectToAction(nameof(Index)) : View();
-   
+
+        [AllowAnonymous]
         [HttpGet("/login")]
         public IActionResult Login([FromQuery] LoginViewModel input) => View(input);
 
-        
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Register() => View();
 
@@ -46,6 +49,8 @@ namespace UserManagerService.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction(nameof(Login), "Home");
         }
+
+        [AllowAnonymous]
         public IActionResult Privacy()
         {
             return View();

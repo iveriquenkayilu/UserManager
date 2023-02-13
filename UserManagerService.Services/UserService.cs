@@ -219,10 +219,11 @@ namespace UserManagerService.Services
 
             var user = await _signInManager.UserManager.FindByIdAsync(input.UserId.ToString());
 
-            var tokens = new AuthTokenModel { SessionId = session.Id };
+            var tokens = new AuthTokenModel ();
             if (input.CompanyId == null)
             {
                 tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, null, null);
+                tokens.SessionId = session.Id;
                 return tokens;
             }
             var companyId = input.CompanyId ?? Guid.Empty;
@@ -231,6 +232,7 @@ namespace UserManagerService.Services
             var roles = await _simpleRoleService.GetUserRolesAsync(user.Id, companyId);
             var company = await _companyService.GetCompanyAsync(companyId);
             tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company);
+            tokens.SessionId = session.Id;
             return tokens;
         }
 

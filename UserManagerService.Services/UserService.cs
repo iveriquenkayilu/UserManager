@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -209,7 +208,7 @@ namespace UserManagerService.Services
             var visitor = _authHelper.GetVisitorInfo();
             if (session.CompanyId != input.CompanyId)
             {
-                if (input.CompanyId != null &&session.CompanyId != Guid.Empty)
+                if (input.CompanyId != null && session.CompanyId != Guid.Empty)
                     throw new CustomException("Invalid session, wrong company Id");
             }
 
@@ -220,17 +219,18 @@ namespace UserManagerService.Services
 
             var user = await _signInManager.UserManager.FindByIdAsync(input.UserId.ToString());
 
+            var tokens = new AuthTokenModel { SessionId = session.Id };
             if (input.CompanyId == null)
             {
-                return _authHelper.CreateSecurityToken(user.Id, user.UserName, null, null);
+                tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, null, null);
+                return tokens;
             }
             var companyId = input.CompanyId ?? Guid.Empty;
             await CheckIfUserBelongsToCompanyAsync(user.Id, companyId);
 
             var roles = await _simpleRoleService.GetUserRolesAsync(user.Id, companyId);
             var company = await _companyService.GetCompanyAsync(companyId);
-            var tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company);
-            tokens.SessionId = session.Id;
+            tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, roles.Select(r => r.ToUpper()).ToList(), company);
             return tokens;
         }
 

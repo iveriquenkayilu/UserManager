@@ -16,6 +16,7 @@ var getAuth = function (sessionId, userId, companyId) {
             data: JSON.stringify(data),
             success: function (data, status, request) {
                 //var headers = request.getAllResponseHeaders();
+                debugger;
                 data.data.expiresAt = moment(Date.now()).add(data.data.duration, 'm').toDate();
                 localStorage.setItem('Auth', JSON.stringify(data.data));
                 setCookie('Authentication', data.data.accessToken, 1);

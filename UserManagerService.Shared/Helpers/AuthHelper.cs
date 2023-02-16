@@ -144,6 +144,7 @@ namespace OBS.UserManagementService.Domain.Helpers
                 var userAgent = _httpContext.HttpContext.Request.Headers["User-Agent"];
 
                 var parser = Parser.GetDefault();
+                var agent = parser.Parse(userAgent).ToString();
                 var operatingSystem = parser.ParseOS(userAgent).ToString();
                 var accessType = parser.ParseUserAgent(userAgent).ToString();
                 var device = parser.ParseDevice(userAgent).ToString();
@@ -153,7 +154,7 @@ namespace OBS.UserManagementService.Domain.Helpers
                 {
                     AccessType = accessType,
                     AddressIp = addressIp,
-                    Device = device,
+                    Device = agent,
                     OperatingSystem = operatingSystem,
                 };
             }

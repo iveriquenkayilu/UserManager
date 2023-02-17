@@ -165,7 +165,7 @@ namespace UserManagerService
                     }
                 };
             });
-
+            services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
             // check between scoped and transcient
             services.AddScoped<IUserContext, UserContext>(c =>
             {

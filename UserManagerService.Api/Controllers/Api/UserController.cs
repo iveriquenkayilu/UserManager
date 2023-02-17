@@ -138,7 +138,6 @@ namespace UserManagerService.Api.Controllers
         [HttpGet("/api/sessions")]
         public async Task<IActionResult> LoginHistory([FromQuery] LoginSessionInputModel input)
         {
-            var t = User.Identity;
             var loginHistory = await _userService.GetLoginSessionsAsync(input);
             return CustomResponse.Success("Login history fetched successfully", loginHistory);
         }

@@ -3,6 +3,10 @@
 
 var getAuth = function (sessionId, userId, companyId) {
 
+    var userIsLoggedIn = isUserLoggedIn();
+    if (userIsLoggedIn)
+        window.location.href = "/home";
+
     var url = "/api/v4/login";
 
     var data = {

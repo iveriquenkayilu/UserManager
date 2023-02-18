@@ -111,10 +111,16 @@ namespace UserManagerService.Services
             return companies;
         }
 
-        public async Task<List<CompanyModel>> GetCompaniesAsync()
+        public async Task<List<CompanyPublicModel>> GetCompaniesAsync(GetCompanyInputModel input)
         {
-            var companies = await UnitOfWork.Query<Company>()
-                .Select(c => new CompanyModel
+            Expression<Func<Company, bool>> predicate = string.IsNullOrEmpty(input.Key) ?
+                c => true : (c => c.Name.ToLower().Contains(input.Key.ToLower())
+                ||c.Description.ToLower().Contains(input.Key.ToLower()) );
+
+            var companies = await UnitOfWork.Query<Company>(predicate)
+                 .Skip(input.Offset) //page
+                 .Take(input.Limit)
+                .Select(c => new CompanyPublicModel
                 {
                     Id = c.Id,
                     Name = c.Name,
@@ -124,6 +130,7 @@ namespace UserManagerService.Services
                     CreatedAt = c.CreatedAt
                 }).ToListAsync();
             return companies;
+            //Total = model.Offset == 0 && patients.Count < model.Limit ? patients.Count : patientsQuery.Count()       
         }
 
         public async Task<List<CompanyModel>> GetCreatedCompaniesAsync() // Or where you are the manager?
@@ -200,7 +207,7 @@ namespace UserManagerService.Services
             company.CreatorId = UserContext.UserId;
 
             // upload to fileService
-            var file = await _fileManagerHelper.UploadFileAsync(new UploadSingleFileModel { AccessLevel = "Public", File = input.Logo });
+            //var file = await _fileManagerHelper.UploadFileAsync(new UploadSingleFileModel { AccessLevel = "Public", File = input.Logo });
             company.Logo = "url";
 
             var mainAddress = new Address

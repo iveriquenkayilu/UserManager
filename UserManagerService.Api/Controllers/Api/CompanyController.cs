@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UserManagerService.Services.Interfaces;
 using UserManagerService.Shared.Constants;
@@ -24,10 +21,11 @@ namespace UserManagerService.Api.Controllers
             _companyService = companyService;
         }
 
-        [HttpGet("all")]
-        public async Task<IActionResult> Get()
+        [AllowAnonymous]
+        [HttpGet("search")]
+        public async Task<IActionResult> Get([FromQuery] GetCompanyInputModel input)
         {
-            var companies = await _companyService.GetCompaniesAsync();
+            var companies = await _companyService.GetCompaniesAsync(input);
             return Ok(ResponseModel.Success(ResponseMessages.CompaniesFetched, companies));
         }
 

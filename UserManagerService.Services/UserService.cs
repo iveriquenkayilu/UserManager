@@ -219,7 +219,7 @@ namespace UserManagerService.Services
 
             var user = await _signInManager.UserManager.FindByIdAsync(input.UserId.ToString());
 
-            var tokens = new AuthTokenModel ();
+            var tokens = new AuthTokenModel();
             if (input.CompanyId == null)
             {
                 tokens = _authHelper.CreateSecurityToken(user.Id, user.UserName, null, null);
@@ -262,23 +262,24 @@ namespace UserManagerService.Services
                 };
             }
 
-            if (companies.Count == 1)
+            if (companies.Any(c => c.Id == input.CompanyId))
             {
-                if (input.CompanyId != null && !companies.Any(c => c.Id == input.CompanyId))
-                    await AddLoginSessionAndThrowException(user.Id, input.CompanyId, ResponseMessages.AuthenticationFailed);
-
-
                 var roles = await _simpleRoleService.GetUserRolesAsync(user.Id, companies[0].Id);
                 var tokens = _authHelper.CreateSecurityToken(user.Id, user.Username, roles.Select(r => r.ToUpper()).ToList(), companies.First());
+                tokens.SessionId = user.SessionId;
                 return new LoginOutputModel
                 {
                     AuthTokens = tokens
                 };
             }
 
+            if (input.CompanyId != null && !companies.Any(c => c.Id == input.CompanyId))
+                await AddLoginSessionAndThrowException(user.Id, input.CompanyId, ResponseMessages.AuthenticationFailed);
+
             return new LoginOutputModel
             {
-                Companies = companies
+                Companies = companies,
+                SessionId = user.SessionId
             };
         }
 

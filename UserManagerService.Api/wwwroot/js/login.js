@@ -3,6 +3,74 @@
     //localStorage.removeItem("Profile");
 });
 
+
+app.controller("login", function ($scope, $http) {
+    $scope.init = function () {
+        $scope.companies=[];
+    };
+
+
+    $scope.login = function (companyId=null) {
+        var bodyData = {
+            Email: $('#Email').val(),
+            Username: $('#Username').val(),
+            Password: $('#Password').val(),
+            CompanyId:companyId
+        };
+        var jsonStringData = JSON.stringify(bodyData);
+        var url = window.returnUrl ?
+            `/api/v3/login?returnUrl=${window.returnUrl}` :
+            "/api/v2/login";
+
+        $http({
+            method: 'POST',
+            url,
+            headers: { 'Content-Type': 'application/json' },
+            data: bodyData
+        }).then(function (response) {
+            //var headers = request.getAllResponseHeaders(); 
+            var result = response.data;
+            if (result.error || result.responseCode == 500) {
+                alert2('error', result.message);
+                submitButton.removeAttribute('data-kt-indicator');
+                // Enable button
+                submitButton.disabled = false;
+                return;
+            }
+
+           
+            if (result.data.companies?.length > 0) {
+                $scope.sessionId = result.data.sessionId;
+                $scope.companies = result.data.companies;
+                $('#loginModal').modal('show');
+                return;
+            }
+
+
+            result.data.expiresAt = moment(Date.now()).add(result.data.duration, 'm').toDate();
+            localStorage.setItem('Auth', JSON.stringify(result.data));
+            setCookie('Authentication', result.data.accessToken, 1);
+            alert2('success', `Logged in successfully`);
+
+            if (window.returnUrl) {
+                window.location.href = window.returnUrl
+                    + `?sessionId=${result.data.sessionId}`
+                    + `&userId=${result.data.userId}`
+                    + `&companyId=${result.data.companyId}`;
+            }
+            else
+                setTimeout(window.location.href = "/home", 3000)
+        }, function (error) {
+            alert2('error', `Failed to login`);
+            submitButton.removeAttribute('data-kt-indicator');
+            // Enable button
+            submitButton.disabled = false;
+        });
+    };
+
+});
+
+
 var login = async function () {
     var bodyData = {
         Email: $('#Email').val(),
@@ -28,7 +96,14 @@ var login = async function () {
                 submitButton.disabled = false;
                 return;
             }
+
+            if (result.data.companies.length > 0) {
+                vue.sessionId = result.data.sessionId;
+                $('#loginModal').modal('show');
+                return;
+            }
                 
+
             result.data.expiresAt = moment(Date.now()).add(result.data.duration, 'm').toDate();
             localStorage.setItem('Auth', JSON.stringify(result.data));
             setCookie('Authentication', result.data.accessToken, 1);
@@ -112,7 +187,8 @@ var KTSigninGeneral = function () {
                     // Disable button to avoid multiple click 
                     submitButton.disabled = true;
 
-                    login();
+                   // login();
+                    angular.element(document.getElementById('kt_body')).scope().login();
                     // Simulate ajax request
 
 

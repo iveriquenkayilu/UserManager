@@ -78,7 +78,7 @@ namespace UserManagerService.Api.Controllers
             var output = await _userService.GetAuthTokenAsync(input);
 
             if (output.Companies is not null)
-                return CustomResponse.Success(ResponseMessages.UserAuthenticated, output.Companies);
+                return CustomResponse.Success(ResponseMessages.UserAuthenticated, new { output.Companies, output.SessionId });
 
             if (string.IsNullOrEmpty(output.AuthTokens.AccessToken) || string.IsNullOrEmpty(output.AuthTokens.RefreshToken))
                 return CustomResponse.Fail(ResponseMessages.AuthenticationFailed);

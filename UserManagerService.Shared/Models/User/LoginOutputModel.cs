@@ -8,6 +8,6 @@ namespace UserManagerService.Shared.Models.User
 	{
 		public List<CompanyShortModel> Companies { get; set; }
 		public AuthTokenModel AuthTokens { get; set; }
-		public Guid ReturnTokenId { get; set; }
+		public Guid SessionId { get; set; }
 	}
 }

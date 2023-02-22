@@ -188,7 +188,8 @@ $('#logout_button').click(function () {
     localStorage.removeItem("Auth");
     localStorage.removeItem("Profile");
     // could send a request to the backend
-    document.cookie = 'Authentication=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+    //document.cookie = 'Authentication=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+    document.cookie = 'Authentication=; Max-Age=0; path=/; domain=' + location.hostname; // hostname
     window.location.href = "/";
     //redirectToLogin();
 });

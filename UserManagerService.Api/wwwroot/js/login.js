@@ -70,65 +70,6 @@ app.controller("login", function ($scope, $http) {
 
 });
 
-
-var login = async function () {
-    var bodyData = {
-        Email: $('#Email').val(),
-        Username: $('#Username').val(),
-        Password: $('#Password').val()
-    };
-    var jsonStringData = JSON.stringify(bodyData);
-    var url = window.returnUrl ?
-        `/api/v3/login?returnUrl=${window.returnUrl}`:
-        "/api/v2/login";
-
-    $.ajax({
-        method: "POST",
-        url,
-        headers: { 'Content-Type': 'application/json;charset=utf-8' },
-        data: jsonStringData,
-        success: function (result, status, request) {
-            //var headers = request.getAllResponseHeaders(); 
-            if (result.error || result.responseCode==500) {
-                alert2('error', result.message);
-                submitButton.removeAttribute('data-kt-indicator');
-                // Enable button
-                submitButton.disabled = false;
-                return;
-            }
-
-            if (result.data.companies.length > 0) {
-                vue.sessionId = result.data.sessionId;
-                $('#loginModal').modal('show');
-                return;
-            }
-                
-
-            result.data.expiresAt = moment(Date.now()).add(result.data.duration, 'm').toDate();
-            localStorage.setItem('Auth', JSON.stringify(result.data));
-            setCookie('Authentication', result.data.accessToken, 1);
-            alert2('success', `Logged in successfully`);
-
-            if (window.returnUrl) {
-                window.location.href = window.returnUrl
-                    + `?sessionId=${result.data.sessionId}`
-                    + `&userId=${result.data.userId}`
-                    + `&companyId=${result.data.companyId}`;
-            }
-            else
-            setTimeout(window.location.href = "/home", 3000)
-            //window.location.href = "/home";
-        },
-        error: function (error) {
-            // sweet alert
-            alert2('error', `Failed to login`);
-            submitButton.removeAttribute('data-kt-indicator');
-            // Enable button
-            submitButton.disabled = false;
-        }
-    });
-};
-
 "use strict";
 var submitButton;
 

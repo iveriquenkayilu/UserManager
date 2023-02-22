@@ -1,6 +1,4 @@
-﻿const domain = "https://rainycorp.net";
-const domainUsers = "https://users.rainycorp.net";
-//"https://localhost:44332";
+﻿
 //angular.element($0).scope().request
 
 $(document).ready(function () {
@@ -73,7 +71,7 @@ function setCookie(cname, cvalue, exdays) {
     const d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     let expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/;SameSite=None; Secure";
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/; Secure"; //SameSite=None;
 }
 
 function inIframe() {

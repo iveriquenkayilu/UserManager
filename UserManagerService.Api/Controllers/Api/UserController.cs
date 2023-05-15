@@ -52,10 +52,11 @@ namespace UserManagerService.Api.Controllers
         public async Task<IActionResult> LoginWithSession([FromBody] LoginInputWithSession input)
         {
             var output = await _userService.GetAuthTokenWithSessionIdAsync(input);
-            var result = (string.IsNullOrEmpty(output.AccessToken))
-                    ? ResponseModel.Fail(ResponseMessages.AuthenticationFailed)
-                    : ResponseModel.Success(ResponseMessages.UserAuthenticated, output);
-            return Ok(result);
+
+            if (string.IsNullOrEmpty(output.AccessToken))
+                return CustomResponse.Fail(ResponseMessages.AuthenticationFailed);
+            else
+                return CustomResponse.Success(ResponseMessages.UserAuthenticated, output);
         }
 
         [AllowAnonymous]

@@ -8,7 +8,7 @@
     <script src="~/js/auth.js" asp-append-version="true"></script>
     <script>
         var returnUrl = '@returnUrl';
-        getAuth('@Model.SessionId', '@Model.UserId', '@Model.CompanyId');
+        getAuth('@Model.SessionId', '@Model.UserId', '@Model.CompanyId',@User.Identity.IsAuthenticated.ToString().ToLower());
     </script>
 }
 

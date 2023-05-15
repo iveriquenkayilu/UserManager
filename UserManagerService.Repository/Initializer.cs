@@ -36,10 +36,10 @@ namespace UserManagerService.Repository
 				_logger.LogInformation($"Hosting environment: {_environment.EnvironmentName}");
 				_logger.LogInformation("Initializing the database and applying migrations");
 
-				//if (_environment.IsDevelopment()) // Inverse
-				//	await _dbContext.Database.EnsureCreatedAsync();
-				//else
-				await _dbContext.Database.MigrateAsync();
+				if (_environment.IsDevelopment()) // Inverse
+					await _dbContext.Database.EnsureCreatedAsync();
+				else
+					await _dbContext.Database.MigrateAsync();
 
 				var companyId = await CreateDefaultCompanyAsync();
 				await AddDefaultValuesAsync(companyId);

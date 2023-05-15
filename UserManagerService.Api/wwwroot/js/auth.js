@@ -1,9 +1,9 @@
 ﻿$(document).ready(function () {
 });
 
-var getAuth = function (sessionId, userId, companyId) {
+var getAuth = function (sessionId, userId, companyId, userIsLoggedIn) {
 
-    var userIsLoggedIn = isUserLoggedIn();
+    //var userIsLoggedIn = isUserLoggedIn();
     if (userIsLoggedIn)
         window.location.href = "/home";
 

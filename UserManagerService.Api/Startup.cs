@@ -55,13 +55,13 @@ namespace UserManagerService
             services.AddHttpContextAccessor();
             services.AddMemoryCache();
 
-            //if (Environment.IsDevelopment())
-            //    services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
-            //    {
-            //        builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-            //    }));
-            //else
+            if (Environment.IsDevelopment())
+                services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
+                {
+                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                }));
+            else
             {
                 var connectionString = Configuration.GetConnectionString("MySqlConnection");
                 services.AddDbContext<ApplicationDbContext>(options =>

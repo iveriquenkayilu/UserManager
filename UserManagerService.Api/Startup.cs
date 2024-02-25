@@ -55,13 +55,13 @@ namespace UserManagerService
             services.AddHttpContextAccessor();
             services.AddMemoryCache();
 
-            if (Environment.IsDevelopment())
-                services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
-                {
-                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-                }));
-            else
+            //if (Environment.IsDevelopment())
+            //    services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), builder =>
+            //    {
+            //        builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            //    }));
+            //else
             {
                 var connectionString = Configuration.GetConnectionString("MySqlConnection");
                 services.AddDbContext<ApplicationDbContext>(options =>
@@ -252,42 +252,39 @@ namespace UserManagerService
                 return new UserContext();
             });
 
-            if (Environment.IsDevelopment())
+            services.AddSwaggerGen(c =>
             {
-                services.AddSwaggerGen(c =>
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserManagerService.Api", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserManagerService.Api", Version = "v1" });
+                    Description = @"JWT Authorization header using the Bearer scheme. Example:  Enter your token in the text input below. Example: '12345abcdef'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
 
-                    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                    {
-                        Description = @"JWT Authorization header using the Bearer scheme. Example:  Enter your token in the text input below. Example: '12345abcdef'",
-                        Name = "Authorization",
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.Http,
-                        Scheme = "Bearer",
-
-                    });
-
-                    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                        {
-                            {
-                                new OpenApiSecurityScheme
-                                { Name = "Bearer",
-                                  In = ParameterLocation.Header,
-                                  Scheme = "oauth2",
-                                  BearerFormat = "Bearer {token}",
-                                  Reference = new OpenApiReference
-                                  {
-                                      Type = ReferenceType.SecurityScheme,
-                                      Id = "Bearer"
-                                  }
-                                }, new string[] {}
-                            }
-                        }
-                    );
                 });
-            }
 
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            { Name = "Bearer",
+                                In = ParameterLocation.Header,
+                                Scheme = "oauth2",
+                                BearerFormat = "Bearer {token}",
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            }, new string[] {}
+                        }
+                    }
+                );
+            });
+            
             services.AddCors(options =>
             {
                 options.AddPolicy("Policy",
@@ -309,10 +306,11 @@ namespace UserManagerService
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseMigrationsEndPoint();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));
+                app.UseMigrationsEndPoint();     
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserManagerService.Api v1"));
 
             app.UseMiddleware<ExceptionMiddleWare>();
             app.UseMiddleware<UserMiddleWare>();
